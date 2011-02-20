@@ -10,3 +10,6 @@
 
 # generated GUI files
 *R.java
+
+# Eclipse settings
+.settings/
