@@ -1,0 +1,1 @@
+Pilot project for a Research & Development course featuring a location-based Android application.
