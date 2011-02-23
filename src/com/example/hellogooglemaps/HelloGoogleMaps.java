@@ -36,8 +36,6 @@ public class HelloGoogleMaps extends MapActivity {
 	    itemizedoverlay.addOverlay(overlayitem);
 	    mapOverlays.add(itemizedoverlay);
 	}
-	
-
     
     @Override
     protected boolean isRouteDisplayed() {

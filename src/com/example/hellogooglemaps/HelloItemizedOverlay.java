@@ -5,8 +5,13 @@ import java.util.ArrayList;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Path;
 
 import com.google.android.maps.ItemizedOverlay;
+import com.google.android.maps.MapView;
 import com.google.android.maps.OverlayItem;
 
 @SuppressWarnings("rawtypes")
@@ -32,6 +37,8 @@ public class HelloItemizedOverlay extends ItemizedOverlay {
 	  dialog.setTitle(item.getTitle());
 	  dialog.setMessage(item.getSnippet());
 	  dialog.show();
+	  Path p = new Path();
+	  p.addCircle(10,10, 10, Path.Direction.CW);
 	  return true;
 	}     
 	
@@ -48,6 +55,14 @@ public class HelloItemizedOverlay extends ItemizedOverlay {
 	@Override
 	public int size() {
 	  return mOverlays.size();
+	}
+	
+	public void draw(Canvas canvas, MapView mv, boolean bool)
+	{
+		super.draw(canvas, mv, bool);
+		final Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		mPaint.setColor(Color.RED);
+		canvas.drawCircle(10, 10, 50, mPaint);
 	}
 
 }
