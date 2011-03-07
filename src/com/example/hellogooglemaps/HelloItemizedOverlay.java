@@ -37,8 +37,8 @@ public class HelloItemizedOverlay extends ItemizedOverlay {
 	  dialog.setTitle(item.getTitle());
 	  dialog.setMessage(item.getSnippet());
 	  dialog.show();
-	  Path p = new Path();
-	  p.addCircle(10,10, 10, Path.Direction.CW);
+	  //Path p = new Path();
+	  //p.addCircle(10,10, 10, Path.Direction.CW);
 	  return true;
 	}     
 	
@@ -57,12 +57,12 @@ public class HelloItemizedOverlay extends ItemizedOverlay {
 	  return mOverlays.size();
 	}
 	
-	public void draw(Canvas canvas, MapView mv, boolean bool)
+	/*public void draw(Canvas canvas, MapView mv, boolean bool)
 	{
 		super.draw(canvas, mv, bool);
 		final Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		mPaint.setColor(Color.RED);
 		canvas.drawCircle(10, 10, 50, mPaint);
-	}
+	}*/
 
 }
