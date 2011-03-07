@@ -11,6 +11,8 @@ public class Ball extends View {
     private final int r;
     private final Paint mPaint = new    Paint(Paint.ANTI_ALIAS_FLAG);
  
+    //TEST ~Joost
+    
     public Ball(Context context, float x, float y, int r) {
         super(context);
         mPaint.setColor(0xFFFF0000);

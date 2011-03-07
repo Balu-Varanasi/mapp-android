@@ -75,6 +75,10 @@ public class HelloGoogleMaps extends MapActivity implements LocationListener {
 		
 	}
 
+	public void test(int a) {
+		int test = a;
+	}
+	
 	public void onProviderDisabled(String provider) {
 		// TODO Auto-generated method stub
 		
