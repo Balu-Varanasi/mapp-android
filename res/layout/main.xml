@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.maps.MapView
+<com.example.hellogooglemaps.HelloMapView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/mapview"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:clickable="true"
-    android:apiKey="0hoppY2hjyX3LI-zdLARFRyABtikA4Nojy2ozGQ"
+    android:apiKey="0pvFh8Xh-G8hVX6MpifGF1o56YtywfIwrcMgP3Q"
 />
+
+<!--
+	Mathijs: android:apiKey="0hoppY2hjyX3LI-zdLARFRyABtikA4Nojy2ozGQ"
+	Joost: android:apiKey="0pvFh8Xh-G8hVX6MpifGF1o56YtywfIwrcMgP3Q"
+-->

@@ -18,28 +18,24 @@ import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
 
 public class HelloGoogleMaps extends MapActivity implements LocationListener {
+	
+	private HelloMapView mapView;
+	
     /** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 	    super.onCreate(savedInstanceState);
 	    setContentView(R.layout.main);
-	    MapView mapView = (MapView) findViewById(R.id.mapview);
+	   
+	    mapView = (HelloMapView) findViewById(R.id.mapview);
 	    mapView.setBuiltInZoomControls(true);
 	    mapView.setSatellite(true);
+	    mapView.register(this);
 	    
-	    List<Overlay> mapOverlays = mapView.getOverlays();
-	    Drawable drawable = this.getResources().getDrawable(R.drawable.androidmarker);
-	    HelloItemizedOverlay itemizedoverlay = new HelloItemizedOverlay(drawable, this);
-	    
+	    GeoPoint point2 = new GeoPoint(35410000, 139460000);
+	    placeLittleGreenMan(point2, "Sekai, konichiwa!", "I'm in Japan!", false);
 	    GeoPoint point = new GeoPoint(51824167,5867374);
-	    OverlayItem overlayitem = new OverlayItem(point, "Nuttige info", "Je hebt op een groen mannetje getapt.");
-	    MapController mapController = mapView.getController();
-	    mapController.animateTo(point);
-	    mapController.setZoom(18);
-	    mapView.invalidate();
-	    
-	    itemizedoverlay.addOverlay(overlayitem);
-	    mapOverlays.add(itemizedoverlay);
+	    placeLittleGreenMan(point, "Nuttige info", "Je hebt op een groen mannetje getapt.", true);
 	    
 	    LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);    
     
@@ -58,25 +54,23 @@ public class HelloGoogleMaps extends MapActivity implements LocationListener {
     }
 
 	public void onLocationChanged(Location location) {
+		GeoPoint point = new GeoPoint((int) (location.getLatitude()*1E6), (int)(location.getLongitude()*1E6));
+		placeLittleGreenMan(point, "Nuttige info", "Je hebt op een groen mannetje getapt.", true);
+	}
+	
+	public void placeLittleGreenMan(GeoPoint point, String title, String content, boolean navigateToGreenMan) {
 		Drawable drawable = this.getResources().getDrawable(R.drawable.androidmarker);
 	    HelloItemizedOverlay itemizedoverlay = new HelloItemizedOverlay(drawable, this);
-		MapView mapView = (MapView) findViewById(R.id.mapview);
 		List<Overlay> mapOverlays = mapView.getOverlays();
-		
-		GeoPoint point = new GeoPoint((int) (location.getLatitude()*1E6), (int)(location.getLongitude()*1E6));
-	    OverlayItem overlayitem = new OverlayItem(point, "Nuttige info", "Je hebt op een groen mannetje getapt.");
-	    MapController mapController = mapView.getController();
-	    mapController.animateTo(point);
-	    mapController.setZoom(18);
+		OverlayItem overlayitem = new OverlayItem(point, title, content);
+	    if (navigateToGreenMan) {
+	    	MapController mapController = mapView.getController();
+	        mapController.animateTo(point);
+	        mapController.setZoom(18);
+	    }
 	    mapView.invalidate();
-	    
 	    itemizedoverlay.addOverlay(overlayitem);
 	    mapOverlays.add(itemizedoverlay);
-		
-	}
-
-	public void test(int a) {
-		int test = a;
 	}
 	
 	public void onProviderDisabled(String provider) {
