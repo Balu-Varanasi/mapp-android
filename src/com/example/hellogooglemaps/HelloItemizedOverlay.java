@@ -32,14 +32,14 @@ public class HelloItemizedOverlay extends ItemizedOverlay {
 	
 	@Override
 	protected boolean onTap(int index) {
-	  OverlayItem item = mOverlays.get(index);
-	  AlertDialog.Builder dialog = new AlertDialog.Builder(mContext);
-	  dialog.setTitle(item.getTitle());
-	  dialog.setMessage(item.getSnippet());
-	  dialog.show();
-	  //Path p = new Path();
-	  //p.addCircle(10,10, 10, Path.Direction.CW);
-	  return true;
+		OverlayItem item = mOverlays.get(index);
+		if (item.getTitle() != null || item.getSnippet() != null) {
+			AlertDialog.Builder dialog = new AlertDialog.Builder(mContext);
+			dialog.setTitle(item.getTitle());
+			dialog.setMessage(item.getSnippet());
+			dialog.show();
+		}
+		return true;
 	}     
 	
 	public void addOverlay(OverlayItem overlay) {
