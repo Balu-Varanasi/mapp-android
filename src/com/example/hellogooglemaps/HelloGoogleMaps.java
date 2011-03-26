@@ -2,6 +2,7 @@ package com.example.hellogooglemaps;
 
 import java.util.List;
 
+import android.graphics.Color;
 import android.os.Bundle;
 
 import com.google.android.maps.GeoPoint;
@@ -22,7 +23,7 @@ public class HelloGoogleMaps extends MapActivity
 	private GeoPoint point;
 	private PolygonManager polygon = new PolygonManager();
 	
-	public static final int pointPixelTreshold = 10; // Maximaal verschil tussen 2 punten in pixels voor ze als gelijk worden beschouwd
+	public static final int pointPixelTreshold = 15; // Maximaal verschil tussen 2 punten in pixels voor ze als gelijk worden beschouwd
 	public static final String TAG = "AppCetera"; // Log-tag
 	public static final int maxTouchDuration = 500;
 	
@@ -64,7 +65,7 @@ public class HelloGoogleMaps extends MapActivity
         listOfOverlays.clear();
         listOfOverlays.add(mapOverlay);
         
-	    mapView.invalidate();
+	    //mapView.invalidate();
 	}
 	
 	/**

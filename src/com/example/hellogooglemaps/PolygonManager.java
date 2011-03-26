@@ -54,16 +54,18 @@ public class PolygonManager
 	 */
 	public boolean editPoint(GeoPoint p, GeoPoint p2)
 	{
+		boolean edited = false;
+		
 		for(int i = 0; i < polygon.size(); i++)
 		{
 			if(polygon.get(i).equals(p))
 			{
 				polygon.set(i, p2);
-				return true;
+				edited = true;
 			}
 		}
 		
-		return false;
+		return edited;
 	}
 	
 	/**
