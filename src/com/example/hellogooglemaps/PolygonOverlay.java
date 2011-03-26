@@ -106,61 +106,21 @@ class PolygonOverlay extends com.google.android.maps.Overlay
     {   
     	// Wanneer de gebruiker zijn vinger op het touchscreen drukt
     	if(event.getAction() == MotionEvent.ACTION_DOWN)
-    	{
-    		// We zijn een punt aan het verplaatsen
-        	/*if(movingPoint)
-    		{
-        		GeoPoint p = mapView.getProjection().fromPixels(
-            			(int) event.getX(),
-                        (int) event.getY());
-    			Log.v(TAG, "Moving polygon point");
-    			Log.v(TAG, polygon.editPoint(movingGeoPoint, p) ? "Success" : "Fail");
-    			movingPoint = false;
-    		}*/
-        	
-    		// We starten een tijdsmeting, omdat we alleen een touch willen registreren
-    		// als deze korter duurt dan een bepaalde tijdsduur
-    		timer = System.currentTimeMillis();
-    		
-    		// Checken of we hier toevallig op een al geplaatst punt touchen
-        	polygon.reset();
-        	while(polygon.hasNextPoint())
-        	{
-		        Point screenPts = new Point();
-		        GeoPoint point = polygon.getNextPoint();
-		        mapView.getProjection().toPixels(point, screenPts);
-		        int divx, divy;
-		        divx = Math.abs(screenPts.x-(int) event.getX());
-		        divy = Math.abs(screenPts.y-(int) event.getY());
-		           
-		        if(divx < HelloGoogleMaps.pointPixelTreshold && divy < HelloGoogleMaps.pointPixelTreshold)
-		        {
-		           	movingPoint = true;
-		           	movingGeoPoint = point;
-		           	break;
-		        }
-        	}
+    	{        	
+    		return notifyTouchDown(event);
     	}
     	
     	if(event.getAction() == MotionEvent.ACTION_MOVE)
     	{
-    		// We zijn een punt aan het verplaatsen
-        	if(movingPoint)
-    		{
-        		GeoPoint p = mapView.getProjection().fromPixels(
-            			(int) event.getX(),
-                        (int) event.getY());
-    			Log.v(TAG, "Moving polygon point");
-    			Log.v(TAG, polygon.editPoint(movingGeoPoint, p) ? "Success" : "Fail");
-    			movingPoint = false;
-    		}
+    		return notifyTouchMove(event);
     	}
     	
         // Wanneer gebruiker zijn vinger optilt
         if (event.getAction() == MotionEvent.ACTION_UP)
         {
-        	notifyTouchUp(event);
-        }                            
+        	return notifyTouchUp(event);
+        }       
+        
         return false;
     }    
     
@@ -168,43 +128,108 @@ class PolygonOverlay extends com.google.android.maps.Overlay
      * Listener voor het touch-up (gebruiker laat vinger los) event
      * @param event
      */
-    public void notifyTouchUp(MotionEvent event)
+    public boolean notifyTouchUp(MotionEvent event)
     {
-    	// Alleen een punt tekenen als de touch minder dan maxTouchDuration duurde
-    	long diff = System.currentTimeMillis()-timer;
-    	GeoPoint p = mapView.getProjection().fromPixels(
-    			(int) event.getX(),
-                (int) event.getY());
-    	
-    	if(!movingPoint && diff < HelloGoogleMaps.maxTouchDuration)
-    	{                
-            // Check of dit punt ongeveer samenvalt met het eerste punt
-            // Indien ja, sluiten we de polygoon
-	        polygon.reset();
-	        if(polygon.hasNextPoint())
-	        {
-		        Point screenPts = new Point();
-		        GeoPoint point = polygon.getNextPoint();
-		        mapView.getProjection().toPixels(point, screenPts);
-		        int divx, divy;
-		        divx = Math.abs(screenPts.x-(int) event.getX());
-		        divy = Math.abs(screenPts.y-(int) event.getY());
-		            
-		        if(divx < HelloGoogleMaps.pointPixelTreshold && divy < HelloGoogleMaps.pointPixelTreshold)
+    	if(movingPoint)
+    	{
+    		movingPoint = false;
+    	}
+    	else
+    	{
+	    	// Alleen een punt tekenen als de touch minder dan maxTouchDuration duurde
+	    	long diff = System.currentTimeMillis()-timer;
+	    	GeoPoint p = mapView.getProjection().fromPixels(
+	    			(int) event.getX(),
+	                (int) event.getY());
+	    	
+	    	if(!movingPoint && diff < HelloGoogleMaps.maxTouchDuration)
+	    	{                
+	            // Check of dit punt ongeveer samenvalt met het eerste punt
+	            // Indien ja, sluiten we de polygoon
+		        polygon.reset();
+		        if(polygon.hasNextPoint())
 		        {
-		           	instance.notifyTouch(point);
-		           	polygon.setIsClosed(true);
+			        Point screenPts = new Point();
+			        GeoPoint point = polygon.getNextPoint();
+			        mapView.getProjection().toPixels(point, screenPts);
+			        int divx, divy;
+			        divx = Math.abs(screenPts.x-(int) event.getX());
+			        divy = Math.abs(screenPts.y-(int) event.getY());
+			            
+			        if(divx < HelloGoogleMaps.pointPixelTreshold && divy < HelloGoogleMaps.pointPixelTreshold)
+			        {
+			           	instance.notifyTouch(point);
+			           	polygon.setIsClosed(true);
+			        }
+			        else
+			        {
+			           	instance.notifyTouch(p);
+			        }
 		        }
 		        else
 		        {
 		           	instance.notifyTouch(p);
 		        }
-	        }
-	        else
-	        {
-	           	instance.notifyTouch(p);
-	        }
-            Log.v(TAG, "Touchevent: " + p.getLatitudeE6() / 1E6 + "/" + p.getLongitudeE6() /1E6);
+	            Log.v(TAG, "Touchevent: " + p.getLatitudeE6() / 1E6 + "/" + p.getLongitudeE6() /1E6);
+	    	}
     	}
+    	
+    	return false;
+    }
+    
+    /**
+     * Listener voor touch-down event (gebruiker raakt scherm aan)
+     * @param event
+     */
+    public boolean notifyTouchDown(MotionEvent event)
+    {
+    	// We starten een tijdsmeting, omdat we alleen een touch willen registreren
+		// als deze korter duurt dan een bepaalde tijdsduur
+		timer = System.currentTimeMillis();
+		
+		// Checken of we hier toevallig op een al geplaatst punt touchen
+    	polygon.reset();
+    	while(polygon.hasNextPoint())
+    	{
+	        Point screenPts = new Point();
+	        GeoPoint point = polygon.getNextPoint();
+	        mapView.getProjection().toPixels(point, screenPts);
+	        int divx, divy;
+	        divx = Math.abs(screenPts.x-(int) event.getX());
+	        divy = Math.abs(screenPts.y-(int) event.getY());
+	           
+	        if(divx < HelloGoogleMaps.pointPixelTreshold 
+	        		&& divy < HelloGoogleMaps.pointPixelTreshold
+	        		&& !point.equals(polygon.getFirstPoint()))
+	        {
+	           	movingPoint = true;
+	           	movingGeoPoint = point;
+	           	
+	           	break;
+	        }
+    	}
+    	
+    	return false;
+    }
+    
+    /**
+     * Listener voor move event (gebruiker verplaatst vinger)
+     * @param event
+     */
+    public boolean notifyTouchMove(MotionEvent event)
+    {
+    	// We zijn een punt aan het verplaatsen
+    	if(movingPoint)
+		{
+    		GeoPoint p = mapView.getProjection().fromPixels(
+        			(int) event.getX(),
+                    (int) event.getY());
+			Log.v(TAG, "Moving polygon point");
+			Log.v(TAG, polygon.editPoint(movingGeoPoint, p) ? "Success" : "Fail");
+			movingGeoPoint = p;
+			return true;
+		}
+    	
+    	return false;
     }
 } 

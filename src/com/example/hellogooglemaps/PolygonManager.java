@@ -101,6 +101,20 @@ public class PolygonManager
 	}
 	
 	/**
+	 * Geeft het eerste punt uit de polygoon, mits er minimaal 1 punt is
+	 * @return het eerste punt uit de polygoon
+	 */
+	public GeoPoint getFirstPoint()
+	{
+		if(polygon.size() > 0)
+		{
+			return polygon.get(0);
+		}
+		
+		return new GeoPoint(0,0);
+	}
+	
+	/**
 	 * Geeft het aantal punten in de polygoon
 	 * @return aantal punten in de polygoon
 	 */
