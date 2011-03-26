@@ -22,7 +22,6 @@ import com.google.android.maps.MapView;
  */
 class PolygonOverlay extends com.google.android.maps.Overlay
 {
-	private HelloGoogleMaps instance = null;
 	private PolygonManager polygon;
 	private Long timer;
 	private boolean movingPoint = false;
@@ -37,13 +36,11 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 	
 	/**
 	 * Constructor
-	 * @param instantie van HelloGoogleMaps
 	 * @param instantie van de polygonmanager
 	 * @param instantie van de mapview
 	 */
-	public PolygonOverlay(HelloGoogleMaps hgm, PolygonManager polygon, MapView mv, int color)
+	public PolygonOverlay(PolygonManager polygon, MapView mv, int color)
 	{
-		this.instance = hgm;
 		this.polygon  = polygon;
 		this.mapView  = mv;
 		
@@ -75,9 +72,9 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 	 * @param polygon
 	 * @param mv
 	 */
-	public PolygonOverlay(HelloGoogleMaps hgm, PolygonManager polygon, MapView mv)
+	public PolygonOverlay(PolygonManager polygon, MapView mv)
 	{
-		this(hgm, polygon, mv, Color.RED);
+		this(polygon, mv, Color.RED);
 	}	
 		
 	/**
@@ -215,17 +212,17 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 			            
 			        if(divx < HelloGoogleMaps.pointPixelTreshold && divy < HelloGoogleMaps.pointPixelTreshold)
 			        {
-			           	instance.notifyTouch(point);
+			           	polygon.addPoint(point);
 			           	polygon.setIsClosed(true);
 			        }
 			        else
 			        {
-			           	instance.notifyTouch(p);
+			           	polygon.addPoint(p);
 			        }
 		        }
 		        else
 		        {
-		           	instance.notifyTouch(p);
+		           	polygon.addPoint(p);
 		        }
 	            Log.v(TAG, "Touchevent: " + p.getLatitudeE6() / 1E6 + "/" + p.getLongitudeE6() /1E6);
 	    	}

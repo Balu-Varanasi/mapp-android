@@ -45,28 +45,13 @@ public class HelloGoogleMaps extends MapActivity
         mapController.setZoom(18);
         
         // Overlay toevoegen
-        PolygonOverlay mapOverlay = new PolygonOverlay(this, polygon, mapView);
+        PolygonOverlay mapOverlay = new PolygonOverlay(polygon, mapView);
         List<Overlay> listOfOverlays = mapView.getOverlays();
         listOfOverlays.clear();
         listOfOverlays.add(mapOverlay);
         
 	    mapView.invalidate();
     }
-	
-	/**
-	 * Wanneer het scherm is aangeraakt ontvangen we daar hier een bericht van
-	 * @param het aangeraakte punt, vertaald naar mapcoördinaten
-	 */
-	public void notifyTouch(GeoPoint p)
-	{
-		polygon.addPoint(p);
-		PolygonOverlay mapOverlay = new PolygonOverlay(this, polygon, mapView);
-        List<Overlay> listOfOverlays = mapView.getOverlays();
-        listOfOverlays.clear();
-        listOfOverlays.add(mapOverlay);
-        
-	    //mapView.invalidate();
-	}
 	
 	/**
 	 * Meuk
