@@ -33,11 +33,30 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 	private Paint shapePaint;
 	private Paint movingPointPaint;
 	private Region pathRegion = null;
+	/**
+	 * Constructor
+	 * @param instantie van de mapview
+	 */
+	public PolygonOverlay(MapView mv)
+	{
+		this(new PolygonManager(), mv);
+	}
 	
 	/**
 	 * Constructor
 	 * @param instantie van de polygonmanager
 	 * @param instantie van de mapview
+	 */
+	public PolygonOverlay(PolygonManager polygon, MapView mv)
+	{
+		this(polygon, mv, Color.RED);
+	}
+	
+	/**
+	 * Constructor
+	 * @param hgm
+	 * @param polygon
+	 * @param mv
 	 */
 	public PolygonOverlay(PolygonManager polygon, MapView mv, int color)
 	{
@@ -64,17 +83,6 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 		this.shapePaint.setStyle(Style.FILL_AND_STROKE);
 		this.shapePaint.setAlpha(50);
 		this.shapePaint.setAntiAlias(true);
-	}
-	
-	/**
-	 * Constructor
-	 * @param hgm
-	 * @param polygon
-	 * @param mv
-	 */
-	public PolygonOverlay(PolygonManager polygon, MapView mv)
-	{
-		this(polygon, mv, Color.RED);
 	}	
 		
 	/**
@@ -88,32 +96,33 @@ class PolygonOverlay extends com.google.android.maps.Overlay
     {
         super.draw(canvas, mapView, shadow);                   
 
-        Log.v(TAG, "Aantal polygoonpunten: " + polygon.getNumPoints());
+       // Log.v(TAG, "Aantal polygoonpunten: " + polygon.getNumPoints());
         Path path = new Path();
         	
         if(polygon.getIsClosed())
         {
         	Point screenPts = new Point();
-               mapView.getProjection().toPixels(polygon.getPreviousPoint(), screenPts);
-               path.moveTo(screenPts.x, screenPts.y);
+            mapView.getProjection().toPixels(polygon.getFirstPoint(), screenPts);
+            path.moveTo(screenPts.x, screenPts.y);
         }
         
-        while(polygon.hasNextPoint())
-        {
+        for (int i = 0; i < polygon.getNumPoints(); i++)
+        { 
           	// 'vertaalt' een punt naar pixels op het scherm
            	Point screenPts2 = new Point();
            	if(!polygon.getIsClosed() || this.polygonEditMode)
            	{
-	            mapView.getProjection().toPixels(polygon.getPreviousPoint(), screenPts2);
+	            mapView.getProjection().toPixels(polygon.getPoint(i), screenPts2);
            	}
            	
-           	GeoPoint next = polygon.getNextPoint();
+           	GeoPoint next = polygon.getPoint(i+1);
           	Point screenPts = new Point();
             mapView.getProjection().toPixels(next, screenPts);
             if(!polygon.getIsClosed() || this.polygonEditMode)
             {
-            	canvas.drawLine(screenPts2.x, screenPts2.y, screenPts.x, screenPts.y, this.pointPaint);
-            	
+            	if (i < polygon.getNumPoints() - 1 || polygon.getIsClosed()) {
+            		canvas.drawLine(screenPts2.x, screenPts2.y, screenPts.x, screenPts.y, this.pointPaint);
+            	}
             	// Ander kleurtje geven als we deze aan het verplaatsen zijn
             	if(this.movingGeoPoint != null && next.equals(this.movingGeoPoint) && this.movingPoint)
             	{
@@ -130,10 +139,14 @@ class PolygonOverlay extends com.google.android.maps.Overlay
                	path.lineTo(screenPts.x, screenPts.y);
             }
         }
+        
             
         // De polygoon is gesloten, vul hem op
         if(polygon.getIsClosed())
         {
+        	Point screenPts = new Point();
+            mapView.getProjection().toPixels(polygon.getFirstPoint(), screenPts);
+        	path.lineTo(screenPts.x, screenPts.y);
            	path.close();
            	canvas.drawPath(path, this.shapePaint);
            	
@@ -212,7 +225,6 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 			            
 			        if(divx < HelloGoogleMaps.pointPixelTreshold && divy < HelloGoogleMaps.pointPixelTreshold)
 			        {
-			           	polygon.addPoint(point);
 			           	polygon.setIsClosed(true);
 			        }
 			        else
@@ -256,9 +268,8 @@ class PolygonOverlay extends com.google.android.maps.Overlay
     	polygon.reset();
     	while(polygon.hasNextPoint())
     	{
-	        Point screenPts = new Point();
 	        GeoPoint point = polygon.getNextPoint();
-	        mapView.getProjection().toPixels(point, screenPts);
+	        Point screenPts = mapView.getProjection().toPixels(point, null);
 	        int divx, divy;
 	        divx = Math.abs(screenPts.x-(int) event.getX());
 	        divy = Math.abs(screenPts.y-(int) event.getY());
@@ -278,10 +289,28 @@ class PolygonOverlay extends com.google.android.maps.Overlay
     	}
     	
     	// Als we ergens klikken, in editmode zijn, en geen punt hebben aangetapt,
-    	// dan schakelen we de editmode weer uit.
     	if(this.pathRegion != null && this.polygonEditMode && !this.movingPoint)
 		{
-			this.polygonEditMode = false;
+    		//controleren of we op een lijn klikken
+    		polygon.reset();
+    		Point pointP = new Point((int) event.getX(), (int) event.getY());
+           	GeoPoint point = mapView.getProjection().fromPixels(pointP.x, pointP.y);
+           	Log.v(TAG, "New line attempt P:"+polygon.getNumPoints());
+        	for (int i = 0; i < polygon.getNumPoints(); i++)
+        	{
+    	        Point pointA = mapView.getProjection().toPixels(polygon.getPoint(i), null);
+    	        Point pointB = mapView.getProjection().toPixels(polygon.getPoint(i+1), null);
+    	        Log.v(TAG, "Points: A: "+pointA.x+' '+pointA.y+" B: "+pointB.x+' '+pointB.y);
+        		AlgebraLine line = new AlgebraLine(pointA, pointB);
+        		if (line.isNear(pointP, HelloGoogleMaps.pointPixelTreshold)) {
+    	           	movingPoint = true;
+    	           	polygon.addIntermediatePoint(point, i+1);
+    	           	movingGeoPoint = point;
+    	           	return true;
+        		}
+        	}
+    		// anders schakelen we de editmode weer uit.
+    		this.polygonEditMode = false;
 		}
     	
     	return false;

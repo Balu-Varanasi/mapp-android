@@ -1,3 +1,5 @@
+//Deze class komt nergens meer in voor. Kan weg? (26/03)
+
 package com.example.hellogooglemaps;
 
 import java.util.ArrayList;

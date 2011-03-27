@@ -21,7 +21,6 @@ public class HelloGoogleMaps extends MapActivity
 	private MapView mapView;
 	private MapController mapController;
 	private GeoPoint point;
-	private PolygonManager polygon = new PolygonManager();
 	
 	public static final int pointPixelTreshold = 15; // Maximaal verschil tussen 2 punten in pixels voor ze als gelijk worden beschouwd
 	public static final String TAG = "AppCetera"; // Log-tag
@@ -45,7 +44,7 @@ public class HelloGoogleMaps extends MapActivity
         mapController.setZoom(18);
         
         // Overlay toevoegen
-        PolygonOverlay mapOverlay = new PolygonOverlay(polygon, mapView);
+        PolygonOverlay mapOverlay = new PolygonOverlay(mapView);
         List<Overlay> listOfOverlays = mapView.getOverlays();
         listOfOverlays.clear();
         listOfOverlays.add(mapOverlay);

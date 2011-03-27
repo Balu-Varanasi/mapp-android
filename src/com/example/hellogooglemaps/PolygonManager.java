@@ -6,8 +6,7 @@ import com.google.android.maps.GeoPoint;
 
 /**
  * Beheert een polygoonstructuur
- * @author Mathijs
- *
+ * @author Mathijs, Joost
  */
 public class PolygonManager
 {
@@ -25,6 +24,14 @@ public class PolygonManager
 		{
 			polygon.add(p);
 		}
+	}
+	
+	/**
+	 * Voegt een punt toe aan de polygoon op de huidige plaats, en schuift de rest 1 plaats op
+	 * @param p: het toe te voegen punt
+	 */
+	public void addIntermediatePoint(GeoPoint p, int index) {
+		polygon.add(index, p);
 	}
 	
 	/**
@@ -53,19 +60,16 @@ public class PolygonManager
 	 * @return true als het punt vervangen is, false als het niet gevonden kon worden
 	 */
 	public boolean editPoint(GeoPoint p, GeoPoint p2)
-	{
-		boolean edited = false;
-		
+	{	
 		for(int i = 0; i < polygon.size(); i++)
 		{
 			if(polygon.get(i).equals(p))
 			{
 				polygon.set(i, p2);
-				edited = true;
+				return true;
 			}
 		}
-		
-		return edited;
+		return false;
 	}
 	
 	/**
@@ -87,10 +91,20 @@ public class PolygonManager
 		polygonPointer++;
 		return p;
 	}
-	
+
 	/**
-	 * Geeft het huidige punt uit de polygoon
-	 * @return het huidige punt uit de polygoon
+	 * Geeft een specifiek punt aan de hand van een index
+	 * @return het gevraagde punt
+	 */
+	public GeoPoint getPoint(int a)
+	{
+		GeoPoint p = polygon.get(a % polygon.size());
+		return p;
+	}
+
+	/**
+	 * Geeft het vorige punt uit de polygoon
+	 * @return het vorige punt uit de polygoon
 	 */
 	public GeoPoint getPreviousPoint()
 	{
@@ -149,5 +163,9 @@ public class PolygonManager
 	public void setIsClosed(boolean val)
 	{
 		isClosed = val;
+	}
+
+	public GeoPoint getLastPoint() {
+		return getPoint(polygon.size()-1 );
 	}
 }
