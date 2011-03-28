@@ -329,6 +329,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
         	}
     		// anders schakelen we de editmode weer uit.
     		this.polygonEditMode = false;
+    		return true;
 		}
     	
     	return false;
