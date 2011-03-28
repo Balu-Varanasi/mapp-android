@@ -33,23 +33,15 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 	private Paint shapePaint;
 	private Paint movingPointPaint;
 	private Region pathRegion = null;
+	private boolean eventConsumed = false;
+	
 	/**
 	 * Constructor
 	 * @param instantie van de mapview
 	 */
 	public PolygonOverlay(MapView mv)
 	{
-		this(new PolygonManager(), mv);
-	}
-	
-	/**
-	 * Constructor
-	 * @param instantie van de polygonmanager
-	 * @param instantie van de mapview
-	 */
-	public PolygonOverlay(PolygonManager polygon, MapView mv)
-	{
-		this(polygon, mv, Color.RED);
+		this(mv, Color.RED);
 	}
 	
 	/**
@@ -58,9 +50,9 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 	 * @param polygon
 	 * @param mv
 	 */
-	public PolygonOverlay(PolygonManager polygon, MapView mv, int color)
+	public PolygonOverlay(MapView mv, int color)
 	{
-		this.polygon  = polygon;
+		this.polygon  = new PolygonManager();
 		this.mapView  = mv;
 		
 		// Hiermee stellen we een aantal paint-eigenschappen in,
@@ -81,7 +73,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 		this.shapePaint.setStrokeWidth(2);
 		this.shapePaint.setStrokeCap(Cap.ROUND);
 		this.shapePaint.setStyle(Style.FILL_AND_STROKE);
-		this.shapePaint.setAlpha(50);
+		this.shapePaint.setAlpha(75);
 		this.shapePaint.setAntiAlias(true);
 	}	
 		
@@ -165,22 +157,43 @@ class PolygonOverlay extends com.google.android.maps.Overlay
      * @return boolean
      */
     public boolean onTouchEvent(MotionEvent event, MapView mapView) 
-    {   
+    {       	
     	// Wanneer de gebruiker zijn vinger op het touchscreen drukt
     	if(event.getAction() == MotionEvent.ACTION_DOWN)
-    	{        	
-    		return notifyTouchDown(event);
+    	{   
+    		this.eventConsumed = notifyTouchDown(event);
+    		return eventConsumed;
     	}
     	
     	if(event.getAction() == MotionEvent.ACTION_MOVE)
     	{
-    		return notifyTouchMove(event);
+    		boolean consumeEvent = false;
+    		consumeEvent = notifyTouchMove(event);
+    		
+    		if(consumeEvent && !this.eventConsumed)
+    		{
+    			this.eventConsumed = true;
+    		}
+    		
+    		return consumeEvent;
     	}
     	
         // Wanneer gebruiker zijn vinger optilt
         if (event.getAction() == MotionEvent.ACTION_UP)
         {
-        	return notifyTouchUp(event);
+        	boolean consumeEvent = false;
+        	consumeEvent = notifyTouchUp(event);
+        	
+        	// Het event is niet opgeëist door een listener, en de touch duurde minder lang
+        	// dan maxTouchDuration
+        	if(!consumeEvent && !this.eventConsumed && HelloGoogleMaps.isFirstOverlay(this)
+        			&& (System.currentTimeMillis()-timer < HelloGoogleMaps.maxTouchDuration))
+        	{
+        		// Voeg een nieuwe laag toe
+        		HelloGoogleMaps.addNewOverlay();
+        	}
+        	
+        	return consumeEvent;
         }       
         
         return false;
@@ -196,12 +209,13 @@ class PolygonOverlay extends com.google.android.maps.Overlay
     	if(this.movingPoint)
     	{
     		movingPoint = false;
+    		return true;
     	}
-    	else if(this.polygonEditMode)
+    	/*else if(this.polygonEditMode)
     	{
     		
-    	}
-    	else
+    	}*/
+    	else if(!polygon.getIsClosed() && !this.polygonEditMode)
     	{
 	    	// Alleen een punt tekenen als de touch minder dan maxTouchDuration duurde
 	    	long diff = System.currentTimeMillis()-timer;
@@ -211,6 +225,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 	    	
 	    	if(!movingPoint && diff < HelloGoogleMaps.maxTouchDuration)
 	    	{                
+	    		Log.v(TAG, "Touchevent: " + p.getLatitudeE6() / 1E6 + "/" + p.getLongitudeE6() /1E6);
 	            // Check of dit punt ongeveer samenvalt met het eerste punt
 	            // Indien ja, sluiten we de polygoon
 		        polygon.reset();
@@ -226,17 +241,19 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 			        if(divx < HelloGoogleMaps.pointPixelTreshold && divy < HelloGoogleMaps.pointPixelTreshold)
 			        {
 			           	polygon.setIsClosed(true);
+			           	return true;
 			        }
 			        else
 			        {
 			           	polygon.addPoint(p);
+			           	return true;
 			        }
 		        }
 		        else
 		        {
 		           	polygon.addPoint(p);
+		           	return true;
 		        }
-	            Log.v(TAG, "Touchevent: " + p.getLatitudeE6() / 1E6 + "/" + p.getLongitudeE6() /1E6);
 	    	}
     	}
     	
@@ -260,7 +277,8 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 	    	if(this.pathRegion.contains((int) event.getX(), (int) event.getY()))
 	    	{
 	    		this.polygonEditMode = true;
-	    		return false;
+	    		HelloGoogleMaps.moveToFront(this);
+	    		return true;
 	    	}
 		}
 		

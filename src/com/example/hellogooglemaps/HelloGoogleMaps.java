@@ -1,9 +1,11 @@
 package com.example.hellogooglemaps;
 
 import java.util.List;
+import java.util.Random;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
@@ -26,6 +28,8 @@ public class HelloGoogleMaps extends MapActivity
 	public static final String TAG = "AppCetera"; // Log-tag
 	public static final int maxTouchDuration = 500;
 	
+	public static HelloGoogleMaps instance;
+	
 	/**
 	 * Wordt aangeroepen wanneer deze activity wordt aangemaakt
 	 */
@@ -34,6 +38,8 @@ public class HelloGoogleMaps extends MapActivity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        
+        HelloGoogleMaps.instance = this;
         
         mapView = (MapView) findViewById(R.id.mapview);
 	    mapView.setBuiltInZoomControls(true);
@@ -51,6 +57,43 @@ public class HelloGoogleMaps extends MapActivity
         
 	    mapView.invalidate();
     }
+	
+	/**
+	 * Verplaatst een overlay naar de bovenste laag
+	 * @param po de overlay om naar boven te verplaatsen
+	 */
+	public static void moveToFront(PolygonOverlay po)
+	{
+		List<Overlay> listOfOverlays = HelloGoogleMaps.instance.mapView.getOverlays();
+		listOfOverlays.remove(po);
+		listOfOverlays.add(po);
+	}
+	
+	/**
+	 * Controleert of de gegeven overlay de eerste (=onderste) overlay is
+	 * @param po de te checken overlay
+	 * @return true indien gegeven overlay de onderste laag is
+	 */
+	public static boolean isFirstOverlay(PolygonOverlay po)
+	{
+		List<Overlay> listOfOverlays = HelloGoogleMaps.instance.mapView.getOverlays();
+		return listOfOverlays.get(0).equals(po);
+	}
+	
+	/**
+	 * Voegt een nieuwe overlay toe
+	 */
+	public static void addNewOverlay()
+	{
+		// Maak een willekeurige kleur
+		Random r = new Random();
+		int color = Color.rgb(r.nextInt(256), r.nextInt(256), r.nextInt(256));
+		// Maak een nieuwe overlay
+		List<Overlay> listOfOverlays = HelloGoogleMaps.instance.mapView.getOverlays();
+		listOfOverlays.add(new PolygonOverlay(HelloGoogleMaps.instance.mapView, color));
+		
+		Log.v(TAG, "Adding new layer");
+	}
 	
 	/**
 	 * Meuk
