@@ -382,4 +382,13 @@ class PolygonOverlay extends com.google.android.maps.Overlay
     {
     	return polygon;
     }
+    
+    /**
+     * Geeft aan of de polygoon in editmode is of niet
+     * @return true als de polygoon in editmode is
+     */
+    public boolean getIsEditMode()
+    {
+    	return this.polygonEditMode;
+    }
 } 

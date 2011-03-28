@@ -89,13 +89,16 @@ public class HelloGoogleMaps extends MapActivity
 	{
 		List<Overlay> listOfOverlays = HelloGoogleMaps.instance.mapView.getOverlays();
 		
-		// Check of de polygoon uit de vorige laag wel gesloten is
-		PolygonOverlay p = (PolygonOverlay) listOfOverlays.get(listOfOverlays.size()-1);
-		PolygonManager pm = p.getManager();
-		if(!pm.getIsClosed())
+		// Check of de polygonen uit de andere lagen wel gesloten zijn
+		for(int i = 0; i < listOfOverlays.size(); i++)
 		{
-			// Nee dus, geen nieuwe laag maken
-			return;
+			PolygonOverlay p = (PolygonOverlay) listOfOverlays.get(i);
+			PolygonManager pm = p.getManager();
+			if(!pm.getIsClosed() || p.getIsEditMode())
+			{
+				// Nee dus, geen nieuwe laag maken
+				return;
+			}
 		}
 		
 		// Maak een willekeurige kleur
