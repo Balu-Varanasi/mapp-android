@@ -6,6 +6,7 @@ import java.util.Random;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MotionEvent;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
@@ -82,15 +83,32 @@ public class HelloGoogleMaps extends MapActivity
 	
 	/**
 	 * Voegt een nieuwe overlay toe
+	 * @param het event dat doorgegeven zal worden aan de nieuwe laag
 	 */
-	public static void addNewOverlay()
+	public static void addNewOverlay(MotionEvent event)
 	{
+		List<Overlay> listOfOverlays = HelloGoogleMaps.instance.mapView.getOverlays();
+		
+		// Check of de polygoon uit de vorige laag wel gesloten is
+		PolygonOverlay p = (PolygonOverlay) listOfOverlays.get(listOfOverlays.size()-1);
+		PolygonManager pm = p.getManager();
+		if(!pm.getIsClosed())
+		{
+			// Nee dus, geen nieuwe laag maken
+			return;
+		}
+		
 		// Maak een willekeurige kleur
 		Random r = new Random();
 		int color = Color.rgb(r.nextInt(256), r.nextInt(256), r.nextInt(256));
 		// Maak een nieuwe overlay
-		List<Overlay> listOfOverlays = HelloGoogleMaps.instance.mapView.getOverlays();
-		listOfOverlays.add(new PolygonOverlay(HelloGoogleMaps.instance.mapView, color));
+		PolygonOverlay po = new PolygonOverlay(HelloGoogleMaps.instance.mapView, color);
+		// Geef het touchevent door, zodat we gelijk een nieuw punt kunnen maken
+		event.setAction(MotionEvent.ACTION_DOWN);
+		po.onTouchEvent(event, HelloGoogleMaps.instance.mapView);
+		event.setAction(MotionEvent.ACTION_UP);
+		po.onTouchEvent(event, HelloGoogleMaps.instance.mapView);
+		listOfOverlays.add(po);
 		
 		Log.v(TAG, "Adding new layer");
 	}

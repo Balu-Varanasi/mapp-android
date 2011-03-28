@@ -23,7 +23,7 @@ import com.google.android.maps.MapView;
 class PolygonOverlay extends com.google.android.maps.Overlay
 {
 	private PolygonManager polygon;
-	private Long timer;
+	private Long timer = (long) 0;
 	private boolean movingPoint = false;
 	private boolean polygonEditMode = false;
 	private GeoPoint movingGeoPoint;
@@ -190,7 +190,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
         			&& (System.currentTimeMillis()-timer < HelloGoogleMaps.maxTouchDuration))
         	{
         		// Voeg een nieuwe laag toe
-        		HelloGoogleMaps.addNewOverlay();
+        		HelloGoogleMaps.addNewOverlay(event);
         	}
         	
         	return consumeEvent;
@@ -222,6 +222,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
     	        if(divx < HelloGoogleMaps.pointPixelTreshold 
     	        		&& divy < HelloGoogleMaps.pointPixelTreshold)
     	        {
+    	        	// Indien er nog meer dan 3 punten over zijn, verwijderen we dit punt
     	        	if(polygon.getNumPoints() > 3 && !movingGeoPoint.equals(point))
     	        	{
     	        		polygon.removePoint(point);
@@ -371,5 +372,14 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 		}
     	
     	return false;
+    }
+    
+    /**
+     * Geeft de polygonmanager van deze overlay
+     * @return de polygonmanager van deze overlay
+     */
+    public PolygonManager getManager()
+    {
+    	return polygon;
     }
 } 
