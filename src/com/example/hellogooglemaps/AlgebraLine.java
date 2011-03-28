@@ -60,6 +60,15 @@ public class AlgebraLine {
 		//double[] proj = projection(p);
 		//Log.v(HelloGoogleMaps.TAG, "Projection: "+proj[0] + ' ' +proj[1]);
 		//double distance = distance(p, proj[0], proj[1]);
+		if (p.x > end.x + d || p.x < start.x - d) {
+			return false;
+		}
+		if ((end.y > start.y && p.y > end.y + d) || (end.y < start.y && p.y > start.y + d)) {
+			return false;
+		}
+		if ((end.y > start.y && p.y < start.y - d) || (end.y < start.y && p.y < end.y - d)) {
+			return false;
+		}
 		double distance = Math.abs((end.x - start.x) * (start.y - p.y) - (end.y - start.y) * (start.x - p.x)) / distance(start, end);
 		//Log.v(HelloGoogleMaps.TAG, "Distance: "+distance);
 		return distance <= d;
