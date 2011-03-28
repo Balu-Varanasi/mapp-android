@@ -209,12 +209,28 @@ class PolygonOverlay extends com.google.android.maps.Overlay
     	if(this.movingPoint)
     	{
     		movingPoint = false;
+    		// Checken of we het punt op een ander punt hebben gesleept
+        	polygon.reset();
+        	while(polygon.hasNextPoint())
+        	{
+    	        GeoPoint point = polygon.getNextPoint();
+    	        Point screenPts = mapView.getProjection().toPixels(point, null);
+    	        int divx, divy;
+    	        divx = Math.abs(screenPts.x-(int) event.getX());
+    	        divy = Math.abs(screenPts.y-(int) event.getY());
+    	           
+    	        if(divx < HelloGoogleMaps.pointPixelTreshold 
+    	        		&& divy < HelloGoogleMaps.pointPixelTreshold)
+    	        {
+    	        	if(polygon.getNumPoints() > 3 && !movingGeoPoint.equals(point))
+    	        	{
+    	        		polygon.removePoint(point);
+    	        		return true;
+    	        	}
+    	        }
+        	}
     		return true;
     	}
-    	/*else if(this.polygonEditMode)
-    	{
-    		
-    	}*/
     	else if(!polygon.getIsClosed() && !this.polygonEditMode)
     	{
 	    	// Alleen een punt tekenen als de touch minder dan maxTouchDuration duurde
