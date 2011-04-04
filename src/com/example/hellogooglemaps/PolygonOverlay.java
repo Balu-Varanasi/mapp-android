@@ -32,6 +32,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 	private Paint pointPaint;
 	private Paint shapePaint;
 	private Paint movingPointPaint;
+	private Paint shapeLinePaint;
 	private Region pathRegion = null;
 	private boolean eventConsumed = false;
 	
@@ -72,9 +73,16 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 		this.shapePaint.setColor(color);
 		this.shapePaint.setStrokeWidth(2);
 		this.shapePaint.setStrokeCap(Cap.ROUND);
-		this.shapePaint.setStyle(Style.FILL_AND_STROKE);
+		this.shapePaint.setStyle(Style.FILL);
 		this.shapePaint.setAlpha(75);
 		this.shapePaint.setAntiAlias(true);
+		
+		this.shapeLinePaint = new Paint();
+		this.shapeLinePaint.setColor(color);
+		this.shapeLinePaint.setStrokeWidth(3);
+		this.shapeLinePaint.setStrokeCap(Cap.ROUND);
+		this.shapeLinePaint.setAlpha(150);
+		this.shapeLinePaint.setAntiAlias(true);
 	}	
 		
 	/**
@@ -102,10 +110,10 @@ class PolygonOverlay extends com.google.android.maps.Overlay
         { 
           	// 'vertaalt' een punt naar pixels op het scherm
            	Point screenPts2 = new Point();
-           	if(!polygon.getIsClosed() || this.polygonEditMode)
-           	{
+           	//if(!polygon.getIsClosed() || this.polygonEditMode)
+           	//{
 	            mapView.getProjection().toPixels(polygon.getPoint(i), screenPts2);
-           	}
+           	//}
            	
            	GeoPoint next = polygon.getPoint(i+1);
           	Point screenPts = new Point();
@@ -129,6 +137,12 @@ class PolygonOverlay extends com.google.android.maps.Overlay
             if(polygon.getIsClosed())
             {
                	path.lineTo(screenPts.x, screenPts.y);
+               	// Toch maar een lijntje om de gesloten polygoon heen tekenen,
+               	// omdat Joël dat leuk vindt
+               	if (i < polygon.getNumPoints() && !this.polygonEditMode)
+               	{
+               		canvas.drawLine(screenPts2.x, screenPts2.y, screenPts.x, screenPts.y, this.shapeLinePaint);
+               	}
             }
         }
         
