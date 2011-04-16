@@ -1,4 +1,4 @@
-package com.example.hellogooglemaps;
+package nl.appcetera.mapp;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -27,7 +27,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 	private boolean movingPoint = false;
 	private boolean polygonEditMode = false;
 	private GeoPoint movingGeoPoint;
-	private static final String TAG = HelloGoogleMaps.TAG;
+	private static final String TAG = Mapp.TAG;
 	private MapView mapView;
 	private Paint pointPaint;
 	private Paint shapePaint;
@@ -200,11 +200,11 @@ class PolygonOverlay extends com.google.android.maps.Overlay
         	
         	// Het event is niet opgeëist door een listener, en de touch duurde minder lang
         	// dan maxTouchDuration
-        	if(!consumeEvent && !this.eventConsumed && HelloGoogleMaps.isFirstOverlay(this)
-        			&& (System.currentTimeMillis()-timer < HelloGoogleMaps.maxTouchDuration))
+        	if(!consumeEvent && !this.eventConsumed && Mapp.isFirstOverlay(this)
+        			&& (System.currentTimeMillis()-timer < Mapp.maxTouchDuration))
         	{
         		// Voeg een nieuwe laag toe
-        		HelloGoogleMaps.addNewOverlay(event);
+        		Mapp.addNewOverlay(event);
         	}
         	
         	return consumeEvent;
@@ -233,8 +233,8 @@ class PolygonOverlay extends com.google.android.maps.Overlay
     	        divx = Math.abs(screenPts.x-(int) event.getX());
     	        divy = Math.abs(screenPts.y-(int) event.getY());
     	           
-    	        if(divx < HelloGoogleMaps.pointPixelTreshold 
-    	        		&& divy < HelloGoogleMaps.pointPixelTreshold)
+    	        if(divx < Mapp.pointPixelTreshold 
+    	        		&& divy < Mapp.pointPixelTreshold)
     	        {
     	        	// Indien er nog meer dan 3 punten over zijn, verwijderen we dit punt
     	        	if(polygon.getNumPoints() > 3 && !movingGeoPoint.equals(point))
@@ -254,7 +254,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 	    			(int) event.getX(),
 	                (int) event.getY());
 	    	
-	    	if(!movingPoint && diff < HelloGoogleMaps.maxTouchDuration)
+	    	if(!movingPoint && diff < Mapp.maxTouchDuration)
 	    	{                
 	    		Log.v(TAG, "Touchevent: " + p.getLatitudeE6() / 1E6 + "/" + p.getLongitudeE6() /1E6);
 	            // Check of dit punt ongeveer samenvalt met het eerste punt
@@ -269,7 +269,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 			        divx = Math.abs(screenPts.x-(int) event.getX());
 			        divy = Math.abs(screenPts.y-(int) event.getY());
 			            
-			        if(divx < HelloGoogleMaps.pointPixelTreshold && divy < HelloGoogleMaps.pointPixelTreshold)
+			        if(divx < Mapp.pointPixelTreshold && divy < Mapp.pointPixelTreshold)
 			        {
 			           	polygon.setIsClosed(true);
 			           	return true;
@@ -308,7 +308,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 	    	if(this.pathRegion.contains((int) event.getX(), (int) event.getY()))
 	    	{
 	    		this.polygonEditMode = true;
-	    		HelloGoogleMaps.moveToFront(this);
+	    		Mapp.moveToFront(this);
 	    		return true;
 	    	}
 		}
@@ -323,8 +323,8 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 	        divx = Math.abs(screenPts.x-(int) event.getX());
 	        divy = Math.abs(screenPts.y-(int) event.getY());
 	           
-	        if(divx < HelloGoogleMaps.pointPixelTreshold 
-	        		&& divy < HelloGoogleMaps.pointPixelTreshold)
+	        if(divx < Mapp.pointPixelTreshold 
+	        		&& divy < Mapp.pointPixelTreshold)
 	        {
 	        	if(point.equals(polygon.getFirstPoint()) && !polygon.getIsClosed())
 	        	{
@@ -351,7 +351,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
     	        Point pointB = mapView.getProjection().toPixels(polygon.getPoint(i+1), null);
     	        Log.v(TAG, "Points: A: "+pointA.x+' '+pointA.y+" B: "+pointB.x+' '+pointB.y);
         		AlgebraLine line = new AlgebraLine(pointA, pointB);
-        		if (line.isNear(pointP, HelloGoogleMaps.pointPixelTreshold)) {
+        		if (line.isNear(pointP, Mapp.pointPixelTreshold)) {
     	           	movingPoint = true;
     	           	polygon.addIntermediatePoint(point, i+1);
     	           	movingGeoPoint = point;

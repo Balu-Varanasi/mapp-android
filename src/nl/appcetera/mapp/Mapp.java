@@ -1,4 +1,4 @@
-package com.example.hellogooglemaps;
+package nl.appcetera.mapp;
 
 import java.util.List;
 import java.util.Random;
@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 
+import nl.appcetera.mapp.R;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
@@ -15,11 +16,11 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 
 /**
- * Polygoon-testklasse
+ * Mapp main activity
  * @author Mathijs
  * @group AppCetera
  */
-public class HelloGoogleMaps extends MapActivity
+public class Mapp extends MapActivity
 {
 	private MapView mapView;
 	private MapController mapController;
@@ -29,7 +30,7 @@ public class HelloGoogleMaps extends MapActivity
 	public static final String TAG = "AppCetera"; // Log-tag
 	public static final int maxTouchDuration = 500;
 	
-	public static HelloGoogleMaps instance;
+	public static Mapp instance;
 	
 	/**
 	 * Wordt aangeroepen wanneer deze activity wordt aangemaakt
@@ -40,7 +41,7 @@ public class HelloGoogleMaps extends MapActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
-        HelloGoogleMaps.instance = this;
+        Mapp.instance = this;
         
         mapView = (MapView) findViewById(R.id.mapview);
 	    mapView.setBuiltInZoomControls(true);
@@ -65,7 +66,7 @@ public class HelloGoogleMaps extends MapActivity
 	 */
 	public static void moveToFront(PolygonOverlay po)
 	{
-		List<Overlay> listOfOverlays = HelloGoogleMaps.instance.mapView.getOverlays();
+		List<Overlay> listOfOverlays = Mapp.instance.mapView.getOverlays();
 		listOfOverlays.remove(po);
 		listOfOverlays.add(po);
 	}
@@ -77,7 +78,7 @@ public class HelloGoogleMaps extends MapActivity
 	 */
 	public static boolean isFirstOverlay(PolygonOverlay po)
 	{
-		List<Overlay> listOfOverlays = HelloGoogleMaps.instance.mapView.getOverlays();
+		List<Overlay> listOfOverlays = Mapp.instance.mapView.getOverlays();
 		return listOfOverlays.get(0).equals(po);
 	}
 	
@@ -87,7 +88,7 @@ public class HelloGoogleMaps extends MapActivity
 	 */
 	public static void addNewOverlay(MotionEvent event)
 	{
-		List<Overlay> listOfOverlays = HelloGoogleMaps.instance.mapView.getOverlays();
+		List<Overlay> listOfOverlays = Mapp.instance.mapView.getOverlays();
 		
 		// Check of de polygonen uit de andere lagen wel gesloten zijn
 		for(int i = 0; i < listOfOverlays.size(); i++)
@@ -105,12 +106,12 @@ public class HelloGoogleMaps extends MapActivity
 		Random r = new Random();
 		int color = Color.rgb(r.nextInt(256), r.nextInt(256), r.nextInt(256));
 		// Maak een nieuwe overlay
-		PolygonOverlay po = new PolygonOverlay(HelloGoogleMaps.instance.mapView, color);
+		PolygonOverlay po = new PolygonOverlay(Mapp.instance.mapView, color);
 		// Geef het touchevent door, zodat we gelijk een nieuw punt kunnen maken
 		event.setAction(MotionEvent.ACTION_DOWN);
-		po.onTouchEvent(event, HelloGoogleMaps.instance.mapView);
+		po.onTouchEvent(event, Mapp.instance.mapView);
 		event.setAction(MotionEvent.ACTION_UP);
-		po.onTouchEvent(event, HelloGoogleMaps.instance.mapView);
+		po.onTouchEvent(event, Mapp.instance.mapView);
 		listOfOverlays.add(po);
 		
 		Log.v(TAG, "Adding new layer");

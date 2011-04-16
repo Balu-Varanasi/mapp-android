@@ -1,4 +1,4 @@
-package com.example.hellogooglemaps;
+package nl.appcetera.mapp;
 
 import android.util.Log;
 import android.graphics.Point;
@@ -10,6 +10,7 @@ import android.graphics.Point;
  */
 
 public class AlgebraLine {
+	// TODO ongebruikte variabelen opruimen
 	private double a;
 	private double b;
 	private Point start;
@@ -30,7 +31,7 @@ public class AlgebraLine {
 			this.end = start;
 			this.start = end;
 		}
-		Log.v(HelloGoogleMaps.TAG, "Points: A: "+this.start.x+' '+this.start.y+" B: "+this.end.x+' '+this.end.y);
+		Log.v(Mapp.TAG, "Points: A: "+this.start.x+' '+this.start.y+" B: "+this.end.x+' '+this.end.y);
 	}
 	
 	/**
@@ -47,7 +48,7 @@ public class AlgebraLine {
 			this.end = start;
 			this.start = end;
 		}
-		Log.v(HelloGoogleMaps.TAG, "Points: A: "+this.start.x+' '+this.start.y+" B: "+this.end.x+' '+this.end.y);
+		Log.v(Mapp.TAG, "Points: A: "+this.start.x+' '+this.start.y+" B: "+this.end.x+' '+this.end.y);
 	}
 	
 	/**
@@ -74,6 +75,7 @@ public class AlgebraLine {
 		return distance <= d;
 	}
 
+	// TODO ongebruikte methoden opruimen
 	/**
 	 * Geeft de projectie van een punt op een vector.
 	 * Vector is in dit geval een punt op de vectorlijn, maar dat maakt voor het principe niet uit
@@ -85,7 +87,7 @@ public class AlgebraLine {
 		double[] proj = new double[2];
 		//http://www.codeguru.com/forum/showthread.php?t=194400
 		double r = segmentalInproduct(start, p, start, end) / Math.pow(distance(start, end),2);
-		Log.v(HelloGoogleMaps.TAG, "r: "+r);
+		Log.v(Mapp.TAG, "r: "+r);
 		if (r <= 0) {
 			proj[0] = start.x;
 			proj[1] = start.y;
@@ -111,6 +113,7 @@ public class AlgebraLine {
 		return Math.sqrt(Math.pow(p.y - q.y,2) + Math.pow(p.x - q.x,2));
 	}
 	
+	// TODO ongebruikte methoden opruimen
 	/**
 	 * Rekent de afstand uit tussen twee punten, waarvan 1 bestaande uit doubles
 	 * @param p het eerste point

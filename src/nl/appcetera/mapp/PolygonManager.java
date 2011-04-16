@@ -1,4 +1,4 @@
-package com.example.hellogooglemaps;
+package nl.appcetera.mapp;
 
 import java.util.ArrayList;
 

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      package="com.example.hellogooglemaps"
+      package="nl.appcetera.mapp"
       android:versionCode="1"
       android:versionName="1.0">
 
 
     <application android:icon="@drawable/icon" android:label="@string/app_name">
    		<uses-library android:name="com.google.android.maps" />
-        <activity android:name=".HelloGoogleMaps"
+        <activity android:name="nl.appcetera.mapp.Mapp"
                   android:label="@string/app_name"
                   android:theme="@android:style/Theme.NoTitleBar">
             <intent-filter>
