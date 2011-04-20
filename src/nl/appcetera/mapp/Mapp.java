@@ -25,6 +25,7 @@ public class Mapp extends MapActivity
 	private MapView mapView;
 	private MapController mapController;
 	private GeoPoint point;
+	private PolygonData database;
 	
 	public static final int pointPixelTreshold = 15; // Maximaal verschil tussen 2 punten in pixels voor ze als gelijk worden beschouwd
 	public static final String TAG = "AppCetera"; // Log-tag
@@ -50,6 +51,8 @@ public class Mapp extends MapActivity
 	    point = new GeoPoint(51824167,5867374);
         mapController.animateTo(point);
         mapController.setZoom(18);
+        
+        database = new PolygonData(this);
         
         // Overlay toevoegen
         PolygonOverlay mapOverlay = new PolygonOverlay(mapView);
@@ -126,4 +129,12 @@ public class Mapp extends MapActivity
 		return false;
 	}
 	
+	/**
+	 * Geeft een instantie van de databasemanager terug
+	 * @return PolygonData
+	 */
+	public static PolygonData getDatabase()
+	{
+		return Mapp.instance.database;
+	}
 }

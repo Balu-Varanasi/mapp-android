@@ -1,10 +1,10 @@
 package nl.appcetera.mapp;
+import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.provider.BaseColumns;
 
 /**
@@ -18,20 +18,20 @@ public class PolygonData extends SQLiteOpenHelper
 	private static final int DATABASE_VERSION = 1;
 	
 	public static final String POLYGON_TABLE_NAME 	= "polygondata";
-	public static final String _ID 					= BaseColumns._ID;
-	public static final String COLOR 				= "color";
-	public static final String LAST_EDITED			= "last_edited";
+	public static final String POLYGON_ID 			= BaseColumns._ID;
+	public static final String POLYGON_COLOR 		= "color";
+	public static final String POLYGON_LAST_EDITED	= "last_edited";
+	public static final String POLYGON_CLOSED		= "is_closed";
 	
 	public static final String POLYGON_POINTS_TABLE_NAME 	= "polygon_points";
-	public static final String POLYGON_ID 					= "polygon_id";
-	public static final String POLYGON_X 					= "coord_x";
-	public static final String POLYGON_Y 					= "coord_y";
+	public static final String POLYGON_POINTS_ID			= "polygon_id";
+	public static final String POLYGON_POINTS_X 			= "coord_x";
+	public static final String POLYGON_POINTS_Y 			= "coord_y";
 	public static final String POLYGON_POINTS_ORDERING		= "ordering";
 	
-	public PolygonData(Context context, String name, CursorFactory factory,
-			int version)
+	public PolygonData(Context context)
 	{
-		super(context, DATABASE_NAME, factory, DATABASE_VERSION);
+		super(context, DATABASE_NAME, null, DATABASE_VERSION);
 	}
 
 	/**
@@ -42,21 +42,22 @@ public class PolygonData extends SQLiteOpenHelper
 	{
 		  String sql =
 		    "CREATE TABLE " + POLYGON_TABLE_NAME + " ("
-		      + _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-		      + COLOR + " TEXT NOT NULL, "
-		      + LAST_EDITED + " INTEGER"
+		      + POLYGON_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+		      + POLYGON_COLOR + " TEXT NOT NULL, "
+		      + POLYGON_LAST_EDITED + " INTEGER, "
+		      + POLYGON_CLOSED + " INTEGER"
 		      + ");";
 		 
 		  db.execSQL(sql);
 		  
 		  String sql2 =
 			    "CREATE TABLE " + POLYGON_POINTS_TABLE_NAME + " ("
-			      + POLYGON_ID + " INTEGER PRIMARY KEY, "
-			      + POLYGON_X + " INTEGER, "
-			      + POLYGON_Y + " INTEGER, "
+			      + POLYGON_POINTS_ID + " INTEGER PRIMARY KEY, "
+			      + POLYGON_POINTS_X + " INTEGER, "
+			      + POLYGON_POINTS_Y + " INTEGER, "
 			      + POLYGON_POINTS_ORDERING + " INTEGER, "
 			      + "FOREIGN KEY(" + POLYGON_ID + ") REFERENCES " + POLYGON_TABLE_NAME 
-			      + "(" + _ID + ")"
+			      + "(" + POLYGON_ID + ")"
 			      + ");";
 			 
 		  db.execSQL(sql2);
@@ -80,12 +81,13 @@ public class PolygonData extends SQLiteOpenHelper
 	 * @param color de kleur van de polygoon als int (voor Java.Color)
 	 * @return het id dat de polygoon gekregen heeft
 	 */
-	public int addPolygon(int color)
+	public int addPolygon(int color, boolean isClosed)
 	{
 		SQLiteDatabase db = getWritableDatabase();
 		ContentValues values = new ContentValues();
-		values.put(COLOR, color);
-		values.put(LAST_EDITED, System.currentTimeMillis()/1000);
+		values.put(POLYGON_COLOR, color);
+		values.put(POLYGON_LAST_EDITED, System.currentTimeMillis()/1000);
+		values.put(POLYGON_CLOSED, isClosed == true ? 1 : 0);
 		db.insertOrThrow(POLYGON_TABLE_NAME, null, values);
 		
 		Cursor c = db.rawQuery("SELECT last_insert_rowid() FROM " + POLYGON_TABLE_NAME, null);
@@ -98,23 +100,26 @@ public class PolygonData extends SQLiteOpenHelper
 	 * @param color de kleur van de polygoon, als integer
 	 * @param isClosed of de polygoon gesloten is of niet
 	 */
-	public void editPolygon(int polygonid, int color)
+	public void editPolygon(int polygonid, int color, boolean isClosed)
 	{
 		SQLiteDatabase db = getWritableDatabase();
 		ContentValues values = new ContentValues();
-		values.put(COLOR, color);
-		values.put(LAST_EDITED, System.currentTimeMillis()/1000);
-		db.update(POLYGON_TABLE_NAME, values, "WHERE " + _ID + "=" + polygonid, null);
+		values.put(POLYGON_COLOR, color);
+		values.put(POLYGON_LAST_EDITED, System.currentTimeMillis()/1000);
+		values.put(POLYGON_CLOSED, isClosed == true ? 1 : 0);
+		db.update(POLYGON_TABLE_NAME, values, "WHERE " + POLYGON_ID + "=" + polygonid, null);
 	}
 	
 	/**
 	 * Geeft alle polygonen terug, gesorteerd op bewerkdatum
 	 * @return een cursor met alle polygonen, gesorteerd op bewerkdatum
 	 */
-	public Cursor getAllPolygons()
+	public Cursor getAllPolygons(Activity activity)
 	{
 		SQLiteDatabase db = getReadableDatabase();
-		Cursor c = db.query(POLYGON_TABLE_NAME, new String[]{_ID, COLOR}, null, null, null, null, LAST_EDITED);
+		Cursor c = db.query(POLYGON_TABLE_NAME, new String[]{POLYGON_ID, POLYGON_COLOR, POLYGON_CLOSED}, 
+				null, null, null, null, POLYGON_LAST_EDITED);
+		activity.startManagingCursor(c);
 		return c;
 	}
 	
@@ -125,7 +130,7 @@ public class PolygonData extends SQLiteOpenHelper
 	public void removePolygon(int polygonid)
 	{
 		SQLiteDatabase db = getWritableDatabase();
-		db.delete(POLYGON_TABLE_NAME, "WHERE " + _ID + "=" + polygonid, null);
+		db.delete(POLYGON_TABLE_NAME, "WHERE " + POLYGON_ID + "=" + polygonid, null);
 	}
 	
 	/**
@@ -139,11 +144,66 @@ public class PolygonData extends SQLiteOpenHelper
 	{
 		SQLiteDatabase db = getWritableDatabase();
 		ContentValues values = new ContentValues();
-		values.put(POLYGON_ID, polygonid);
-		values.put(POLYGON_X, x);
-		values.put(POLYGON_Y, y);
+		values.put(POLYGON_POINTS_ID, polygonid);
+		values.put(POLYGON_POINTS_X, x);
+		values.put(POLYGON_POINTS_Y, y);
 		values.put(POLYGON_POINTS_ORDERING, ordering);
 		db.insertOrThrow(POLYGON_POINTS_TABLE_NAME, null, values);
 	}
+	
+	/**
+	 * Wijzig de coördinaten van een punt
+	 * @param polygonid het id van de polygoon waar het te wijzigen punt bij hoort
+	 * @param x nieuwe positie van het punt
+	 * @param y nieuwe positie van het punt
+	 * @param ordering (nieuwe) index van het te wijzigen punt
+	 */
+	public void editPolygonPoint(int polygonid, long x, long y, int ordering)
+	{
+		SQLiteDatabase db = getWritableDatabase();
+		ContentValues values = new ContentValues();
+		values.put(POLYGON_POINTS_X, x);
+		values.put(POLYGON_POINTS_Y, y);
+		values.put(POLYGON_POINTS_ORDERING, ordering);
+		db.update(POLYGON_POINTS_TABLE_NAME, values, "WHERE " + POLYGON_POINTS_ID + " = " 
+				+ polygonid	+ " AND " + POLYGON_POINTS_ORDERING + " = " + ordering, null);
+	}
+	
+	/**
+	 * Verwijder een gegeven punt uit een polygoon
+	 * @param polygonid het id van de polygoon waar een punt uit moet
+	 * @param ordering de index van het te verwijderen punt
+	 */
+	public void removePolygonPoint(int polygonid, int ordering)
+	{
+		SQLiteDatabase db = getWritableDatabase();
+		db.delete(POLYGON_POINTS_TABLE_NAME, "WHERE " + POLYGON_POINTS_ID + " = " 
+				+ polygonid	+ " AND " + POLYGON_POINTS_ORDERING + " = " + ordering, null);
+	}
+	
+	/**
+	 * Verwijder alle bij een polygoon behorende punten
+	 * @param polygonid het id van de polygoon waar alle punten van weg moeten
+	 */
+	public void removePolygonPoints(int polygonid)
+	{
+		SQLiteDatabase db = getWritableDatabase();
+		db.delete(POLYGON_POINTS_TABLE_NAME, "WHERE " + POLYGON_POINTS_ID + " = " 
+				+ polygonid, null);
+	}
 
+	/**
+	 * Geeft alle bij een polygoon behorende punten terug, op juiste wijze gesorteerd
+	 * @param polygonid het id van de polygoon waar je de punten bij wilt hebben
+	 * @return een cursor met alle polygoonpunten
+	 */
+	public Cursor getAllPolygonPoints(Activity activity, int polygonid)
+	{
+		SQLiteDatabase db = getReadableDatabase();
+		Cursor c = db.query(POLYGON_POINTS_TABLE_NAME, 
+				new String[]{POLYGON_POINTS_X, POLYGON_POINTS_Y, POLYGON_POINTS_ORDERING},
+				POLYGON_ID + " = " + polygonid, null, null, null, POLYGON_POINTS_ORDERING);
+		activity.startManagingCursor(c);
+		return c;
+	}
 }

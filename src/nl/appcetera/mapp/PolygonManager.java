@@ -13,6 +13,7 @@ public class PolygonManager
 	private ArrayList<GeoPoint> polygon = new ArrayList<GeoPoint>();
 	private int polygonPointer = 0;
 	private boolean isClosed = false;
+	private int polygonId = 0;
 	
 	/**
 	 * Voegt een punt toe aan de polygoon
@@ -55,8 +56,8 @@ public class PolygonManager
 	
 	/**
 	 * Past een punt uit de polygoon aan
-	 * @param het te vervangen punt
-	 * @param het nieuwe punt
+	 * @param p het te vervangen punt
+	 * @param p2 het nieuwe punt
 	 * @return true als het punt vervangen is, false als het niet gevonden kon worden
 	 */
 	public boolean editPoint(GeoPoint p, GeoPoint p2)
@@ -165,7 +166,30 @@ public class PolygonManager
 		isClosed = val;
 	}
 
-	public GeoPoint getLastPoint() {
+	/**
+	 * Geeft het laatste punt van deze polygoon terug
+	 * @return laatste punt van de polygoon
+	 */
+	public GeoPoint getLastPoint()
+	{
 		return getPoint(polygon.size()-1 );
+	}
+	
+	/**
+	 * Zet het id van deze polygoon
+	 * @param id het id van de polygoon
+	 */
+	public void setId(int id)
+	{
+		polygonId = id;
+	}
+	
+	/**
+	 * Geeft het id van deze polygoon terug
+	 * @return id van de polygoon
+	 */
+	public int getId()
+	{
+		return polygonId;
 	}
 }

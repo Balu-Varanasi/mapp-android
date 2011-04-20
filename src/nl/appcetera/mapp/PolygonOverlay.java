@@ -59,16 +59,20 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 		// Hiermee stellen we een aantal paint-eigenschappen in,
         // zoals de kleur waarmee we verven, de dikte van de lijn en
         // de vorm van de uiteinden van de lijnen
+		
+		// Voor het tekenen van een hoekpunt van een polygoon
 		this.pointPaint = new Paint();
 		this.pointPaint.setColor(color);
 		this.pointPaint.setStrokeWidth(2);
 		this.pointPaint.setStrokeCap(Cap.ROUND);
 		
+		// Voor het tekenen van een hoekpunt van een polygoon dat verplaatst wordt
 		this.movingPointPaint = new Paint();
 		this.movingPointPaint.setColor(Color.GRAY);
 		this.movingPointPaint.setStrokeWidth(2);
 		this.movingPointPaint.setStrokeCap(Cap.ROUND);
 		
+		// Voor het tekenen van een hele polygoon
 		this.shapePaint = new Paint();
 		this.shapePaint.setColor(color);
 		this.shapePaint.setStrokeWidth(2);
@@ -77,6 +81,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 		this.shapePaint.setAlpha(75);
 		this.shapePaint.setAntiAlias(true);
 		
+		// Voor het tekenen van de lijnen om een polygoon heen
 		this.shapeLinePaint = new Paint();
 		this.shapeLinePaint.setColor(color);
 		this.shapeLinePaint.setStrokeWidth(3);
