@@ -2,6 +2,8 @@ package nl.appcetera.mapp;
 
 import java.util.ArrayList;
 
+import android.graphics.Color;
+
 import com.google.android.maps.GeoPoint;
 
 /**
@@ -14,7 +16,7 @@ public class PolygonManager
 	private int polygonPointer = 0;
 	private boolean isClosed = false;
 	private int polygonId = 0;
-	
+	private Color color;
 	/**
 	 * Voegt een punt toe aan de polygoon
 	 * @param p: het toe te voegen punt
@@ -191,5 +193,23 @@ public class PolygonManager
 	public int getId()
 	{
 		return polygonId;
+	}
+	
+	/**
+	 * Zet de kleur van deze polygoon
+	 * @param id het id van de polygoon
+	 */
+	public void setColor(Color color)
+	{
+		this.color = color;
+	}
+	
+	/**
+	 * Geeft de kleur van deze polygoon
+	 * @return kleur van de polygoon
+	 */
+	public Color getColor(int color)
+	{
+		return this.color;
 	}
 }

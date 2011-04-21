@@ -26,6 +26,8 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 	private Long timer = (long) 0;
 	private boolean movingPoint = false;
 	private boolean polygonEditMode = false;
+	private boolean metaPopupVisible = false;
+	private MetaPopup metapopup;
 	private GeoPoint movingGeoPoint;
 	private static final String TAG = Mapp.TAG;
 	private MapView mapView;
@@ -291,6 +293,16 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 		           	return true;
 		        }
 	    	}
+    	}
+    	
+    	else if (polygon.getIsClosed() && !metaPopupVisible)
+    	{
+    		metaPopupVisible = true;
+    		metapopup = new MetaPopup();
+    	}
+    	else if (metaPopupVisible) {
+    		metaPopupVisible = false;
+    		metapopup = null;
     	}
     	
     	return false;
