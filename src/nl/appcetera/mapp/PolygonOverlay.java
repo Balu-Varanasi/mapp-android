@@ -25,6 +25,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 	private PolygonManager polygon;
 	private Long timer = (long) 0;
 	private boolean movingPoint = false;
+	private int movingPointId = 0;
 	private boolean polygonEditMode = false;
 	private boolean metaPopupVisible = false;
 	private MetaPopup metapopup;
@@ -62,7 +63,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
         // zoals de kleur waarmee we verven, de dikte van de lijn en
         // de vorm van de uiteinden van de lijnen
 		
-		// Voor het tekenen van een hoekpunt van een polygoon
+		// Voor het tekenen van een hoekpunt/lijn van een polygoon
 		this.pointPaint = new Paint();
 		this.pointPaint.setColor(color);
 		this.pointPaint.setStrokeWidth(2);
@@ -77,8 +78,6 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 		// Voor het tekenen van een hele polygoon
 		this.shapePaint = new Paint();
 		this.shapePaint.setColor(color);
-		this.shapePaint.setStrokeWidth(2);
-		this.shapePaint.setStrokeCap(Cap.ROUND);
 		this.shapePaint.setStyle(Style.FILL);
 		this.shapePaint.setAlpha(75);
 		this.shapePaint.setAntiAlias(true);
@@ -229,7 +228,14 @@ class PolygonOverlay extends com.google.android.maps.Overlay
     {
     	if(this.movingPoint)
     	{
+    		// We waren een punt aan het verplaatsen maar hebben het scherm losgelaten
+    		// Schakel puntverplaatsing uit en sla de nieuwe positie op
     		movingPoint = false;
+    		GeoPoint p = mapView.getProjection().fromPixels(
+        			(int) event.getX(),
+                    (int) event.getY());
+    		polygon.saveMovedPoint(movingPointId, p);
+    		
     		// Checken of we het punt op een ander punt hebben gesleept
         	polygon.reset();
         	while(polygon.hasNextPoint())
@@ -350,6 +356,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 	        	
 	           	movingPoint = true;
 	           	movingGeoPoint = point;
+	           	movingPointId = polygon.getPointer();
 	           	return true;
 	        }
     	}

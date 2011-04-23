@@ -15,7 +15,7 @@ import android.provider.BaseColumns;
 public class PolygonData extends SQLiteOpenHelper
 {
 	private static final String DATABASE_NAME = "mapp.db";
-	private static final int DATABASE_VERSION = 1;
+	private static final int DATABASE_VERSION = 10;
 	
 	public static final String POLYGON_TABLE_NAME 	= "polygondata";
 	public static final String POLYGON_ID 			= BaseColumns._ID;
@@ -52,12 +52,12 @@ public class PolygonData extends SQLiteOpenHelper
 		  
 		  String sql2 =
 			    "CREATE TABLE " + POLYGON_POINTS_TABLE_NAME + " ("
-			      + POLYGON_POINTS_ID + " INTEGER PRIMARY KEY, "
+			      + POLYGON_POINTS_ID + " INTEGER, "
 			      + POLYGON_POINTS_X + " INTEGER, "
 			      + POLYGON_POINTS_Y + " INTEGER, "
 			      + POLYGON_POINTS_ORDERING + " INTEGER, "
-			      + "FOREIGN KEY(" + POLYGON_ID + ") REFERENCES " + POLYGON_TABLE_NAME 
-			      + "(" + POLYGON_ID + ")"
+			      + "FOREIGN KEY(" + POLYGON_POINTS_ID + ") REFERENCES " + POLYGON_TABLE_NAME 
+			      + "(" + POLYGON_ID + ") ON UPDATE CASCADE ON DELETE CASCADE"
 			      + ");";
 			 
 		  db.execSQL(sql2);
@@ -88,10 +88,7 @@ public class PolygonData extends SQLiteOpenHelper
 		values.put(POLYGON_COLOR, color);
 		values.put(POLYGON_LAST_EDITED, System.currentTimeMillis()/1000);
 		values.put(POLYGON_CLOSED, isClosed == true ? 1 : 0);
-		db.insertOrThrow(POLYGON_TABLE_NAME, null, values);
-		
-		Cursor c = db.rawQuery("SELECT last_insert_rowid() FROM " + POLYGON_TABLE_NAME, null);
-		return c.getInt(0);		
+		return (int) db.insertOrThrow(POLYGON_TABLE_NAME, null, values);
 	}
 	
 	/**
@@ -107,7 +104,7 @@ public class PolygonData extends SQLiteOpenHelper
 		values.put(POLYGON_COLOR, color);
 		values.put(POLYGON_LAST_EDITED, System.currentTimeMillis()/1000);
 		values.put(POLYGON_CLOSED, isClosed == true ? 1 : 0);
-		db.update(POLYGON_TABLE_NAME, values, "WHERE " + POLYGON_ID + "=" + polygonid, null);
+		db.update(POLYGON_TABLE_NAME, values, POLYGON_ID + "=" + polygonid, null);
 	}
 	
 	/**
@@ -130,14 +127,14 @@ public class PolygonData extends SQLiteOpenHelper
 	public void removePolygon(int polygonid)
 	{
 		SQLiteDatabase db = getWritableDatabase();
-		db.delete(POLYGON_TABLE_NAME, "WHERE " + POLYGON_ID + "=" + polygonid, null);
+		db.delete(POLYGON_TABLE_NAME, POLYGON_ID + "=" + polygonid, null);
 	}
 	
 	/**
 	 * Voegt een punt toe aan een polygoon op gegeven index
 	 * @param polygonid id van de polygoon waar het punt aan toegevoegd wordt
-	 * @param x positie van het punt
-	 * @param y positie van het punt
+	 * @param x positie van het punt (latitude)
+	 * @param y positie van het punt (longtitude)
 	 * @param ordering index van het punt, waarbij 0 het startpunt is
 	 */
 	public void addPolygonPoint(int polygonid, long x, long y, int ordering)
@@ -149,13 +146,18 @@ public class PolygonData extends SQLiteOpenHelper
 		values.put(POLYGON_POINTS_Y, y);
 		values.put(POLYGON_POINTS_ORDERING, ordering);
 		db.insertOrThrow(POLYGON_POINTS_TABLE_NAME, null, values);
+		
+		// Laatst-bewerkt datum bijwerken
+		values = new ContentValues();
+		values.put(POLYGON_LAST_EDITED, System.currentTimeMillis()/1000);
+		db.update(POLYGON_TABLE_NAME, values, POLYGON_ID + "=" + polygonid, null);
 	}
 	
 	/**
 	 * Wijzig de coördinaten van een punt
 	 * @param polygonid het id van de polygoon waar het te wijzigen punt bij hoort
-	 * @param x nieuwe positie van het punt
-	 * @param y nieuwe positie van het punt
+	 * @param x nieuwe positie van het punt (latitude)
+	 * @param y nieuwe positie van het punt (longtitude)
 	 * @param ordering (nieuwe) index van het te wijzigen punt
 	 */
 	public void editPolygonPoint(int polygonid, long x, long y, int ordering)
@@ -165,8 +167,13 @@ public class PolygonData extends SQLiteOpenHelper
 		values.put(POLYGON_POINTS_X, x);
 		values.put(POLYGON_POINTS_Y, y);
 		values.put(POLYGON_POINTS_ORDERING, ordering);
-		db.update(POLYGON_POINTS_TABLE_NAME, values, "WHERE " + POLYGON_POINTS_ID + " = " 
+		db.update(POLYGON_POINTS_TABLE_NAME, values, POLYGON_POINTS_ID + " = " 
 				+ polygonid	+ " AND " + POLYGON_POINTS_ORDERING + " = " + ordering, null);
+		
+		// Laatst-bewerkt datum bijwerken
+		values = new ContentValues();
+		values.put(POLYGON_LAST_EDITED, System.currentTimeMillis()/1000);
+		db.update(POLYGON_TABLE_NAME, values, POLYGON_ID + "=" + polygonid, null);
 	}
 	
 	/**
@@ -177,8 +184,13 @@ public class PolygonData extends SQLiteOpenHelper
 	public void removePolygonPoint(int polygonid, int ordering)
 	{
 		SQLiteDatabase db = getWritableDatabase();
-		db.delete(POLYGON_POINTS_TABLE_NAME, "WHERE " + POLYGON_POINTS_ID + " = " 
+		db.delete(POLYGON_POINTS_TABLE_NAME, POLYGON_POINTS_ID + " = " 
 				+ polygonid	+ " AND " + POLYGON_POINTS_ORDERING + " = " + ordering, null);
+		
+		// Laatst-bewerkt datum bijwerken
+		ContentValues values = new ContentValues();
+		values.put(POLYGON_LAST_EDITED, System.currentTimeMillis()/1000);
+		db.update(POLYGON_TABLE_NAME, values, POLYGON_ID + "=" + polygonid, null);
 	}
 	
 	/**
@@ -188,7 +200,7 @@ public class PolygonData extends SQLiteOpenHelper
 	public void removePolygonPoints(int polygonid)
 	{
 		SQLiteDatabase db = getWritableDatabase();
-		db.delete(POLYGON_POINTS_TABLE_NAME, "WHERE " + POLYGON_POINTS_ID + " = " 
+		db.delete(POLYGON_POINTS_TABLE_NAME, POLYGON_POINTS_ID + " = " 
 				+ polygonid, null);
 	}
 
@@ -202,8 +214,24 @@ public class PolygonData extends SQLiteOpenHelper
 		SQLiteDatabase db = getReadableDatabase();
 		Cursor c = db.query(POLYGON_POINTS_TABLE_NAME, 
 				new String[]{POLYGON_POINTS_X, POLYGON_POINTS_Y, POLYGON_POINTS_ORDERING},
-				POLYGON_ID + " = " + polygonid, null, null, null, POLYGON_POINTS_ORDERING);
+				POLYGON_POINTS_ID + " = " + polygonid, null, null, null, POLYGON_POINTS_ORDERING);
 		activity.startManagingCursor(c);
 		return c;
+	}
+	
+	/**
+	 * Verandert de volgorde van een groepje polygoonpunten, bijvoorbeeld handig
+	 * als je tussenin een punt wilt toevoegen of verwijderen
+	 * @param polygonid het id van de polygoon waar de punten bij horen
+	 * @param index alle punten groter dan of gelijk aan deze index worden verplaatst
+	 * @param diff het verschil waarmee je de punten wilt verplaatsen, 1 voor alle indices 1 omhoog, -1 voor alle indices 1 omlaag
+	 */
+	public void movePolygonPointsIndexes(int polygonid, int index, int diff)
+	{
+		SQLiteDatabase db = getWritableDatabase();
+		db.execSQL("UPDATE " + POLYGON_POINTS_TABLE_NAME + " SET " + POLYGON_POINTS_ORDERING
+				+ "=" + POLYGON_POINTS_ORDERING + "+" + diff + " WHERE "
+				+ POLYGON_POINTS_ORDERING + ">=" + index + " AND " + POLYGON_POINTS_ID
+				+ "=" + polygonid);
 	}
 }

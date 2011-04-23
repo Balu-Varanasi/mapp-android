@@ -2,13 +2,12 @@ package nl.appcetera.mapp;
 
 import java.util.ArrayList;
 
-import android.graphics.Color;
-
 import com.google.android.maps.GeoPoint;
 
 /**
  * Beheert een polygoonstructuur
- * @author Mathijs, Joost
+ * @author Mathijs
+ * @author Joost
  */
 public class PolygonManager
 {
@@ -16,7 +15,9 @@ public class PolygonManager
 	private int polygonPointer = 0;
 	private boolean isClosed = false;
 	private int polygonId = 0;
-	private Color color;
+	private int color;
+	private boolean dbEnable = true;
+	
 	/**
 	 * Voegt een punt toe aan de polygoon
 	 * @param p: het toe te voegen punt
@@ -25,6 +26,11 @@ public class PolygonManager
 	{
 		if(!isClosed)
 		{
+			if(dbEnable)
+			{
+				Mapp.getDatabase().addPolygonPoint(polygonId, p.getLatitudeE6(), 
+						p.getLongitudeE6(), polygon.size());
+			}
 			polygon.add(p);
 		}
 	}
@@ -33,7 +39,14 @@ public class PolygonManager
 	 * Voegt een punt toe aan de polygoon op de huidige plaats, en schuift de rest 1 plaats op
 	 * @param p: het toe te voegen punt
 	 */
-	public void addIntermediatePoint(GeoPoint p, int index) {
+	public void addIntermediatePoint(GeoPoint p, int index)
+	{
+		if(dbEnable)
+		{
+			Mapp.getDatabase().movePolygonPointsIndexes(polygonId, index, 1);
+			Mapp.getDatabase().addPolygonPoint(polygonId, p.getLongitudeE6(), 
+					p.getLatitudeE6(), index);
+		}
 		polygon.add(index, p);
 	}
 	
@@ -48,6 +61,11 @@ public class PolygonManager
 		{
 			if(polygon.get(i).equals(p))
 			{
+				if(dbEnable)
+				{
+					Mapp.getDatabase().removePolygonPoint(polygonId, i);
+					Mapp.getDatabase().movePolygonPointsIndexes(polygonId, i, -1);
+				}
 				polygon.remove(i);
 				return true;
 			}
@@ -71,6 +89,22 @@ public class PolygonManager
 				polygon.set(i, p2);
 				return true;
 			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Sla de nieuwe positie van een verplaatst punt op
+	 * @param id de index van het punt
+	 * @param p de nieuwe positie van het punt
+	 * @return
+	 */
+	public boolean saveMovedPoint(int id, GeoPoint p)
+	{	
+		if(dbEnable)
+		{
+			Mapp.getDatabase().editPolygonPoint(id, p.getLatitudeE6(), p.getLongitudeE6(), id);
+			return true;
 		}
 		return false;
 	}
@@ -165,6 +199,10 @@ public class PolygonManager
 	 */
 	public void setIsClosed(boolean val)
 	{
+		if(dbEnable)
+		{
+			Mapp.getDatabase().editPolygon(polygonId, color, val);
+		}
 		isClosed = val;
 	}
 
@@ -197,10 +235,14 @@ public class PolygonManager
 	
 	/**
 	 * Zet de kleur van deze polygoon
-	 * @param id het id van de polygoon
+	 * @param color de kleur van de polygoon
 	 */
-	public void setColor(Color color)
+	public void setColor(int color)
 	{
+		if(dbEnable)
+		{
+			Mapp.getDatabase().editPolygon(polygonId, color, isClosed);
+		}
 		this.color = color;
 	}
 	
@@ -208,8 +250,28 @@ public class PolygonManager
 	 * Geeft de kleur van deze polygoon
 	 * @return kleur van de polygoon
 	 */
-	public Color getColor(int color)
+	public int getColor()
 	{
 		return this.color;
+	}
+	
+	/**
+	 * Geeft de huidige waarde van de pointer terug
+	 * @return
+	 */
+	public int getPointer()
+	{
+		return polygonPointer;
+	}
+	
+	/**
+	 * Zet de enable state van de database
+	 * Tijdens het initialiseren van de polygonmanager met waarden uit de database,
+	 * moet de enable op false staan om onnodige queries te voorkomen
+	 * @param enable true voor enable, false voor niet enable
+	 */
+	public void setDbEnable(boolean enable)
+	{
+		dbEnable = enable;
 	}
 }

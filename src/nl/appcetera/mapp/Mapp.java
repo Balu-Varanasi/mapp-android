@@ -1,9 +1,7 @@
 package nl.appcetera.mapp;
 
 import java.util.List;
-import java.util.Random;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -26,6 +24,7 @@ public class Mapp extends MapActivity
 	private MapController mapController;
 	private GeoPoint point;
 	private PolygonData database;
+	private OverlayManager om;
 	
 	public static final int pointPixelTreshold = 15; // Maximaal verschil tussen 2 punten in pixels voor ze als gelijk worden beschouwd
 	public static final String TAG = "AppCetera"; // Log-tag
@@ -52,16 +51,21 @@ public class Mapp extends MapActivity
         mapController.animateTo(point);
         mapController.setZoom(18);
         
+        // Databaseklasse opstarten
         database = new PolygonData(this);
+
+        // Opgeslagen overlays laden
+        om = new OverlayManager(mapView, database, this);
+        om.loadOverlays();
         
-        // Overlay toevoegen
-        PolygonOverlay mapOverlay = new PolygonOverlay(mapView);
-        List<Overlay> listOfOverlays = mapView.getOverlays();
-        listOfOverlays.clear();
-        listOfOverlays.add(mapOverlay);
-        
-	    mapView.invalidate();
+        mapView.invalidate();
     }
+	
+	@Override
+	public void onDestroy()
+	{
+		database.close();
+	}
 	
 	/**
 	 * Verplaatst een overlay naar de bovenste laag
@@ -91,33 +95,18 @@ public class Mapp extends MapActivity
 	 */
 	public static void addNewOverlay(MotionEvent event)
 	{
-		List<Overlay> listOfOverlays = Mapp.instance.mapView.getOverlays();
+		PolygonOverlay po = Mapp.instance.om.addOverlay();
 		
-		// Check of de polygonen uit de andere lagen wel gesloten zijn
-		for(int i = 0; i < listOfOverlays.size(); i++)
+		if(po != null)
 		{
-			PolygonOverlay p = (PolygonOverlay) listOfOverlays.get(i);
-			PolygonManager pm = p.getManager();
-			if(!pm.getIsClosed() || p.getIsEditMode())
-			{
-				// Nee dus, geen nieuwe laag maken
-				return;
-			}
+			// Geef het touchevent door, zodat we gelijk een nieuw punt kunnen maken
+			event.setAction(MotionEvent.ACTION_DOWN);
+			po.onTouchEvent(event, Mapp.instance.mapView);
+			event.setAction(MotionEvent.ACTION_UP);
+			po.onTouchEvent(event, Mapp.instance.mapView);
+			
+			Log.v(TAG, "Adding new layer");
 		}
-		
-		// Maak een willekeurige kleur
-		Random r = new Random();
-		int color = Color.rgb(r.nextInt(256), r.nextInt(256), r.nextInt(256));
-		// Maak een nieuwe overlay
-		PolygonOverlay po = new PolygonOverlay(Mapp.instance.mapView, color);
-		// Geef het touchevent door, zodat we gelijk een nieuw punt kunnen maken
-		event.setAction(MotionEvent.ACTION_DOWN);
-		po.onTouchEvent(event, Mapp.instance.mapView);
-		event.setAction(MotionEvent.ACTION_UP);
-		po.onTouchEvent(event, Mapp.instance.mapView);
-		listOfOverlays.add(po);
-		
-		Log.v(TAG, "Adding new layer");
 	}
 	
 	/**
