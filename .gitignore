@@ -13,3 +13,5 @@
 
 # Eclipse settings
 .settings/
+
+.project
