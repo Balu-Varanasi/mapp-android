@@ -63,13 +63,12 @@ public class OverlayManager
 			do
 			{
 				// Niewe laag + polygoon toevoegen
-				PolygonOverlay mapOverlay = new PolygonOverlay(mv);
-		        
+				PolygonOverlay mapOverlay = new PolygonOverlay(mv, c.getInt(1));
+				
 		        // De polygonmanager goed instellen
 		        PolygonManager pm = mapOverlay.getManager();
 		        pm.setDbEnable(false);
 		        pm.setId(c.getInt(0));
-		        pm.setColor(c.getInt(1));
 		        boolean isClosed = c.getInt(2) != 0;
 		        
 		        // Punten ophalen en toevoegen aan de manager
@@ -119,7 +118,7 @@ public class OverlayManager
 		// Maak een nieuwe overlay
 		PolygonOverlay po = new PolygonOverlay(mv, color);
 
-		int id = db.addPolygon(po.getManager().getColor(), po.getManager().getIsClosed());
+		int id = db.addPolygon(color, po.getManager().getIsClosed());
         po.getManager().setId(id);
         
         listOfOverlays.add(po);

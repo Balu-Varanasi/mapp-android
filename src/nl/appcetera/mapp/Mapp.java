@@ -2,6 +2,7 @@ package nl.appcetera.mapp;
 
 import java.util.List;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -46,11 +47,7 @@ public class Mapp extends MapActivity
         mapView = (MapView) findViewById(R.id.mapview);
 	    mapView.setBuiltInZoomControls(true);
 	    mapView.setSatellite(true);
-	    mapController = mapView.getController();
-	    point = new GeoPoint(51824167,5867374);
-        mapController.animateTo(point);
-        mapController.setZoom(18);
-        
+
         // Databaseklasse opstarten
         database = new PolygonData(this);
 
@@ -61,10 +58,44 @@ public class Mapp extends MapActivity
         mapView.invalidate();
     }
 	
+	/**
+	 * Wanneer de app gekilled wordt
+	 */
 	@Override
 	public void onDestroy()
 	{
+		super.onDestroy();
 		database.close();
+	}
+	
+	/**
+	 * De applicatie gaat weer verder
+	 */
+	@Override
+	public void onResume()
+	{
+		super.onResume();
+		SharedPreferences settings = getPreferences(MODE_PRIVATE);
+		mapController = mapView.getController();
+	    point = new GeoPoint(settings.getInt("pos_lat", 51824167),
+	    		settings.getInt("pos_long", 5867374));
+        mapController.setZoom(settings.getInt("zoomlevel", 10));
+        mapController.animateTo(point);
+	}
+	
+	/**
+	 * Er komt een andere app overheen, deze wordt gepauzeerd
+	 */
+	@Override
+	public void onPause()
+	{
+		super.onPause();
+		SharedPreferences settings = getPreferences(MODE_PRIVATE);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putInt("zoomlevel", mapView.getZoomLevel());
+		editor.putInt("pos_long", mapView.getMapCenter().getLongitudeE6());
+		editor.putInt("pos_lat", mapView.getMapCenter().getLatitudeE6());
+		editor.commit();
 	}
 	
 	/**
