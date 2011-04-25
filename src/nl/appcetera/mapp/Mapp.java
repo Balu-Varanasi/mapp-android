@@ -39,11 +39,16 @@ public class Mapp extends MapActivity
 	@Override
     public void onCreate(Bundle savedInstanceState)
     {
+		// Constructor van de parent aanroepen
         super.onCreate(savedInstanceState);
+        
+        // Juiste layout (mapview) zetten
         setContentView(R.layout.main);
         
+        // Instantie van deze klasse beschikbaar maken met een statische variabele
         Mapp.instance = this;
         
+        // Mapview dingetjes
         mapView = (MapView) findViewById(R.id.mapview);
 	    mapView.setBuiltInZoomControls(true);
 	    mapView.setSatellite(true);
@@ -54,6 +59,10 @@ public class Mapp extends MapActivity
         // Opgeslagen overlays laden
         om = new OverlayManager(mapView, database, this);
         om.loadOverlays();
+        
+        // Syncservice starten
+        ServerSync s = new ServerSync(database, getApplicationContext());
+    	s.startSync();
         
         mapView.invalidate();
     }
