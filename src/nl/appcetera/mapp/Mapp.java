@@ -2,10 +2,18 @@ package nl.appcetera.mapp;
 
 import java.util.List;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 import nl.appcetera.mapp.R;
 import com.google.android.maps.GeoPoint;
@@ -17,6 +25,7 @@ import com.google.android.maps.Overlay;
 /**
  * Mapp main activity
  * @author Mathijs
+ * @author Joost
  * @group AppCetera
  */
 public class Mapp extends MapActivity
@@ -26,10 +35,11 @@ public class Mapp extends MapActivity
 	private GeoPoint point;
 	private PolygonData database;
 	private OverlayManager om;
-	
+	private MetaPopupManager metaPopupManager;
 	public static final int pointPixelTreshold = 15; // Maximaal verschil tussen 2 punten in pixels voor ze als gelijk worden beschouwd
 	public static final String TAG = "AppCetera"; // Log-tag
 	public static final int maxTouchDuration = 500;
+	private static final int METAPOPUP_ID = 0;
 	
 	public static Mapp instance;
 	
@@ -65,6 +75,9 @@ public class Mapp extends MapActivity
     	s.startSync();
         
         mapView.invalidate();
+        
+        showMetaPopup();
+
     }
 	
 	/**
@@ -167,5 +180,41 @@ public class Mapp extends MapActivity
 	public static PolygonData getDatabase()
 	{
 		return Mapp.instance.database;
+	}
+
+	public boolean displayingMetaPopup() {
+		return metaPopupManager.isVisible();
+	}
+
+	public void hideMetaPopup() {
+		dismissDialog(METAPOPUP_ID);
+	}
+
+	public void showMetaPopup() {
+		showDialog(METAPOPUP_ID);
+	}
+	
+	protected Dialog onCreateDialog(int id) {
+	    Dialog dialog = null;
+	    Toast.makeText(getApplicationContext(), "attempt show dialog", Toast.LENGTH_LONG).show();
+	    switch(id) {
+	    case METAPOPUP_ID:
+	    	AlertDialog.Builder builder;
+	    	AlertDialog alertDialog;
+
+	    	Context mContext = getApplicationContext();
+	    	LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(LAYOUT_INFLATER_SERVICE);
+	    	View layout = inflater.inflate(R.layout.metapopup,
+	    	                               (ViewGroup) findViewById(R.id.LinearLayout01));
+
+	    	ImageView image = (ImageView) layout.findViewById(R.id.ImageView01);
+	    	image.setImageResource(R.drawable.androidmarker);
+
+	    	builder = new AlertDialog.Builder(mContext);
+	    	builder.setView(layout);
+	    	alertDialog = builder.create();
+	        break;
+	    }
+	    return dialog;
 	}
 }

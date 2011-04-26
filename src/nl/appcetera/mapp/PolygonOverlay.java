@@ -27,8 +27,6 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 	private boolean movingPoint = false;
 	private int movingPointId = 0;
 	private boolean polygonEditMode = false;
-	private boolean metaPopupVisible = false;
-	private MetaPopup metapopup;
 	private GeoPoint movingGeoPoint;
 	private static final String TAG = Mapp.TAG;
 	private MapView mapView;
@@ -301,14 +299,14 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 	    	}
     	}
     	
-    	else if (polygon.getIsClosed() && !metaPopupVisible)
+    	else if (polygon.getIsClosed() && Mapp.instance.displayingMetaPopup())
     	{
-    		metaPopupVisible = true;
-    		metapopup = new MetaPopup();
+    		Mapp.instance.hideMetaPopup();
+    		//TODO maak metapopup onzichtbaar
     	}
-    	else if (metaPopupVisible) {
-    		metaPopupVisible = false;
-    		metapopup = null;
+    	else if (polygon.getIsClosed()) {
+    		Mapp.instance.showMetaPopup();
+    		//TODO maak metapopup onzichtbaar
     	}
     	
     	return false;
