@@ -21,12 +21,15 @@ public class ServerSync implements Runnable
 	 * Constructor
 	 * @param db
 	 */
-	public ServerSync(PolygonData db, Context c)
+	public ServerSync(Context c)
 	{
-		this.db = db;
+		this.db = new PolygonData(c);
 		ServerSync.c = c;
 	}
 	
+	/**
+	 * Start het synchroniseren
+	 */
 	public void startSync()
 	{
 		enable = true;
@@ -34,14 +37,36 @@ public class ServerSync implements Runnable
 		syncHandler.post(this);
 	}
 	
-	public void run()
+	/**
+	 * Stopt het synchroniseren
+	 */
+	public void stopSync()
 	{
-		new DataSyncTask().execute(db);
-        syncHandler.postDelayed(this, 60000);
+		enable = false;
 	}
 	
+	/**
+	 * Voert één synchronisatiecyclus uit
+	 */
+	public void run()
+	{
+		//if(enable)
+		{
+			new DataSyncTask().execute(db);
+			syncHandler.postDelayed(this, 60000);
+		}
+	}
+	
+	/**
+	 * De werkelijke synchronisatie vindt, in een aparte thread, plaats in deze klasse
+	 * @author Mathijs
+	 *
+	 */
 	private class DataSyncTask extends AsyncTask<PolygonData, Void, String>
 	{
+		/**
+		 * Sync op de achtergrond
+		 */
 		@Override
 		protected String doInBackground(PolygonData... db)
 		{
@@ -57,6 +82,10 @@ public class ServerSync implements Runnable
 			return "Ok";
 		}
 		
+		/**
+		 * Wordt aangeroepen wanneer sync klaar is.
+		 * Deze methode draait in de UI thread en is dus 'blocking'
+		 */
 		@Override
 		protected void onPostExecute(String result)
 		{

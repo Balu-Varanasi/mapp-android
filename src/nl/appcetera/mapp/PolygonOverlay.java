@@ -58,7 +58,6 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 	{
 		this.polygon  = new PolygonManager();
 		this.mapView  = mv;
-		this.polygon.setColor(color);
 		
 		// Hiermee stellen we een aantal paint-eigenschappen in,
         // zoals de kleur waarmee we verven, de dikte van de lijn en

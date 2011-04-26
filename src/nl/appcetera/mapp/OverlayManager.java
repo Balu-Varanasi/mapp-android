@@ -43,7 +43,7 @@ public class OverlayManager
 		// Er zijn geen polygonen opgeslagen
 		if(!c.moveToFirst())
 		{
-			// Niewe laag + polygoon toevoegen
+			/*// Niewe laag + polygoon toevoegen
 			PolygonOverlay mapOverlay = new PolygonOverlay(mv);
 	        List<Overlay> listOfOverlays = mv.getOverlays();
 	        listOfOverlays.clear();
@@ -52,8 +52,10 @@ public class OverlayManager
 	        int id = db.addPolygon(mapOverlay.getManager().getColor(), 
 	        		mapOverlay.getManager().getIsClosed());
 	        mapOverlay.getManager().setId(id);
+	        mapOverlay.getManager().setColor(color)
 	        
-	        listOfOverlays.add(mapOverlay);
+	        listOfOverlays.add(mapOverlay);*/
+			addOverlay();
 		}
 		else
 		{
@@ -69,6 +71,7 @@ public class OverlayManager
 		        PolygonManager pm = mapOverlay.getManager();
 		        pm.setDbEnable(false);
 		        pm.setId(c.getInt(0));
+				pm.setColor(c.getInt(1));
 		        boolean isClosed = c.getInt(2) != 0;
 		        
 		        // Punten ophalen en toevoegen aan de manager
@@ -101,14 +104,17 @@ public class OverlayManager
 		List<Overlay> listOfOverlays = mv.getOverlays();
 		
 		// Check of de polygonen uit de andere lagen wel gesloten zijn
-		for(int i = 0; i < listOfOverlays.size(); i++)
+		if(listOfOverlays.size() > 0)
 		{
-			PolygonOverlay p = (PolygonOverlay) listOfOverlays.get(i);
-			PolygonManager pm = p.getManager();
-			if(!pm.getIsClosed() || p.getIsEditMode())
+			for(int i = 0; i < listOfOverlays.size(); i++)
 			{
-				// Nee dus, geen nieuwe laag maken
-				return null;
+				PolygonOverlay p = (PolygonOverlay) listOfOverlays.get(i);
+				PolygonManager pm = p.getManager();
+				if(!pm.getIsClosed() || p.getIsEditMode())
+				{
+					// Nee dus, geen nieuwe laag maken
+					return null;
+				}
 			}
 		}
 		
@@ -120,6 +126,7 @@ public class OverlayManager
 
 		int id = db.addPolygon(color, po.getManager().getIsClosed());
         po.getManager().setId(id);
+        po.getManager().setColor(color);
         
         listOfOverlays.add(po);
         

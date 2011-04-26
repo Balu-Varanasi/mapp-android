@@ -61,7 +61,7 @@ public class Mapp extends MapActivity
         om.loadOverlays();
         
         // Syncservice starten
-        ServerSync s = new ServerSync(database, getApplicationContext());
+        ServerSync s = new ServerSync(getApplicationContext());
     	s.startSync();
         
         mapView.invalidate();
@@ -90,6 +90,7 @@ public class Mapp extends MapActivity
 	    		settings.getInt("pos_long", 5867374));
         mapController.setZoom(settings.getInt("zoomlevel", 10));
         mapController.animateTo(point);
+        database = new PolygonData(this);
 	}
 	
 	/**
@@ -105,6 +106,7 @@ public class Mapp extends MapActivity
 		editor.putInt("pos_long", mapView.getMapCenter().getLongitudeE6());
 		editor.putInt("pos_lat", mapView.getMapCenter().getLatitudeE6());
 		editor.commit();
+		database.close();
 	}
 	
 	/**
