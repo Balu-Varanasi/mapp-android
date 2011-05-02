@@ -36,9 +36,11 @@ public class Mapp extends MapActivity
 	private PolygonData database;
 	private OverlayManager om;
 	private MetaPopupManager metaPopupManager;
+	private ServerSync s;
 	public static final int pointPixelTreshold = 15; // Maximaal verschil tussen 2 punten in pixels voor ze als gelijk worden beschouwd
 	public static final String TAG = "AppCetera"; // Log-tag
 	public static final int maxTouchDuration = 500;
+	public static final int polygonMinDisplayWidth = 5; // Wanneer een polygoon smaller is dan dit wordt ie niet getoond
 	private static final int METAPOPUP_ID = 0;
 	
 	public static Mapp instance;
@@ -68,10 +70,11 @@ public class Mapp extends MapActivity
 
         // Opgeslagen overlays laden
         om = new OverlayManager(mapView, database, this);
+        om.setGroup(0);
         om.loadOverlays();
         
         // Syncservice starten
-        ServerSync s = new ServerSync(getApplicationContext());
+        s = new ServerSync(getApplicationContext());
     	s.startSync();
         
         mapView.invalidate();
@@ -88,6 +91,7 @@ public class Mapp extends MapActivity
 	{
 		super.onDestroy();
 		database.close();
+		s.stopSync();
 	}
 	
 	/**
@@ -97,13 +101,26 @@ public class Mapp extends MapActivity
 	public void onResume()
 	{
 		super.onResume();
+		
+		// Settings ophalen
 		SharedPreferences settings = getPreferences(MODE_PRIVATE);
+		
+		// Naar de juiste plaats op de kaart gaan
 		mapController = mapView.getController();
 	    point = new GeoPoint(settings.getInt("pos_lat", 51824167),
 	    		settings.getInt("pos_long", 5867374));
         mapController.setZoom(settings.getInt("zoomlevel", 10));
         mapController.animateTo(point);
+        
+        // Database opstarten
         database = new PolygonData(this);
+        
+        // Syncservice hervatten
+        s.startSync();
+        
+        // Juiste groep ophalen en polygonen laden
+        om.setGroup(settings.getInt("group", 0));
+        om.loadOverlays();
 	}
 	
 	/**
@@ -113,13 +130,21 @@ public class Mapp extends MapActivity
 	public void onPause()
 	{
 		super.onPause();
+		
+		// Settings opslaan
 		SharedPreferences settings = getPreferences(MODE_PRIVATE);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putInt("zoomlevel", mapView.getZoomLevel());
 		editor.putInt("pos_long", mapView.getMapCenter().getLongitudeE6());
 		editor.putInt("pos_lat", mapView.getMapCenter().getLatitudeE6());
+		editor.putInt("group", 0);
 		editor.commit();
+		
+		// Database afsluiten
 		database.close();
+		
+		// Syncservice stoppen
+		s.stopSync();
 	}
 	
 	/**

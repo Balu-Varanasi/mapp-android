@@ -1,5 +1,7 @@
 package nl.appcetera.mapp;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -158,12 +160,25 @@ class PolygonOverlay extends com.google.android.maps.Overlay
             mapView.getProjection().toPixels(polygon.getFirstPoint(), screenPts);
         	path.lineTo(screenPts.x, screenPts.y);
            	path.close();
-           	canvas.drawPath(path, this.shapePaint);
            	
            	RectF rectF = new RectF();
            	path.computeBounds(rectF, true);
-           	pathRegion = new Region();
-           	pathRegion.setPath(path, new Region((int) rectF.left, (int) rectF.top, (int) rectF.right, (int) rectF.bottom));
+           	
+           	// Niet opvullen als de polygoon toch te klein wordt op de kaart
+           	if(Math.abs(rectF.width()) > Mapp.polygonMinDisplayWidth)
+           	{
+           		canvas.drawPath(path, this.shapePaint);
+           	
+           		pathRegion = new Region();
+           		pathRegion.setPath(path, new Region((int) rectF.left, (int) rectF.top, (int) rectF.right, (int) rectF.bottom));
+           	}
+           	else
+           	{
+           		// Maar in plaats daarvan een marker tonen
+           		Bitmap bmp = BitmapFactory.decodeResource(
+           				Mapp.instance.getResources(), R.drawable.androidmarker);
+           		canvas.drawBitmap(bmp, rectF.centerX(), rectF.centerY(), null);
+           	}
         }
         polygon.reset();
     }
@@ -299,7 +314,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 	    	}
     	}
     	
-    	else if (polygon.getIsClosed() && Mapp.instance.displayingMetaPopup())
+    	/*else if (polygon.getIsClosed() && Mapp.instance.displayingMetaPopup())
     	{
     		Mapp.instance.hideMetaPopup();
     		//TODO maak metapopup onzichtbaar
@@ -307,7 +322,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
     	else if (polygon.getIsClosed()) {
     		Mapp.instance.showMetaPopup();
     		//TODO maak metapopup onzichtbaar
-    	}
+    	}*/
     	
     	return false;
     }

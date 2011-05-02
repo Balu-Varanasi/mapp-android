@@ -50,7 +50,7 @@ public class ServerSync implements Runnable
 	 */
 	public void run()
 	{
-		//if(enable)
+		if(enable)
 		{
 			new DataSyncTask().execute(db);
 			syncHandler.postDelayed(this, 60000);

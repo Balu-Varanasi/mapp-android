@@ -20,6 +20,7 @@ public class OverlayManager
 	private MapView mv;
 	private PolygonData db;
 	private Mapp activity;
+	private int group = 0;
 	
 	/**
 	 * Constructor
@@ -34,27 +35,24 @@ public class OverlayManager
 	}
 	
 	/**
+	 * Zet het nieuwe id van de groep die je wilt bekijken
+	 * @param group het id van de groep om polygonen uit te tonen
+	 */
+	public void setGroup(int group)
+	{
+		this.group = group;
+	}
+	
+	/**
 	 * Laadt alle polygonen uit de database en plaatst deze in overlays
 	 */
 	public void loadOverlays()
 	{
-		Cursor c = db.getAllPolygons(activity);
+		Cursor c = db.getAllPolygons(activity, group);
 		
 		// Er zijn geen polygonen opgeslagen
 		if(!c.moveToFirst())
 		{
-			/*// Niewe laag + polygoon toevoegen
-			PolygonOverlay mapOverlay = new PolygonOverlay(mv);
-	        List<Overlay> listOfOverlays = mv.getOverlays();
-	        listOfOverlays.clear();
-	        
-	        // Nieuwe polygoon in database stoppen en het id aan de polygoon geven
-	        int id = db.addPolygon(mapOverlay.getManager().getColor(), 
-	        		mapOverlay.getManager().getIsClosed());
-	        mapOverlay.getManager().setId(id);
-	        mapOverlay.getManager().setColor(color)
-	        
-	        listOfOverlays.add(mapOverlay);*/
 			addOverlay();
 		}
 		else
@@ -124,7 +122,7 @@ public class OverlayManager
 		// Maak een nieuwe overlay
 		PolygonOverlay po = new PolygonOverlay(mv, color);
 
-		int id = db.addPolygon(color, po.getManager().getIsClosed());
+		int id = db.addPolygon(color, po.getManager().getIsClosed(), group);
         po.getManager().setId(id);
         po.getManager().setColor(color);
         

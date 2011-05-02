@@ -15,19 +15,25 @@ import android.provider.BaseColumns;
 public class PolygonData extends SQLiteOpenHelper
 {
 	private static final String DATABASE_NAME = "mapp.db";
-	private static final int DATABASE_VERSION = 14;
+	private static final int DATABASE_VERSION = 16;
 	
 	public static final String POLYGON_TABLE_NAME 	= "polygondata";
 	public static final String POLYGON_ID 			= BaseColumns._ID;
 	public static final String POLYGON_COLOR 		= "color";
 	public static final String POLYGON_LAST_EDITED	= "last_edited";
 	public static final String POLYGON_CLOSED		= "is_closed";
+	public static final String POLYGON_GROUP		= "groupid";
 	
 	public static final String POLYGON_POINTS_TABLE_NAME 	= "polygon_points";
 	public static final String POLYGON_POINTS_ID			= "polygon_id";
 	public static final String POLYGON_POINTS_X 			= "coord_x";
 	public static final String POLYGON_POINTS_Y 			= "coord_y";
 	public static final String POLYGON_POINTS_ORDERING		= "ordering";
+	
+	public static final String GROUPS_TABLE_NAME	= "groups";
+	public static final String GROUPS_ID			= BaseColumns._ID;
+	public static final String GROUPS_NAME			= "group_name";
+	
 	
 	public PolygonData(Context context)
 	{
@@ -40,17 +46,28 @@ public class PolygonData extends SQLiteOpenHelper
 	@Override
 	public void onCreate(SQLiteDatabase db)
 	{
-		  String sql =
+		String sql3 =
+		    "CREATE TABLE " + GROUPS_TABLE_NAME + " ("
+		      + GROUPS_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+		      + GROUPS_NAME + " TEXT"
+		      + ");";
+		db.execSQL(sql3);
+		db.execSQL("INSERT INTO " + GROUPS_TABLE_NAME + " (" + GROUPS_NAME + ") VALUES ('Default')");
+		
+		String sql =
 		    "CREATE TABLE " + POLYGON_TABLE_NAME + " ("
 		      + POLYGON_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-		      + POLYGON_COLOR + " TEXT NOT NULL, "
+		      + POLYGON_COLOR + " INTEGER NOT NULL, "
 		      + POLYGON_LAST_EDITED + " INTEGER, "
-		      + POLYGON_CLOSED + " INTEGER"
+		      + POLYGON_CLOSED + " INTEGER, "
+		      + POLYGON_GROUP + " INTEGER NOT NULL, "
+		      + "FOREIGN KEY(" + POLYGON_GROUP + ") REFERENCES " + GROUPS_TABLE_NAME 
+		      + "(" + GROUPS_ID + ") ON UPDATE CASCADE ON DELETE CASCADE"
 		      + ");";
 		 
-		  db.execSQL(sql);
+		db.execSQL(sql);
 		  
-		  String sql2 =
+		String sql2 =
 			    "CREATE TABLE " + POLYGON_POINTS_TABLE_NAME + " ("
 			      + POLYGON_POINTS_ID + " INTEGER, "
 			      + POLYGON_POINTS_X + " INTEGER, "
@@ -60,7 +77,7 @@ public class PolygonData extends SQLiteOpenHelper
 			      + "(" + POLYGON_ID + ") ON UPDATE CASCADE ON DELETE CASCADE"
 			      + ");";
 			 
-		  db.execSQL(sql2);
+		db.execSQL(sql2);
 	}
 
 	/**
@@ -73,6 +90,7 @@ public class PolygonData extends SQLiteOpenHelper
 	{
 		db.execSQL("DROP TABLE IF EXISTS " + POLYGON_TABLE_NAME);
 		db.execSQL("DROP TABLE IF EXISTS " + POLYGON_POINTS_TABLE_NAME);
+		db.execSQL("DROP TABLE IF EXISTS " + GROUPS_TABLE_NAME);
 		onCreate(db);
 	}
 	
@@ -81,13 +99,14 @@ public class PolygonData extends SQLiteOpenHelper
 	 * @param color de kleur van de polygoon als int (voor Java.Color)
 	 * @return het id dat de polygoon gekregen heeft
 	 */
-	public int addPolygon(int color, boolean isClosed)
+	public int addPolygon(int color, boolean isClosed, int group)
 	{
 		SQLiteDatabase db = getWritableDatabase();
 		ContentValues values = new ContentValues();
 		values.put(POLYGON_COLOR, color);
 		values.put(POLYGON_LAST_EDITED, System.currentTimeMillis()/1000);
 		values.put(POLYGON_CLOSED, isClosed == true ? 1 : 0);
+		values.put(POLYGON_GROUP, group);
 		return (int) db.insertOrThrow(POLYGON_TABLE_NAME, null, values);
 	}
 	
@@ -111,11 +130,11 @@ public class PolygonData extends SQLiteOpenHelper
 	 * Geeft alle polygonen terug, gesorteerd op bewerkdatum
 	 * @return een cursor met alle polygonen, gesorteerd op bewerkdatum
 	 */
-	public Cursor getAllPolygons(Activity activity)
+	public Cursor getAllPolygons(Activity activity, int group)
 	{
 		SQLiteDatabase db = getReadableDatabase();
 		Cursor c = db.query(POLYGON_TABLE_NAME, new String[]{POLYGON_ID, POLYGON_COLOR, POLYGON_CLOSED}, 
-				null, null, null, null, POLYGON_LAST_EDITED);
+				POLYGON_GROUP + "=" + group, null, null, null, POLYGON_LAST_EDITED);
 		activity.startManagingCursor(c);
 		return c;
 	}
