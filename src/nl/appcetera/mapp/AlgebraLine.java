@@ -10,9 +10,6 @@ import android.graphics.Point;
  */
 
 public class AlgebraLine {
-	// TODO ongebruikte variabelen opruimen
-	private double a;
-	private double b;
 	private Point start;
 	private Point end;
 	
@@ -37,9 +34,9 @@ public class AlgebraLine {
 	/**
 	 * Constructor voor lijn van vorm y = ax + b
 	 */
-	public AlgebraLine(double a, double b, Point start, Point end) {
-		this.a = a;
-		this.b = b;
+	public AlgebraLine(int a, int b) {
+		Point start = new Point(0, b);
+		Point end = new Point(a + b, 1);
 		if (start.x <= end.x) {
 			this.start = start;
 			this.end = end;
@@ -75,34 +72,6 @@ public class AlgebraLine {
 		return distance <= d;
 	}
 
-	// TODO ongebruikte methoden opruimen
-	/**
-	 * Geeft de projectie van een punt op een vector.
-	 * Vector is in dit geval een punt op de vectorlijn, maar dat maakt voor het principe niet uit
-	 * @param p het punt om te bekijken
-	 * @param V de vector om te bekijken
-	 * @return GeoPoint met de coordinaten van de projectie
-	 */
-	private double[] projection(Point p) {
-		double[] proj = new double[2];
-		//http://www.codeguru.com/forum/showthread.php?t=194400
-		double r = segmentalInproduct(start, p, start, end) / Math.pow(distance(start, end),2);
-		Log.v(Mapp.TAG, "r: "+r);
-		if (r <= 0) {
-			proj[0] = start.x;
-			proj[1] = start.y;
-		}
-		else if (r >= 1) {
-			proj[0] = end.x;
-			proj[1] = end.y;
-		}
-		else {
-			proj[0] = start.x + r*(end.x - start.x);
-			proj[1] = start.y + r*(end.y - start.y);
-		}
-		return proj;	
-	}
-	
 	/**
 	 * Rekent de afstand uit tussen twee punten
 	 * @param p het eerste point
@@ -111,30 +80,6 @@ public class AlgebraLine {
 	 */
 	private static double distance(Point p, Point q) {
 		return Math.sqrt(Math.pow(p.y - q.y,2) + Math.pow(p.x - q.x,2));
-	}
-	
-	// TODO ongebruikte methoden opruimen
-	/**
-	 * Rekent de afstand uit tussen twee punten, waarvan 1 bestaande uit doubles
-	 * @param p het eerste point
-	 * @param qx het x-coordinaat van het eerste punt
-	 * @param qy het y-coordinaat van het tweede punt
-	 * @return double de afstand tussen de punten
-	 */
-	private static double distance(Point p, double qx, double qy) {
-		return Math.sqrt(Math.pow(p.y - qy,2) + Math.pow(p.x - qx,2));
-	}
-	
-	/**
-	 * Rekent het inproduct uit van twee segmenten
-	 * @param A het eerste point van segment AB
-	 * @param B het tweede point van segment AB
-	 * @param C het eerste point van segment CD
-	 * @param D het tweede point van segment CD
-	 * @return int het inproduct van de twee points
-	 */
-	private static int segmentalInproduct(Point A, Point B, Point C, Point D) {
-		return (A.x - B.x) * (C.x - D.x) + (A.x - B.x) * (C.x - D.x);
 	}
 
 }

@@ -17,6 +17,7 @@ public class MetaPopupManager extends Dialog {
 
 	private boolean isVisible = false;
 	private AlertDialog.Builder builder;
+	//Wordt nog nodig, is nu nog niet gelezen dus vandaar de foutmelding
 	private AlertDialog alertDialog;
 	
 	public MetaPopupManager(Context context) {

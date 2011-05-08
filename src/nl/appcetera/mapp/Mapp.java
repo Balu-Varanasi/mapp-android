@@ -207,25 +207,38 @@ public class Mapp extends MapActivity
 		return Mapp.instance.database;
 	}
 
+	/**
+	 * Bekijkt of we op dit moment een metapopup aan het tonen zijn
+	 * @return de visible-state van de metapopup
+	 */
 	public boolean displayingMetaPopup() {
 		return metaPopupManager.isVisible();
 	}
 
+	/**
+	 * Verbergt de metapopup
+	 */
 	public void hideMetaPopup() {
 		dismissDialog(METAPOPUP_ID);
 	}
 
+	/**
+	 * Toont een nieuwe metapopup
+	 */
 	public void showMetaPopup() {
 		showDialog(METAPOPUP_ID);
 	}
-	
+	/**
+	 * een Override van de onCreatedialog om metapopups te ondersteunen
+	 * @param id Een ID dat aangeeft welk type popup we willen tonen
+	 */
+	@Override
 	protected Dialog onCreateDialog(int id) {
 	    Dialog dialog = null;
 	    Toast.makeText(getApplicationContext(), "attempt show dialog", Toast.LENGTH_LONG).show();
 	    switch(id) {
 	    case METAPOPUP_ID:
 	    	AlertDialog.Builder builder;
-	    	AlertDialog alertDialog;
 
 	    	Context mContext = getApplicationContext();
 	    	LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(LAYOUT_INFLATER_SERVICE);
@@ -237,7 +250,7 @@ public class Mapp extends MapActivity
 
 	    	builder = new AlertDialog.Builder(mContext);
 	    	builder.setView(layout);
-	    	alertDialog = builder.create();
+	    	dialog = builder.create();
 	        break;
 	    }
 	    return dialog;
