@@ -79,8 +79,8 @@ public class Mapp extends MapActivity
         
         mapView.invalidate();
         
-        showMetaPopup();
-
+        //MetaPopupManager maken
+        metaPopupManager = new MetaPopupManager(getApplicationContext());
     }
 	
 	/**
@@ -219,14 +219,16 @@ public class Mapp extends MapActivity
 	 * Verbergt de metapopup
 	 */
 	public void hideMetaPopup() {
-		dismissDialog(METAPOPUP_ID);
+		Toast.makeText(getApplicationContext(), "HideMeta", Toast.LENGTH_SHORT).show();
+		//dismissDialog(METAPOPUP_ID);
 	}
 
 	/**
 	 * Toont een nieuwe metapopup
 	 */
 	public void showMetaPopup() {
-		showDialog(METAPOPUP_ID);
+		//showDialog(METAPOPUP_ID);
+		Toast.makeText(getApplicationContext(), "ShowMeta", Toast.LENGTH_SHORT).show();
 	}
 	/**
 	 * een Override van de onCreatedialog om metapopups te ondersteunen

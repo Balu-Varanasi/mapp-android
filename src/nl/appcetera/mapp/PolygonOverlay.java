@@ -314,7 +314,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 	    	}
     	}
     	
-    	/*else if (polygon.getIsClosed() && Mapp.instance.displayingMetaPopup())
+    	else if (polygon.getIsClosed() && Mapp.instance.displayingMetaPopup())
     	{
     		Mapp.instance.hideMetaPopup();
     		//TODO maak metapopup onzichtbaar
@@ -322,7 +322,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
     	else if (polygon.getIsClosed()) {
     		Mapp.instance.showMetaPopup();
     		//TODO maak metapopup onzichtbaar
-    	}*/
+    	}
     	
     	return false;
     }
