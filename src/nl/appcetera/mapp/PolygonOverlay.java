@@ -313,17 +313,18 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 		        }
 	    	}
     	}
-    	
-    	else if (polygon.getIsClosed() && Mapp.instance.displayingMetaPopup())
-    	{
-    		Mapp.instance.hideMetaPopup();
-    		//TODO maak metapopup onzichtbaar
+    	/*
+    	else if (polygon.getIsClosed() && (this.pathRegion.contains((int) event.getX(), (int) event.getY()))) {
+    		if (!this.polygonEditMode && Mapp.instance.displayingMetaPopup()) {
+    			Mapp.instance.hideMetaPopup();
+    			return true;
+    		}
+    		else {
+    			Mapp.instance.showMetaPopup((int) event.getX(), (int) event.getY());
+    			return true;
+    		}
     	}
-    	else if (polygon.getIsClosed()) {
-    		Mapp.instance.showMetaPopup();
-    		//TODO maak metapopup onzichtbaar
-    	}
-    	
+    	*/
     	return false;
     }
     
@@ -344,6 +345,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 	    	if(this.pathRegion.contains((int) event.getX(), (int) event.getY()))
 	    	{
 	    		this.polygonEditMode = true;
+	    		Mapp.instance.showMetaPopup((int) event.getX(), (int) event.getY());
 	    		Mapp.moveToFront(this);
 	    		return true;
 	    	}
@@ -397,6 +399,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
         	}
     		// anders schakelen we de editmode weer uit.
     		this.polygonEditMode = false;
+    		Mapp.instance.hideMetaPopup();
     		return true;
 		}
     	
@@ -442,4 +445,5 @@ class PolygonOverlay extends com.google.android.maps.Overlay
     {
     	return this.polygonEditMode;
     }
+    
 } 

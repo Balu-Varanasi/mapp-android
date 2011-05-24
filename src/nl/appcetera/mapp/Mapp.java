@@ -35,13 +35,12 @@ public class Mapp extends MapActivity
 	private GeoPoint point;
 	private PolygonData database;
 	private OverlayManager om;
-	private MetaPopupManager metaPopupManager;
+	private static MetaPopupOverlay metaPopupOverlay;
 	private ServerSync s;
 	public static final int pointPixelTreshold = 15; // Maximaal verschil tussen 2 punten in pixels voor ze als gelijk worden beschouwd
 	public static final String TAG = "AppCetera"; // Log-tag
 	public static final int maxTouchDuration = 500;
 	public static final int polygonMinDisplayWidth = 5; // Wanneer een polygoon smaller is dan dit wordt ie niet getoond
-	private static final int METAPOPUP_ID = 0;
 	
 	public static Mapp instance;
 	
@@ -77,10 +76,10 @@ public class Mapp extends MapActivity
         s = new ServerSync(getApplicationContext());
     	s.startSync();
         
-        mapView.invalidate();
-        
         //MetaPopupManager maken
-        metaPopupManager = new MetaPopupManager(getApplicationContext());
+        metaPopupOverlay = new MetaPopupOverlay(mapView, getApplicationContext(), this);
+        mapView.getOverlays().add(metaPopupOverlay);
+        mapView.invalidate();
     }
 	
 	/**
@@ -154,8 +153,10 @@ public class Mapp extends MapActivity
 	public static void moveToFront(PolygonOverlay po)
 	{
 		List<Overlay> listOfOverlays = Mapp.instance.mapView.getOverlays();
+		listOfOverlays.remove(metaPopupOverlay);
 		listOfOverlays.remove(po);
 		listOfOverlays.add(po);
+		listOfOverlays.add(metaPopupOverlay);
 	}
 	
 	/**
@@ -212,49 +213,20 @@ public class Mapp extends MapActivity
 	 * @return de visible-state van de metapopup
 	 */
 	public boolean displayingMetaPopup() {
-		return metaPopupManager.isVisible();
+		return metaPopupOverlay.isVisible();
 	}
 
 	/**
 	 * Verbergt de metapopup
 	 */
 	public void hideMetaPopup() {
-		Toast.makeText(getApplicationContext(), "HideMeta", Toast.LENGTH_SHORT).show();
-		//dismissDialog(METAPOPUP_ID);
+		metaPopupOverlay.makeInvisible();
 	}
 
 	/**
-	 * Toont een nieuwe metapopup
+	 * Toont de metapopup
 	 */
-	public void showMetaPopup() {
-		//showDialog(METAPOPUP_ID);
-		Toast.makeText(getApplicationContext(), "ShowMeta", Toast.LENGTH_SHORT).show();
-	}
-	/**
-	 * een Override van de onCreatedialog om metapopups te ondersteunen
-	 * @param id Een ID dat aangeeft welk type popup we willen tonen
-	 */
-	@Override
-	protected Dialog onCreateDialog(int id) {
-	    Dialog dialog = null;
-	    Toast.makeText(getApplicationContext(), "attempt show dialog", Toast.LENGTH_LONG).show();
-	    switch(id) {
-	    case METAPOPUP_ID:
-	    	AlertDialog.Builder builder;
-
-	    	Context mContext = getApplicationContext();
-	    	LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(LAYOUT_INFLATER_SERVICE);
-	    	View layout = inflater.inflate(R.layout.metapopup,
-	    	                               (ViewGroup) findViewById(R.id.LinearLayout01));
-
-	    	ImageView image = (ImageView) layout.findViewById(R.id.ImageView01);
-	    	image.setImageResource(R.drawable.androidmarker);
-
-	    	builder = new AlertDialog.Builder(mContext);
-	    	builder.setView(layout);
-	    	dialog = builder.create();
-	        break;
-	    }
-	    return dialog;
+	public void showMetaPopup(int x, int y) {
+		metaPopupOverlay.makeVisible(x, y);
 	}
 }

@@ -13,7 +13,6 @@ import com.google.android.maps.Overlay;
 /**
  * Beheert de overlays in de mapview
  * @author Mathijs
- *
  */
 public class OverlayManager
 {
@@ -58,7 +57,14 @@ public class OverlayManager
 		else
 		{
 			List<Overlay> listOfOverlays = mv.getOverlays();
-	        listOfOverlays.clear();
+			int i = 0;
+			while (i < listOfOverlays.size())
+			{
+				if (listOfOverlays.get(i).getClass().getName().equals("PolygonOverlay"))
+					listOfOverlays.remove(i);
+				else
+					i++;
+			}
 	        
 			do
 			{
@@ -106,12 +112,15 @@ public class OverlayManager
 		{
 			for(int i = 0; i < listOfOverlays.size(); i++)
 			{
-				PolygonOverlay p = (PolygonOverlay) listOfOverlays.get(i);
-				PolygonManager pm = p.getManager();
-				if(!pm.getIsClosed() || p.getIsEditMode())
-				{
-					// Nee dus, geen nieuwe laag maken
-					return null;
+				Overlay q = (Overlay) listOfOverlays.get(i);
+				if (q.getClass().getName().equals("PolygonOverlay")) {
+					PolygonOverlay p = (PolygonOverlay) q;
+					PolygonManager pm = p.getManager();
+					if(!pm.getIsClosed() || p.getIsEditMode())
+					{
+						// Nee dus, geen nieuwe laag maken
+						return null;
+					}
 				}
 			}
 		}
