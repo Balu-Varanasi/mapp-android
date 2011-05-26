@@ -51,7 +51,7 @@ public class MetaPopupOverlay extends com.google.android.maps.Overlay {
     {
 		super.draw(canvas, mapView, shadow);   
 		Log.v("Draw van metapopup","Aangeroepen");
-    	if (isVisible) {
+    	if (isVisible && false) {
     		Log.v("Draw van metapopup","voorbij de check");
 	    	Bitmap popupImage = BitmapFactory.decodeResource(context.getResources(), R.drawable.metapopup);
 	        canvas.drawBitmap(popupImage,

@@ -274,4 +274,13 @@ public class PolygonManager
 	{
 		dbEnable = enable;
 	}
+	
+	/**
+	 * Deze functie geeft het aantal punten dat de polygoon bevat
+	 * @return het aantal punten van de polygon
+	 */
+	public int getPointCount()
+	{
+		return polygon.size();
+	}
 }

@@ -37,7 +37,7 @@ public class Mapp extends MapActivity
 	private OverlayManager om;
 	private static MetaPopupOverlay metaPopupOverlay;
 	private ServerSync s;
-	public static final int pointPixelTreshold = 15; // Maximaal verschil tussen 2 punten in pixels voor ze als gelijk worden beschouwd
+	public static final int pointPixelTreshold = 50; // Maximaal verschil tussen 2 punten in pixels voor ze als gelijk worden beschouwd
 	public static final String TAG = "AppCetera"; // Log-tag
 	public static final int maxTouchDuration = 500;
 	public static final int polygonMinDisplayWidth = 5; // Wanneer een polygoon smaller is dan dit wordt ie niet getoond

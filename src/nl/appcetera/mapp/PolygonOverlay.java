@@ -297,8 +297,9 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 			            
 			        if(divx < Mapp.pointPixelTreshold && divy < Mapp.pointPixelTreshold)
 			        {
-			           	polygon.setIsClosed(true);
-			           	return true;
+			        	if (polygon.getPointCount() >= 3)
+			        		polygon.setIsClosed(true);
+			        	return true;
 			        }
 			        else
 			        {
@@ -353,7 +354,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 		
 		// Checken of we hier toevallig op een al geplaatst punt touchen
     	polygon.reset();
-    	while(polygon.hasNextPoint())
+    	while(polygon.hasNextPoint() && this.polygonEditMode)
     	{
 	        GeoPoint point = polygon.getNextPoint();
 	        Point screenPts = mapView.getProjection().toPixels(point, null);
