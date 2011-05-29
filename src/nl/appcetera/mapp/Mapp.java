@@ -134,6 +134,8 @@ public class Mapp extends MapActivity
 		
 		// Syncservice stoppen
 		s.stopSync();
+		
+		OverlayManager.editModeMutex(false);
 	}
 	
 	/**
