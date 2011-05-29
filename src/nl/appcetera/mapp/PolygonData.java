@@ -38,7 +38,7 @@ public class PolygonData extends SQLiteOpenHelper
 	public PolygonData(Context context)
 	{
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
-		onUpgrade(getWritableDatabase(), 1, 2); // Handig tijdens debuggen
+		//onUpgrade(getWritableDatabase(), 1, 2); // Handig tijdens debuggen
 	}
 
 	/**
