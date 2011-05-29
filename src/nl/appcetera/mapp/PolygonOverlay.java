@@ -363,7 +363,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 		
 		// Checken of we hier toevallig op een al geplaatst punt touchen (en in editmode zijn)
     	polygon.reset();
-    	while(polygon.hasNextPoint() && this.polygonEditMode)
+    	while(polygon.hasNextPoint() && (this.polygonEditMode || !this.polygon.getIsClosed()))
     	{
 	        GeoPoint point = polygon.getNextPoint();
 	        Point screenPts = mapView.getProjection().toPixels(point, null);
