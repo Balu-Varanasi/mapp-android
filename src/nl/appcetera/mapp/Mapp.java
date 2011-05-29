@@ -2,18 +2,10 @@ package nl.appcetera.mapp;
 
 import java.util.List;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.Toast;
 
 import nl.appcetera.mapp.R;
 import com.google.android.maps.GeoPoint;
@@ -69,8 +61,6 @@ public class Mapp extends MapActivity
 
         // Opgeslagen overlays laden
         om = new OverlayManager(mapView, database, this);
-        om.setGroup(0);
-        om.loadOverlays();
         
         // Syncservice starten
         s = new ServerSync(getApplicationContext());
@@ -167,7 +157,9 @@ public class Mapp extends MapActivity
 	public static boolean isFirstOverlay(PolygonOverlay po)
 	{
 		List<Overlay> listOfOverlays = Mapp.instance.mapView.getOverlays();
-		return listOfOverlays.get(0).equals(po);
+		return (listOfOverlays.get(0).equals(po)) 
+			|| (listOfOverlays.get(0).equals(metaPopupOverlay) 
+					&& listOfOverlays.get(1).equals(po));
 	}
 	
 	/**

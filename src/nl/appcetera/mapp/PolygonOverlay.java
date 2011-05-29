@@ -102,7 +102,6 @@ class PolygonOverlay extends com.google.android.maps.Overlay
     {
         super.draw(canvas, mapView, shadow);                   
 
-       // Log.v(TAG, "Aantal polygoonpunten: " + polygon.getNumPoints());
         Path path = new Path();
         	
         if(polygon.getIsClosed())
@@ -216,7 +215,6 @@ class PolygonOverlay extends com.google.android.maps.Overlay
         {
         	boolean consumeEvent = false;
         	consumeEvent = notifyTouchUp(event);
-        	
         	// Het event is niet opgeëist door een listener, en de touch duurde minder lang
         	// dan maxTouchDuration
         	if(!consumeEvent && !this.eventConsumed && Mapp.isFirstOverlay(this)
@@ -272,7 +270,8 @@ class PolygonOverlay extends com.google.android.maps.Overlay
         	}
     		return true;
     	}
-    	else if(!polygon.getIsClosed() && !this.polygonEditMode)
+    	
+    	if(!polygon.getIsClosed() && !this.polygonEditMode) // Nieuwe polygoon aan 't maken
     	{
 	    	// Alleen een punt tekenen als de touch minder dan maxTouchDuration duurde
 	    	long diff = System.currentTimeMillis()-timer;
@@ -282,8 +281,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 	    	
 	    	if(!movingPoint && diff < Mapp.maxTouchDuration)
 	    	{                
-	    		Log.v(TAG, "Touchevent: " + p.getLatitudeE6() / 1E6 + "/" + p.getLongitudeE6() /1E6);
-	            // Check of dit punt ongeveer samenvalt met het eerste punt
+	    		// Check of dit punt ongeveer samenvalt met het eerste punt
 	            // Indien ja, sluiten we de polygoon
 		        polygon.reset();
 		        if(polygon.hasNextPoint())
@@ -298,7 +296,10 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 			        if(divx < Mapp.pointPixelTreshold && divy < Mapp.pointPixelTreshold)
 			        {
 			        	if (polygon.getPointCount() >= 3)
+			        	{
 			        		polygon.setIsClosed(true);
+			        		OverlayManager.editModeMutex(false);
+			        	}
 			        	return true;
 			        }
 			        else
@@ -313,6 +314,8 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 		           	return true;
 		        }
 	    	}
+	    	
+	    	return false;
     	}
     	/*
     	else if (polygon.getIsClosed() && (this.pathRegion.contains((int) event.getX(), (int) event.getY()))) {
@@ -341,18 +344,24 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 		timer = System.currentTimeMillis();
 		
 		// Testen of we in een polygoon getapped hebben
-		if(this.pathRegion != null && !this.polygonEditMode)
+		if(this.pathRegion != null && !this.polygonEditMode && this.polygon.getIsClosed())
 		{
 	    	if(this.pathRegion.contains((int) event.getX(), (int) event.getY()))
 	    	{
-	    		this.polygonEditMode = true;
-	    		Mapp.instance.showMetaPopup((int) event.getX(), (int) event.getY());
-	    		Mapp.moveToFront(this);
-	    		return true;
+	    		// Ja dus, schakel editmode in en toon een metapopupje
+	    		if(OverlayManager.editModeMutex(true))
+	    		{
+	    			this.polygonEditMode = true;
+		    		Mapp.instance.showMetaPopup((int) event.getX(), (int) event.getY());
+		    		Mapp.moveToFront(this);
+		    		return true;
+	    		}
+	    		
+	    		return false;
 	    	}
 		}
 		
-		// Checken of we hier toevallig op een al geplaatst punt touchen
+		// Checken of we hier toevallig op een al geplaatst punt touchen (en in editmode zijn)
     	polygon.reset();
     	while(polygon.hasNextPoint() && this.polygonEditMode)
     	{
@@ -400,6 +409,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
         	}
     		// anders schakelen we de editmode weer uit.
     		this.polygonEditMode = false;
+    		OverlayManager.editModeMutex(false);
     		Mapp.instance.hideMetaPopup();
     		return true;
 		}
@@ -416,12 +426,11 @@ class PolygonOverlay extends com.google.android.maps.Overlay
     {
     	// We zijn een punt aan het verplaatsen
     	if(this.movingPoint)
-		{
+		{Log.v("AppC", "Moving stuff");
     		GeoPoint p = mapView.getProjection().fromPixels(
         			(int) event.getX(),
                     (int) event.getY());
-			Log.v(TAG, "Moving polygon point");
-			Log.v(TAG, polygon.editPoint(movingGeoPoint, p) ? "Success" : "Fail");
+    		polygon.editPoint(movingGeoPoint, p);
 			movingGeoPoint = p;
 			return true;
 		}

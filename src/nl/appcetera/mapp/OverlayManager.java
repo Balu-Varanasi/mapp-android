@@ -20,6 +20,7 @@ public class OverlayManager
 	private PolygonData db;
 	private Mapp activity;
 	private int group = 0;
+	private static boolean editModeMutex = false; //False indien niemand in editmode zit, true indien dat wel 't geval is
 	
 	/**
 	 * Constructor
@@ -105,6 +106,11 @@ public class OverlayManager
 	 */
 	public PolygonOverlay addOverlay()
 	{
+		if(!OverlayManager.editModeMutex(true))
+		{
+			return null;
+		}
+		
 		List<Overlay> listOfOverlays = mv.getOverlays();
 		
 		// Check of de polygonen uit de andere lagen wel gesloten zijn
@@ -131,12 +137,28 @@ public class OverlayManager
 		// Maak een nieuwe overlay
 		PolygonOverlay po = new PolygonOverlay(mv, color);
 
-		int id = db.addPolygon(color, po.getManager().getIsClosed(), group);
+		int id = db.addPolygon(color, false, group);
         po.getManager().setId(id);
         po.getManager().setColor(color);
         
         listOfOverlays.add(po);
         
         return po;
+	}
+	
+	/**
+	 * Zet de mutex state op gegeven parameter
+	 * @param b true indien je de editmode in gaat, false indien je d'r uit gaat
+	 * @return true indien de mutex vrij is
+	 */
+	public static boolean editModeMutex(boolean b)
+	{
+		if(b && OverlayManager.editModeMutex)
+		{
+			return false;
+		}
+		
+		OverlayManager.editModeMutex = b;
+		return true;
 	}
 }

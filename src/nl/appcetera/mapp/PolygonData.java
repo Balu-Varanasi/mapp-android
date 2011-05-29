@@ -15,7 +15,7 @@ import android.provider.BaseColumns;
 public class PolygonData extends SQLiteOpenHelper
 {
 	private static final String DATABASE_NAME = "mapp.db";
-	private static final int DATABASE_VERSION = 26;
+	private static final int DATABASE_VERSION = 4;
 	
 	public static final String POLYGON_TABLE_NAME 	= "polygondata";
 	public static final String POLYGON_ID 			= BaseColumns._ID;
@@ -38,6 +38,7 @@ public class PolygonData extends SQLiteOpenHelper
 	public PolygonData(Context context)
 	{
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
+		onUpgrade(getWritableDatabase(), 1, 2); // Handig tijdens debuggen
 	}
 
 	/**

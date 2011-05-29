@@ -1,22 +1,23 @@
 package nl.appcetera.mapp;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Random;
+import java.io.InputStreamReader;
 
-import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthenticationException;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.auth.DigestScheme;
+import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.util.Log;
 import android.widget.Toast;
 
 /**
@@ -46,7 +47,7 @@ public class ServerSync implements Runnable
 	 */
 	public void startSync()
 	{
-		enable = true;
+		//enable = true;
 		syncHandler.removeCallbacks(this);
 		syncHandler.post(this);
 	}
@@ -85,16 +86,28 @@ public class ServerSync implements Runnable
 		protected String doInBackground(PolygonData... db)
 		{
 			HttpClient httpclient = new DefaultHttpClient();
-			HttpGet httpget = new HttpGet("http://192.168.2.2/MVics/Mappserver/v1/polygons");
-			DigestScheme digestAuth = new DigestScheme();
+			
+			HttpGet httpget = new HttpGet("http://192.168.2.4/MVics/Mappserver/v1/polygons");
+			UsernamePasswordCredentials creds = new UsernamePasswordCredentials("test@example.com", "098f6bcd4621d373cade4e832627b4f6");
+			
+			try
+			{
+				httpget.addHeader(new BasicScheme().authenticate(creds, httpget));
+			} 
+			catch (AuthenticationException e1)
+			{
+				return "Server authentication failed";
+			}
+			
+			/*DigestScheme digestAuth = new DigestScheme();
 			digestAuth.overrideParamter("algorithm", "MD5");
 			digestAuth.overrideParamter("realm", "http://192.168.2.2/MVics/Mappserver/v1/polygons");
 			digestAuth.overrideParamter("nonce", Long.toString(new Random().nextLong(), 36));
 			digestAuth.overrideParamter("qop", "auth");
 			digestAuth.overrideParamter("nc", "0");
-			digestAuth.overrideParamter("cnonce", DigestScheme.createCnonce());
+			digestAuth.overrideParamter("cnonce", DigestScheme.createCnonce());*/
 
-			try
+			/*try
 			{
 				Header auth = digestAuth.authenticate(new
 				      UsernamePasswordCredentials("test@example.com", "098f6bcd4621d373cade4e832627b4f6"), httpget);
@@ -103,8 +116,10 @@ public class ServerSync implements Runnable
 			catch (AuthenticationException e)
 			{
 				return "Authentication failed";
-			}
+			}*/
 
+			String result;
+			
 		    try
 		    {
 		        // Add your data
@@ -116,7 +131,17 @@ public class ServerSync implements Runnable
 		        // Execute HTTP Post Request
 		        HttpResponse response = httpclient.execute(httpget);
 		        InputStream is = response.getEntity().getContent();
-		        //is.
+		        
+		        // Lees de uitvoer
+			    BufferedReader r = new BufferedReader(new InputStreamReader(is));
+			    StringBuilder total = new StringBuilder();
+			    String line;
+			    while((line = r.readLine()) != null)
+			    {
+			        total.append(line);
+			    }
+			    
+			    result = total.toString();
 		    }
 		    catch (ClientProtocolException e)
 		    {
@@ -127,6 +152,8 @@ public class ServerSync implements Runnable
 		    {
 		        return e.getMessage();
 		    }
+		    
+		    Log.v(Mapp.TAG, result);
 			
 			return "Ok";
 		}
