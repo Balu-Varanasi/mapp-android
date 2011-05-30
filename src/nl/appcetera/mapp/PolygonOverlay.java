@@ -381,7 +381,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 	        	
 	           	movingPoint = true;
 	           	movingGeoPoint = point;
-	           	movingPointId = polygon.getPointer();
+	           	movingPointId = polygon.getPointer()-1;
 	           	return true;
 	        }
     	}
@@ -404,6 +404,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
     	           	movingPoint = true;
     	           	polygon.addIntermediatePoint(point, i+1);
     	           	movingGeoPoint = point;
+    	           	movingPointId = (i+1);
     	           	return true;
         		}
         	}

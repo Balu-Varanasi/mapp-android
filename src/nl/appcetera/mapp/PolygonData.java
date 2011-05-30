@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
+import android.util.Log;
 
 /**
  * Polygon data management
@@ -15,7 +16,7 @@ import android.provider.BaseColumns;
 public class PolygonData extends SQLiteOpenHelper
 {
 	private static final String DATABASE_NAME = "mapp.db";
-	private static final int DATABASE_VERSION = 6;
+	private static final int DATABASE_VERSION = 9;
 	
 	public static final String POLYGON_TABLE_NAME 	= "polygondata";
 	public static final String POLYGON_ID 			= BaseColumns._ID;
@@ -108,6 +109,7 @@ public class PolygonData extends SQLiteOpenHelper
 		values.put(POLYGON_LAST_EDITED, System.currentTimeMillis()/1000);
 		values.put(POLYGON_CLOSED, isClosed == true ? 1 : 0);
 		values.put(POLYGON_GROUP, group);
+		Log.v("AppC","Nieuwe polygoon in db gestopt");
 		return (int) db.insertOrThrow(POLYGON_TABLE_NAME, null, values);
 	}
 	
@@ -136,7 +138,7 @@ public class PolygonData extends SQLiteOpenHelper
 		SQLiteDatabase db = getReadableDatabase();
 		Cursor c = db.query(POLYGON_TABLE_NAME, new String[]{POLYGON_ID, POLYGON_COLOR, POLYGON_CLOSED}, 
 				POLYGON_GROUP + "=" + group, null, null, null, POLYGON_LAST_EDITED);
-		//activity.startManagingCursor(c);
+		activity.startManagingCursor(c);
 		return c;
 	}
 	
@@ -189,7 +191,7 @@ public class PolygonData extends SQLiteOpenHelper
 		values.put(POLYGON_POINTS_ORDERING, ordering);
 		db.update(POLYGON_POINTS_TABLE_NAME, values, POLYGON_POINTS_ID + " = " 
 				+ polygonid	+ " AND " + POLYGON_POINTS_ORDERING + " = " + ordering, null);
-		
+
 		// Laatst-bewerkt datum bijwerken
 		values = new ContentValues();
 		values.put(POLYGON_LAST_EDITED, System.currentTimeMillis()/1000);
@@ -235,7 +237,7 @@ public class PolygonData extends SQLiteOpenHelper
 		Cursor c = db.query(POLYGON_POINTS_TABLE_NAME, 
 				new String[]{POLYGON_POINTS_X, POLYGON_POINTS_Y, POLYGON_POINTS_ORDERING},
 				POLYGON_POINTS_ID + " = " + polygonid, null, null, null, POLYGON_POINTS_ORDERING);
-		//activity.startManagingCursor(c);
+		activity.startManagingCursor(c);
 		return c;
 	}
 	
