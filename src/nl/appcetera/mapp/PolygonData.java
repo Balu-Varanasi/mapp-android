@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
-import android.util.Log;
 
 /**
  * Polygon data management
@@ -109,7 +108,6 @@ public class PolygonData extends SQLiteOpenHelper
 		values.put(POLYGON_LAST_EDITED, System.currentTimeMillis()/1000);
 		values.put(POLYGON_CLOSED, isClosed == true ? 1 : 0);
 		values.put(POLYGON_GROUP, group);
-		Log.v("AppC","Nieuwe polygoon in db gestopt");
 		return (int) db.insertOrThrow(POLYGON_TABLE_NAME, null, values);
 	}
 	

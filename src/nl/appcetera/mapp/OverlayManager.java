@@ -5,7 +5,6 @@ import java.util.Random;
 
 import android.database.Cursor;
 import android.graphics.Color;
-import android.util.Log;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapView;
@@ -83,7 +82,6 @@ public class OverlayManager
 		        // De polygonmanager goed instellen
 		        PolygonManager pm = mapOverlay.getManager();
 		        pm.setDbEnable(false);
-		        Log.v("AppC", "Loading poly id " + c.getInt(0));
 		        pm.setId(c.getInt(0));
 				pm.setColor(c.getInt(1));
 		        boolean isClosed = c.getInt(2) != 0;
@@ -94,7 +92,7 @@ public class OverlayManager
 		        if(c2.moveToFirst())
 		        {
 			        do
-			        {Log.v("AppC","Point " + c2.getLong(2) + ": " + (int) c2.getLong(0) + "|" + (int) c2.getLong(1));
+			        {
 			        	GeoPoint p = new GeoPoint((int) c2.getLong(0), (int) c2.getLong(1));
 			        	pm.addPoint(p);
 			        }

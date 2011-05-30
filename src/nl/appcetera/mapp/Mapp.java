@@ -4,7 +4,6 @@ import java.util.List;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MotionEvent;
 
 import nl.appcetera.mapp.R;
@@ -180,8 +179,6 @@ public class Mapp extends MapActivity
 			po.onTouchEvent(event, Mapp.instance.mapView);
 			event.setAction(MotionEvent.ACTION_UP);
 			po.onTouchEvent(event, Mapp.instance.mapView);
-			
-			Log.v(TAG, "Adding new layer");
 		}
 	}
 	

@@ -11,7 +11,6 @@ import android.graphics.Paint.Cap;
 import android.graphics.Paint.Style;
 import android.graphics.RectF;
 import android.graphics.Region;
-import android.util.Log;
 import android.view.MotionEvent;
 
 import com.google.android.maps.GeoPoint;
@@ -30,7 +29,6 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 	private int movingPointId = 0;
 	private boolean polygonEditMode = false;
 	private GeoPoint movingGeoPoint;
-	private static final String TAG = Mapp.TAG;
 	private MapView mapView;
 	private Paint pointPaint;
 	private Paint shapePaint;
@@ -393,12 +391,12 @@ class PolygonOverlay extends com.google.android.maps.Overlay
     		polygon.reset();
     		Point pointP = new Point((int) event.getX(), (int) event.getY());
            	GeoPoint point = mapView.getProjection().fromPixels(pointP.x, pointP.y);
-           	Log.v(TAG, "New line attempt P:"+polygon.getNumPoints());
+
         	for (int i = 0; i < polygon.getNumPoints(); i++)
         	{
     	        Point pointA = mapView.getProjection().toPixels(polygon.getPoint(i), null);
     	        Point pointB = mapView.getProjection().toPixels(polygon.getPoint(i+1), null);
-    	        Log.v(TAG, "Points: A: "+pointA.x+' '+pointA.y+" B: "+pointB.x+' '+pointB.y);
+    	        
         		AlgebraLine line = new AlgebraLine(pointA, pointB);
         		if (line.isNear(pointP, Mapp.pointPixelTreshold)) {
     	           	movingPoint = true;
@@ -427,7 +425,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
     {
     	// We zijn een punt aan het verplaatsen
     	if(this.movingPoint)
-		{Log.v("AppC", "Moving stuff");
+		{
     		GeoPoint p = mapView.getProjection().fromPixels(
         			(int) event.getX(),
                     (int) event.getY());
