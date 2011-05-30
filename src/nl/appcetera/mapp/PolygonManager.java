@@ -44,8 +44,8 @@ public class PolygonManager
 		if(dbEnable)
 		{
 			Mapp.getDatabase().movePolygonPointsIndexes(polygonId, index, 1);
-			Mapp.getDatabase().addPolygonPoint(polygonId, p.getLongitudeE6(), 
-					p.getLatitudeE6(), index);
+			Mapp.getDatabase().addPolygonPoint(polygonId, p.getLatitudeE6(), 
+					p.getLongitudeE6(), index);
 		}
 		polygon.add(index, p);
 	}
@@ -103,7 +103,7 @@ public class PolygonManager
 	{	
 		if(dbEnable)
 		{
-			Mapp.getDatabase().editPolygonPoint(id, p.getLatitudeE6(), p.getLongitudeE6(), id);
+			Mapp.getDatabase().editPolygonPoint(polygonId, p.getLatitudeE6(), p.getLongitudeE6(), id);
 			return true;
 		}
 		return false;

@@ -5,6 +5,7 @@ import java.util.Random;
 
 import android.database.Cursor;
 import android.graphics.Color;
+import android.util.Log;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapView;
@@ -19,7 +20,8 @@ public class OverlayManager
 	private MapView mv;
 	private PolygonData db;
 	private Mapp activity;
-	private int group = 0;
+	private int group = 1;
+	private static int groupId = 1;
 	private static boolean editModeMutex = false; //False indien niemand in editmode zit, true indien dat wel 't geval is
 	
 	/**
@@ -41,6 +43,12 @@ public class OverlayManager
 	public void setGroup(int group)
 	{
 		this.group = group;
+		OverlayManager.groupId = group;
+	}
+	
+	public static int getGroupId()
+	{
+		return OverlayManager.groupId;
 	}
 	
 	/**
@@ -75,6 +83,7 @@ public class OverlayManager
 		        // De polygonmanager goed instellen
 		        PolygonManager pm = mapOverlay.getManager();
 		        pm.setDbEnable(false);
+		        Log.v("AppC", "Loading poly id " + c.getInt(0));
 		        pm.setId(c.getInt(0));
 				pm.setColor(c.getInt(1));
 		        boolean isClosed = c.getInt(2) != 0;
@@ -85,7 +94,7 @@ public class OverlayManager
 		        if(c2.moveToFirst())
 		        {
 			        do
-			        {
+			        {Log.v("AppC","Point " + c2.getLong(2) + ": " + (int) c2.getLong(0) + "|" + (int) c2.getLong(1));
 			        	GeoPoint p = new GeoPoint((int) c2.getLong(0), (int) c2.getLong(1));
 			        	pm.addPoint(p);
 			        }
@@ -136,11 +145,13 @@ public class OverlayManager
 		int color = Color.rgb(r.nextInt(256), r.nextInt(256), r.nextInt(256));
 		// Maak een nieuwe overlay
 		PolygonOverlay po = new PolygonOverlay(mv, color);
+		po.getManager().setDbEnable(false);
 
 		int id = db.addPolygon(color, false, group);
         po.getManager().setId(id);
         po.getManager().setColor(color);
         
+        po.getManager().setDbEnable(true);
         listOfOverlays.add(po);
         
         return po;

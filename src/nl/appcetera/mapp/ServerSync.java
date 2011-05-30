@@ -15,6 +15,8 @@ import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.util.Log;
@@ -47,7 +49,7 @@ public class ServerSync implements Runnable
 	 */
 	public void startSync()
 	{
-		//enable = true;
+		enable = true;
 		syncHandler.removeCallbacks(this);
 		syncHandler.post(this);
 	}
@@ -67,8 +69,18 @@ public class ServerSync implements Runnable
 	{
 		if(enable)
 		{
-			new DataSyncTask().execute(db);
-			syncHandler.postDelayed(this, 60000);
+			if(this.deviceIsOnline())
+			{
+				new DataSyncTask().execute(db);
+				syncHandler.postDelayed(this, Mapp.syncInterval);
+			}
+			else
+			{
+				CharSequence text = "Device offline, next synchronisation attempt in " + (Mapp.offlineRetryInterval/60000) + " minutes";
+				Toast toast = Toast.makeText(ServerSync.c, text, Toast.LENGTH_LONG);
+				toast.show();
+				syncHandler.postDelayed(this, Mapp.offlineRetryInterval);
+			}
 		}
 	}
 	
@@ -87,7 +99,7 @@ public class ServerSync implements Runnable
 		{
 			HttpClient httpclient = new DefaultHttpClient();
 			
-			HttpGet httpget = new HttpGet("http://192.168.2.4/MVics/Mappserver/v1/polygons");
+			HttpGet httpget = new HttpGet("http://192.168.2.4/MVics/Mappserver/v1/polygons/group_id/" + OverlayManager.getGroupId());
 			UsernamePasswordCredentials creds = new UsernamePasswordCredentials("test@example.com", "098f6bcd4621d373cade4e832627b4f6");
 			
 			try
@@ -98,37 +110,12 @@ public class ServerSync implements Runnable
 			{
 				return "Server authentication failed";
 			}
-			
-			/*DigestScheme digestAuth = new DigestScheme();
-			digestAuth.overrideParamter("algorithm", "MD5");
-			digestAuth.overrideParamter("realm", "http://192.168.2.2/MVics/Mappserver/v1/polygons");
-			digestAuth.overrideParamter("nonce", Long.toString(new Random().nextLong(), 36));
-			digestAuth.overrideParamter("qop", "auth");
-			digestAuth.overrideParamter("nc", "0");
-			digestAuth.overrideParamter("cnonce", DigestScheme.createCnonce());*/
 
-			/*try
-			{
-				Header auth = digestAuth.authenticate(new
-				      UsernamePasswordCredentials("test@example.com", "098f6bcd4621d373cade4e832627b4f6"), httpget);
-				httpget.setHeader(auth);
-			} 
-			catch (AuthenticationException e)
-			{
-				return "Authentication failed";
-			}*/
-
-			String result;
+			String result = null;
 			
 		    try
 		    {
-		        // Add your data
-		        /*List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-		        nameValuePairs.add(new BasicNameValuePair("id", "12345"));
-		        nameValuePairs.add(new BasicNameValuePair("stringdata", "AndDev is Cool!"));
-		        httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));*/
-
-		        // Execute HTTP Post Request
+		        // Execute HTTP GET Request
 		        HttpResponse response = httpclient.execute(httpget);
 		        InputStream is = response.getEntity().getContent();
 		        
@@ -150,6 +137,7 @@ public class ServerSync implements Runnable
 		    }
 		    catch (IOException e)
 		    {
+		    	e.printStackTrace();
 		        return e.getMessage();
 		    }
 		    
@@ -180,5 +168,16 @@ public class ServerSync implements Runnable
 				toast.show();
 			}
 		}
+	}
+	
+	/**
+	 * Checkt of de telefoon online is
+	 * @return true indien online
+	 */
+	protected boolean deviceIsOnline()
+	{
+		ConnectivityManager cm = (ConnectivityManager) Mapp.instance.getSystemService(Context.CONNECTIVITY_SERVICE);
+	    NetworkInfo netInfo = cm.getActiveNetworkInfo();
+	    return (netInfo != null && netInfo.isConnectedOrConnecting());
 	}
 }

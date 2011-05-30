@@ -15,7 +15,7 @@ import android.provider.BaseColumns;
 public class PolygonData extends SQLiteOpenHelper
 {
 	private static final String DATABASE_NAME = "mapp.db";
-	private static final int DATABASE_VERSION = 5;
+	private static final int DATABASE_VERSION = 6;
 	
 	public static final String POLYGON_TABLE_NAME 	= "polygondata";
 	public static final String POLYGON_ID 			= BaseColumns._ID;
@@ -136,7 +136,7 @@ public class PolygonData extends SQLiteOpenHelper
 		SQLiteDatabase db = getReadableDatabase();
 		Cursor c = db.query(POLYGON_TABLE_NAME, new String[]{POLYGON_ID, POLYGON_COLOR, POLYGON_CLOSED}, 
 				POLYGON_GROUP + "=" + group, null, null, null, POLYGON_LAST_EDITED);
-		activity.startManagingCursor(c);
+		//activity.startManagingCursor(c);
 		return c;
 	}
 	
@@ -235,7 +235,7 @@ public class PolygonData extends SQLiteOpenHelper
 		Cursor c = db.query(POLYGON_POINTS_TABLE_NAME, 
 				new String[]{POLYGON_POINTS_X, POLYGON_POINTS_Y, POLYGON_POINTS_ORDERING},
 				POLYGON_POINTS_ID + " = " + polygonid, null, null, null, POLYGON_POINTS_ORDERING);
-		activity.startManagingCursor(c);
+		//activity.startManagingCursor(c);
 		return c;
 	}
 	
@@ -250,7 +250,7 @@ public class PolygonData extends SQLiteOpenHelper
 	{
 		SQLiteDatabase db = getWritableDatabase();
 		db.execSQL("UPDATE " + POLYGON_POINTS_TABLE_NAME + " SET " + POLYGON_POINTS_ORDERING
-				+ "=" + POLYGON_POINTS_ORDERING + "+" + diff + " WHERE "
+				+ "=(" + POLYGON_POINTS_ORDERING + "+" + diff + ") WHERE "
 				+ POLYGON_POINTS_ORDERING + ">=" + index + " AND " + POLYGON_POINTS_ID
 				+ "=" + polygonid);
 	}

@@ -33,6 +33,8 @@ public class Mapp extends MapActivity
 	public static final String TAG = "AppCetera"; // Log-tag
 	public static final int maxTouchDuration = 500;
 	public static final int polygonMinDisplayWidth = 5; // Wanneer een polygoon smaller is dan dit wordt ie niet getoond
+	public static final int syncInterval = 60*1000; // Interval tussen synchronisaties in milliseconden
+	public static final int offlineRetryInterval = 30*60*1000; // Interval tussen sync-attempts als toestel offline is
 	
 	public static Mapp instance;
 	
@@ -64,7 +66,6 @@ public class Mapp extends MapActivity
         
         // Syncservice starten
         s = new ServerSync(getApplicationContext());
-    	s.startSync();
         
         //MetaPopupManager maken
         metaPopupOverlay = new MetaPopupOverlay(mapView, getApplicationContext(), this);
@@ -108,7 +109,7 @@ public class Mapp extends MapActivity
         s.startSync();
         
         // Juiste groep ophalen en polygonen laden
-        om.setGroup(settings.getInt("group", 0));
+        om.setGroup(settings.getInt("group", 1));
         om.loadOverlays();
 	}
 	
