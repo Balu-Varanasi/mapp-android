@@ -173,7 +173,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
            	{
            		// Maar in plaats daarvan een marker tonen
            		Bitmap bmp = BitmapFactory.decodeResource(
-           				Mapp.instance.getResources(), R.drawable.polygonmarker_trans);
+           				Mapp.instance.getResources(), R.drawable.polygonmarker);
            		canvas.drawBitmap(bmp, rectF.centerX()-(bmp.getWidth()/2), rectF.centerY()-(bmp.getHeight()), null);
            	}
         }
