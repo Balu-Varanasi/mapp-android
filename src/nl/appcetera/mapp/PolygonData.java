@@ -15,7 +15,7 @@ import android.provider.BaseColumns;
 public class PolygonData extends SQLiteOpenHelper
 {
 	private static final String DATABASE_NAME = "mapp.db";
-	private static final int DATABASE_VERSION = 5;
+	private static final int DATABASE_VERSION = 9;
 	
 	public static final String POLYGON_TABLE_NAME 	= "polygondata";
 	public static final String POLYGON_ID 			= BaseColumns._ID;
@@ -189,7 +189,7 @@ public class PolygonData extends SQLiteOpenHelper
 		values.put(POLYGON_POINTS_ORDERING, ordering);
 		db.update(POLYGON_POINTS_TABLE_NAME, values, POLYGON_POINTS_ID + " = " 
 				+ polygonid	+ " AND " + POLYGON_POINTS_ORDERING + " = " + ordering, null);
-		
+
 		// Laatst-bewerkt datum bijwerken
 		values = new ContentValues();
 		values.put(POLYGON_LAST_EDITED, System.currentTimeMillis()/1000);
@@ -250,7 +250,7 @@ public class PolygonData extends SQLiteOpenHelper
 	{
 		SQLiteDatabase db = getWritableDatabase();
 		db.execSQL("UPDATE " + POLYGON_POINTS_TABLE_NAME + " SET " + POLYGON_POINTS_ORDERING
-				+ "=" + POLYGON_POINTS_ORDERING + "+" + diff + " WHERE "
+				+ "=(" + POLYGON_POINTS_ORDERING + "+" + diff + ") WHERE "
 				+ POLYGON_POINTS_ORDERING + ">=" + index + " AND " + POLYGON_POINTS_ID
 				+ "=" + polygonid);
 	}

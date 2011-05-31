@@ -19,7 +19,8 @@ public class OverlayManager
 	private MapView mv;
 	private PolygonData db;
 	private Mapp activity;
-	private int group = 0;
+	private int group = 1;
+	private static int groupId = 1;
 	private static boolean editModeMutex = false; //False indien niemand in editmode zit, true indien dat wel 't geval is
 	
 	/**
@@ -41,6 +42,12 @@ public class OverlayManager
 	public void setGroup(int group)
 	{
 		this.group = group;
+		OverlayManager.groupId = group;
+	}
+	
+	public static int getGroupId()
+	{
+		return OverlayManager.groupId;
 	}
 	
 	/**
@@ -136,11 +143,13 @@ public class OverlayManager
 		int color = Color.rgb(r.nextInt(256), r.nextInt(256), r.nextInt(256));
 		// Maak een nieuwe overlay
 		PolygonOverlay po = new PolygonOverlay(mv, color);
+		po.getManager().setDbEnable(false);
 
 		int id = db.addPolygon(color, false, group);
         po.getManager().setId(id);
         po.getManager().setColor(color);
         
+        po.getManager().setDbEnable(true);
         listOfOverlays.add(po);
         
         return po;
