@@ -13,6 +13,8 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -99,7 +101,7 @@ public class ServerSync implements Runnable
 		{
 			HttpClient httpclient = new DefaultHttpClient();
 			
-			HttpGet httpget = new HttpGet("http://192.168.2.4/MVics/Mappserver/v1/polygons/group_id/" + OverlayManager.getGroupId());
+			HttpGet httpget = new HttpGet("http://192.168.2.2/MVics/Mappserver/v1/polygons/group_id/" + OverlayManager.getGroupId());
 			UsernamePasswordCredentials creds = new UsernamePasswordCredentials("test@example.com", "098f6bcd4621d373cade4e832627b4f6");
 			
 			try
@@ -111,7 +113,7 @@ public class ServerSync implements Runnable
 				return "Server authentication failed";
 			}
 
-			String result = null;
+			JSONObject result;
 			
 		    try
 		    {
@@ -127,21 +129,28 @@ public class ServerSync implements Runnable
 			    {
 			        total.append(line);
 			    }
-			    
-			    result = total.toString();
+
+			    Log.v("APPCRES", total.toString());
+			    Log.v("APPCRES", response.getStatusLine().getStatusCode() + "");
+			    result = new JSONObject(total.toString());
 		    }
 		    catch (ClientProtocolException e)
 		    {
-		    	e.printStackTrace();
-		        return e.getMessage();
+		    	Log.e(Mapp.TAG, "ClientProtocolException");
+		        return "Connecting to server failed";
 		    }
 		    catch (IOException e)
 		    {
-		    	e.printStackTrace();
-		        return e.getMessage();
-		    }
-		    
-		    Log.v(Mapp.TAG, result);
+		    	Log.e(Mapp.TAG, "IOException");
+		        return "Connecting to server failed";
+		    } 
+		    catch (JSONException e)
+		    {
+		    	Log.e(Mapp.TAG, "JSONException");
+		        return "Invalid server response";
+			}
+
+		    //Log.v(Mapp.TAG, result);
 			
 			return "Ok";
 		}

@@ -45,6 +45,10 @@ public class OverlayManager
 		OverlayManager.groupId = group;
 	}
 	
+	/**
+	 * Handige statische methode om het huidige groepid op te vragen
+	 * @return groepid dat nu wordt bekeken
+	 */
 	public static int getGroupId()
 	{
 		return OverlayManager.groupId;
