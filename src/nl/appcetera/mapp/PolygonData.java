@@ -160,6 +160,11 @@ public class PolygonData extends SQLiteOpenHelper
 	{
 		SQLiteDatabase db = getWritableDatabase();
 		db.delete(POLYGON_TABLE_NAME, POLYGON_ID + "=" + polygonid, null);
+		
+		// Toevoegen aan de verwijderlijst t.b.v. synchronisatie
+		ContentValues values = new ContentValues();
+		values.put(POLYGON_ID, polygonid);
+		db.insertOrThrow(POLYGON_REMOVAL_TABLE_NAME, null, values);
 	}
 	
 	/**
