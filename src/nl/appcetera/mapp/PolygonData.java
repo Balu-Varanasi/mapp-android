@@ -168,6 +168,27 @@ public class PolygonData extends SQLiteOpenHelper
 	}
 	
 	/**
+	 * Geeft alle te verwijderen polygonen terug
+	 * @return een Cursor met alle te verwijderen polygonen
+	 */
+	public Cursor getRemovedPolygons()
+	{
+		SQLiteDatabase db = getReadableDatabase();
+		Cursor c = db.query(POLYGON_REMOVAL_TABLE_NAME, new String[]{POLYGON_ID}, null, null, null, null, null);
+		return c;
+	}
+	
+	/**
+	 * Interessante functienaam, minder interessante functie, haalt een polygoon uit de verwijderlijst
+	 * @param polygonid het id van de te verwijderen polygoon
+	 */
+	public void removeRemovedPolygon(int polygonid)
+	{
+		SQLiteDatabase db = getWritableDatabase();
+		db.delete(POLYGON_REMOVAL_TABLE_NAME, POLYGON_ID + "=" + polygonid, null);
+	}
+	
+	/**
 	 * Voegt een punt toe aan een polygoon op gegeven index
 	 * @param polygonid id van de polygoon waar het punt aan toegevoegd wordt
 	 * @param x positie van het punt (latitude)
