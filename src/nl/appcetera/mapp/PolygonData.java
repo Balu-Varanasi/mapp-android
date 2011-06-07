@@ -15,7 +15,7 @@ import android.provider.BaseColumns;
 public class PolygonData extends SQLiteOpenHelper
 {
 	private static final String DATABASE_NAME = "mapp.db";
-	private static final int DATABASE_VERSION = 2;
+	private static final int DATABASE_VERSION = 3;
 	
 	public static final String POLYGON_TABLE_NAME 	= "polygondata";
 	public static final String POLYGON_ID 			= BaseColumns._ID;
@@ -23,6 +23,7 @@ public class PolygonData extends SQLiteOpenHelper
 	public static final String POLYGON_LAST_EDITED	= "last_edited";
 	public static final String POLYGON_CLOSED		= "is_closed";
 	public static final String POLYGON_GROUP		= "groupid";
+	public static final String POLYGON_IS_NEW		= "new";
 	
 	public static final String POLYGON_POINTS_TABLE_NAME 	= "polygon_points";
 	public static final String POLYGON_POINTS_ID			= "polygon_id";
@@ -33,6 +34,9 @@ public class PolygonData extends SQLiteOpenHelper
 	public static final String GROUPS_TABLE_NAME	= "groups";
 	public static final String GROUPS_ID			= BaseColumns._ID;
 	public static final String GROUPS_NAME			= "group_name";
+	
+	public static final String POLYGON_REMOVAL_TABLE_NAME = "removed_polygons";
+	
 	
 	
 	public PolygonData(Context context)
@@ -62,6 +66,7 @@ public class PolygonData extends SQLiteOpenHelper
 		      + POLYGON_LAST_EDITED + " INTEGER, "
 		      + POLYGON_CLOSED + " INTEGER, "
 		      + POLYGON_GROUP + " INTEGER NOT NULL, "
+		      + POLYGON_IS_NEW + " INTEGER NOT NULL, "
 		      + "FOREIGN KEY(" + POLYGON_GROUP + ") REFERENCES " + GROUPS_TABLE_NAME 
 		      + "(" + GROUPS_ID + ") ON UPDATE CASCADE ON DELETE CASCADE"
 		      + ");";
@@ -69,16 +74,22 @@ public class PolygonData extends SQLiteOpenHelper
 		db.execSQL(sql);
 		  
 		String sql2 =
-			    "CREATE TABLE " + POLYGON_POINTS_TABLE_NAME + " ("
-			      + POLYGON_POINTS_ID + " INTEGER, "
-			      + POLYGON_POINTS_X + " INTEGER, "
-			      + POLYGON_POINTS_Y + " INTEGER, "
-			      + POLYGON_POINTS_ORDERING + " INTEGER, "
-			      + "FOREIGN KEY(" + POLYGON_POINTS_ID + ") REFERENCES " + POLYGON_TABLE_NAME 
-			      + "(" + POLYGON_ID + ") ON UPDATE CASCADE ON DELETE CASCADE"
-			      + ");";
+			"CREATE TABLE " + POLYGON_POINTS_TABLE_NAME + " ("
+			  + POLYGON_POINTS_ID + " INTEGER, "
+			  + POLYGON_POINTS_X + " INTEGER, "
+			  + POLYGON_POINTS_Y + " INTEGER, "
+			  + POLYGON_POINTS_ORDERING + " INTEGER, "
+			  + "FOREIGN KEY(" + POLYGON_POINTS_ID + ") REFERENCES " + POLYGON_TABLE_NAME 
+			  + "(" + POLYGON_ID + ") ON UPDATE CASCADE ON DELETE CASCADE"
+			  + ");";
 			 
 		db.execSQL(sql2);
+		
+		String sql4 = 
+			"CREATE TABLE " + POLYGON_REMOVAL_TABLE_NAME + " ("
+			  + POLYGON_ID + " INTEGER NOT NULL"
+			  + ");";
+		db.execSQL(sql4);
 	}
 
 	/**
@@ -108,6 +119,7 @@ public class PolygonData extends SQLiteOpenHelper
 		values.put(POLYGON_LAST_EDITED, System.currentTimeMillis()/1000);
 		values.put(POLYGON_CLOSED, isClosed == true ? 1 : 0);
 		values.put(POLYGON_GROUP, group);
+		values.put(POLYGON_IS_NEW, 1);
 		return (int) db.insertOrThrow(POLYGON_TABLE_NAME, null, values);
 	}
 	
