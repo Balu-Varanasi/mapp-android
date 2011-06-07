@@ -87,7 +87,8 @@ public class PolygonData extends SQLiteOpenHelper
 		
 		String sql4 = 
 			"CREATE TABLE " + POLYGON_REMOVAL_TABLE_NAME + " ("
-			  + POLYGON_ID + " INTEGER NOT NULL"
+			  + POLYGON_ID + " INTEGER NOT NULL, "
+			  + POLYGON_GROUP + " INTEGER NOT NULL"
 			  + ");";
 		db.execSQL(sql4);
 	}
@@ -159,11 +160,19 @@ public class PolygonData extends SQLiteOpenHelper
 	public void removePolygon(int polygonid)
 	{
 		SQLiteDatabase db = getWritableDatabase();
+		
+		// Groep opvragen
+		Cursor c = db.query(POLYGON_TABLE_NAME, new String[]{POLYGON_GROUP}, 
+				POLYGON_ID + "=" + polygonid, null, null, null, POLYGON_LAST_EDITED);
+		c.moveToFirst();
+		
+		// Polygoon verwijderen
 		db.delete(POLYGON_TABLE_NAME, POLYGON_ID + "=" + polygonid, null);
 		
 		// Toevoegen aan de verwijderlijst t.b.v. synchronisatie
 		ContentValues values = new ContentValues();
 		values.put(POLYGON_ID, polygonid);
+		values.put(POLYGON_GROUP, c.getInt(0));
 		db.insertOrThrow(POLYGON_REMOVAL_TABLE_NAME, null, values);
 	}
 	
@@ -171,10 +180,10 @@ public class PolygonData extends SQLiteOpenHelper
 	 * Geeft alle te verwijderen polygonen terug
 	 * @return een Cursor met alle te verwijderen polygonen
 	 */
-	public Cursor getRemovedPolygons()
+	public Cursor getRemovedPolygons(int group)
 	{
 		SQLiteDatabase db = getReadableDatabase();
-		Cursor c = db.query(POLYGON_REMOVAL_TABLE_NAME, new String[]{POLYGON_ID}, null, null, null, null, null);
+		Cursor c = db.query(POLYGON_REMOVAL_TABLE_NAME, new String[]{POLYGON_ID}, POLYGON_GROUP + "=" + group, null, null, null, null);
 		return c;
 	}
 	
