@@ -35,6 +35,11 @@ public class SyncClient
 		this.db = db;
 	}
 	
+	public String deletePolygons()
+	{
+		return "Ok";
+	}
+	
 	/**
 	 * Verstuurt alle opgeslagen polygonen uit de huidige groep naar de server
 	 * @return http statuscode, of 0 indien er een andere fout optrad
