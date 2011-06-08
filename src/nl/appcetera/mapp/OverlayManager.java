@@ -154,7 +154,7 @@ public class OverlayManager
         po.getManager().setColor(color);
         
         po.getManager().setDbEnable(true);
-        po.getManager().setName(newPolygonNamePrefix + " " + id);
+        po.getManager().setName(newPolygonNamePrefix + " " + Mapp.getDatabase().getNumPolygons(group));
         listOfOverlays.add(po);
         
         return po;

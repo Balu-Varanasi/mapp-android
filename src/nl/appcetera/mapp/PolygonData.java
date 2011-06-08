@@ -14,28 +14,28 @@ import android.provider.BaseColumns;
 public class PolygonData extends SQLiteOpenHelper
 {
 	private static final String DATABASE_NAME = "mapp.db";
-	private static final int DATABASE_VERSION = 3;
+	private static final int DATABASE_VERSION = 4;
 	
-	public static final String POLYGON_TABLE_NAME 	= "polygondata";
-	public static final String POLYGON_ID 			= BaseColumns._ID;
-	public static final String POLYGON_COLOR 		= "color";
-	public static final String POLYGON_LAST_EDITED	= "last_edited";
-	public static final String POLYGON_CLOSED		= "is_closed";
-	public static final String POLYGON_GROUP		= "groupid";
-	public static final String POLYGON_IS_NEW		= "new";
-	public static final String POLYGON_NAME			= "name";
+	private static final String POLYGON_TABLE_NAME 	= "polygondata";
+	private static final String POLYGON_ID 			= BaseColumns._ID;
+	private static final String POLYGON_COLOR 		= "color";
+	private static final String POLYGON_LAST_EDITED	= "last_edited";
+	private static final String POLYGON_CLOSED		= "is_closed";
+	private static final String POLYGON_GROUP		= "groupid";
+	private static final String POLYGON_IS_NEW		= "new";
+	private static final String POLYGON_NAME			= "name";
 	
-	public static final String POLYGON_POINTS_TABLE_NAME 	= "polygon_points";
-	public static final String POLYGON_POINTS_ID			= "polygon_id";
-	public static final String POLYGON_POINTS_X 			= "coord_x";
-	public static final String POLYGON_POINTS_Y 			= "coord_y";
-	public static final String POLYGON_POINTS_ORDERING		= "ordering";
+	private static final String POLYGON_POINTS_TABLE_NAME 	= "polygon_points";
+	private static final String POLYGON_POINTS_ID			= "polygon_id";
+	private static final String POLYGON_POINTS_X 			= "coord_x";
+	private static final String POLYGON_POINTS_Y 			= "coord_y";
+	private static final String POLYGON_POINTS_ORDERING		= "ordering";
 	
-	public static final String GROUPS_TABLE_NAME	= "groups";
-	public static final String GROUPS_ID			= BaseColumns._ID;
-	public static final String GROUPS_NAME			= "group_name";
+	private static final String GROUPS_TABLE_NAME	= "groups";
+	private static final String GROUPS_ID			= BaseColumns._ID;
+	private static final String GROUPS_NAME			= "group_name";
 	
-	public static final String POLYGON_REMOVAL_TABLE_NAME = "removed_polygons";
+	private static final String POLYGON_REMOVAL_TABLE_NAME = "removed_polygons";
 	
 	
 	
@@ -105,6 +105,7 @@ public class PolygonData extends SQLiteOpenHelper
 		db.execSQL("DROP TABLE IF EXISTS " + POLYGON_TABLE_NAME);
 		db.execSQL("DROP TABLE IF EXISTS " + POLYGON_POINTS_TABLE_NAME);
 		db.execSQL("DROP TABLE IF EXISTS " + GROUPS_TABLE_NAME);
+		db.execSQL("DROP TABLE IF EXISTS " + POLYGON_REMOVAL_TABLE_NAME);
 		onCreate(db);
 	}
 	
@@ -162,9 +163,41 @@ public class PolygonData extends SQLiteOpenHelper
 	public Cursor getNewPolygons(int group)
 	{
 		SQLiteDatabase db = getReadableDatabase();
-		Cursor c = db.query(POLYGON_TABLE_NAME, new String[]{POLYGON_ID, POLYGON_COLOR, POLYGON_NAME, POLYGON_GROUP}, 
-				POLYGON_GROUP + "=" + group + " AND " + POLYGON_IS_NEW + "=1" + " AND POLYGON_CLOSED=1", null, null, null, null);
+		Cursor c = db.query(POLYGON_TABLE_NAME, new String[]{POLYGON_ID, POLYGON_COLOR, POLYGON_NAME}, 
+				POLYGON_GROUP + "=" + group + " AND " + POLYGON_IS_NEW + "=1" + " AND " + POLYGON_CLOSED + "=1", null, null, null, null);
 		return c;
+	}
+	
+	/**
+	 * Geeft het aantal polygonen in de gegeven groep terug
+	 * @param group het id van de group
+	 * @return het aantal polygonen in de groep
+	 */
+	public int getNumPolygons(int group)
+	{
+		SQLiteDatabase db = getReadableDatabase();
+		Cursor c = db.query(POLYGON_TABLE_NAME, new String[]{"COUNT(*)"}, 
+				POLYGON_GROUP + "=" + group, null, null, null, null);
+		
+		if(!c.moveToFirst())
+		{
+			return 0;
+		}
+		
+		return c.getInt(0);
+	}
+	
+	/**
+	 * Geeft een polygoon een nieuw id
+	 * @param oldid het oude id
+	 * @param newid het nieuwe id
+	 */
+	public void updatePolygonId(int oldid, int newid)
+	{
+		SQLiteDatabase db = getWritableDatabase();
+		ContentValues values = new ContentValues();
+		values.put(POLYGON_ID, newid);
+		db.update(POLYGON_TABLE_NAME, values, POLYGON_ID + "=" + oldid, null);
 	}
 	
 	/**
@@ -195,7 +228,12 @@ public class PolygonData extends SQLiteOpenHelper
 	 * @return een Cursor met alle te verwijderen polygonen
 	 */
 	public Cursor getRemovedPolygons(int group)
-	{
+	{try {
+		Thread.sleep(10000);
+	} catch (InterruptedException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}//Om te testen of het multithreaded gebeuren goed gaat, TODO weghalen
 		SQLiteDatabase db = getReadableDatabase();
 		Cursor c = db.query(POLYGON_REMOVAL_TABLE_NAME, new String[]{POLYGON_ID}, POLYGON_GROUP + "=" + group, null, null, null, null);
 		return c;

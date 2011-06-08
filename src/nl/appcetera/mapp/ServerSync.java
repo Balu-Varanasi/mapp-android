@@ -19,6 +19,7 @@ public class ServerSync implements Runnable
 	private static Context c;
 	private boolean enable = false;
 	private Handler syncHandler = new Handler();
+	private SyncClient syncClient;
 	
 	/**
 	 * Constructor
@@ -28,6 +29,7 @@ public class ServerSync implements Runnable
 	{
 		this.db = new PolygonData(c);
 		ServerSync.c = c;
+		this.syncClient = new SyncClient(db);
 	}
 	
 	/**
@@ -46,6 +48,7 @@ public class ServerSync implements Runnable
 	public void stopSync()
 	{
 		enable = false;
+		syncHandler.removeCallbacks(this);
 	}
 	
 	/**
@@ -136,6 +139,10 @@ public class ServerSync implements Runnable
 
 		    //Log.v(Mapp.TAG, result);
 			*/
+			if(!syncClient.sync(OverlayManager.getGroupId()))
+			{
+				return syncClient.getError();
+			}
 			return "Ok";
 		}
 		
