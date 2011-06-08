@@ -14,7 +14,7 @@ import android.provider.BaseColumns;
 public class PolygonData extends SQLiteOpenHelper
 {
 	private static final String DATABASE_NAME = "mapp.db";
-	private static final int DATABASE_VERSION = 4;
+	private static final int DATABASE_VERSION = 6;
 	
 	private static final String POLYGON_TABLE_NAME 	= "polygondata";
 	private static final String POLYGON_ID 			= BaseColumns._ID;
@@ -176,15 +176,9 @@ public class PolygonData extends SQLiteOpenHelper
 	public int getNumPolygons(int group)
 	{
 		SQLiteDatabase db = getReadableDatabase();
-		Cursor c = db.query(POLYGON_TABLE_NAME, new String[]{"COUNT(*)"}, 
+		Cursor c = db.query(POLYGON_TABLE_NAME, new String[]{POLYGON_ID}, 
 				POLYGON_GROUP + "=" + group, null, null, null, null);
-		
-		if(!c.moveToFirst())
-		{
-			return 0;
-		}
-		
-		return c.getInt(0);
+		return c.getCount();
 	}
 	
 	/**
@@ -228,12 +222,7 @@ public class PolygonData extends SQLiteOpenHelper
 	 * @return een Cursor met alle te verwijderen polygonen
 	 */
 	public Cursor getRemovedPolygons(int group)
-	{try {
-		Thread.sleep(10000);
-	} catch (InterruptedException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}//Om te testen of het multithreaded gebeuren goed gaat, TODO weghalen
+	{
 		SQLiteDatabase db = getReadableDatabase();
 		Cursor c = db.query(POLYGON_REMOVAL_TABLE_NAME, new String[]{POLYGON_ID}, POLYGON_GROUP + "=" + group, null, null, null, null);
 		return c;
