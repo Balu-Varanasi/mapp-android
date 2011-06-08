@@ -61,7 +61,7 @@ public class Mapp extends MapActivity
         database = new PolygonData(this);
 
         // Opgeslagen overlays laden
-        om = new OverlayManager(mapView, database, this);
+        om = new OverlayManager(mapView, database);
         
         // Syncservice starten
         s = new ServerSync(getApplicationContext());

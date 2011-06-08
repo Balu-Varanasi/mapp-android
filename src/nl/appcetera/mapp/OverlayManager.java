@@ -18,8 +18,8 @@ public class OverlayManager
 {
 	private MapView mv;
 	private PolygonData db;
-	private Mapp activity;
 	private int group = 1;
+	private static final String newPolygonNamePrefix = "New Polygon";
 	private static int groupId = 1;
 	private static boolean editModeMutex = false; //False indien niemand in editmode zit, true indien dat wel 't geval is
 	
@@ -28,11 +28,10 @@ public class OverlayManager
 	 * @param mv MapView instance
 	 * @param db PolygonData instance
 	 */
-	public OverlayManager(MapView mv, PolygonData db, Mapp activity)
+	public OverlayManager(MapView mv, PolygonData db)
 	{
 		this.mv = mv;
 		this.db = db;
-		this.activity = activity;
 	}
 	
 	/**
@@ -59,7 +58,7 @@ public class OverlayManager
 	 */
 	public void loadOverlays()
 	{
-		Cursor c = db.getAllPolygons(activity, group);
+		Cursor c = db.getAllPolygons(group);
 		
 		// Er zijn geen polygonen opgeslagen
 		if(!c.moveToFirst())
@@ -88,10 +87,11 @@ public class OverlayManager
 		        pm.setDbEnable(false);
 		        pm.setId(c.getInt(0));
 				pm.setColor(c.getInt(1));
+				pm.setName(c.getString(4));
 		        boolean isClosed = c.getInt(2) != 0;
 		        
 		        // Punten ophalen en toevoegen aan de manager
-		        Cursor c2 = db.getAllPolygonPoints(activity, pm.getId());
+		        Cursor c2 = db.getAllPolygonPoints(pm.getId());
 		        
 		        if(c2.moveToFirst())
 		        {
@@ -154,6 +154,7 @@ public class OverlayManager
         po.getManager().setColor(color);
         
         po.getManager().setDbEnable(true);
+        po.getManager().setName(newPolygonNamePrefix + " " + id);
         listOfOverlays.add(po);
         
         return po;

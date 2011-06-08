@@ -16,6 +16,7 @@ public class PolygonManager
 	private boolean isClosed = false;
 	private int polygonId = 0;
 	private int color;
+	private String name;
 	private boolean dbEnable = true;
 	
 	/**
@@ -201,7 +202,7 @@ public class PolygonManager
 	{
 		if(dbEnable)
 		{
-			Mapp.getDatabase().editPolygon(polygonId, color, val);
+			Mapp.getDatabase().editPolygon(polygonId, color, val, name);
 		}
 		isClosed = val;
 	}
@@ -241,7 +242,7 @@ public class PolygonManager
 	{
 		if(dbEnable)
 		{
-			Mapp.getDatabase().editPolygon(polygonId, color, isClosed);
+			Mapp.getDatabase().editPolygon(polygonId, color, isClosed, name);
 		}
 		this.color = color;
 	}
@@ -282,5 +283,28 @@ public class PolygonManager
 	public int getPointCount()
 	{
 		return polygon.size();
+	}
+	
+	/**
+	 * Stelt de naam van deze polygoon in op de gegeven string
+	 * @param name de nieuwe naam
+	 */
+	public void setName(String name)
+	{
+		this.name = name;
+		
+		if(dbEnable)
+		{
+			Mapp.getDatabase().editPolygon(polygonId, color, isClosed, name);
+		}
+	}
+	
+	/**
+	 * Geef de huidige naam van deze polygoon terug
+	 * @return de naam van de polygoon
+	 */
+	public String getName()
+	{
+		return this.name;
 	}
 }

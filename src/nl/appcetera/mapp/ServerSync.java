@@ -1,27 +1,11 @@
 package nl.appcetera.mapp;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.auth.AuthenticationException;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.auth.BasicScheme;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Handler;
-import android.util.Log;
 import android.widget.Toast;
 
 /**
@@ -99,7 +83,7 @@ public class ServerSync implements Runnable
 		@Override
 		protected String doInBackground(PolygonData... db)
 		{
-			HttpClient httpclient = new DefaultHttpClient();
+			/*HttpClient httpclient = new DefaultHttpClient();
 			
 			HttpGet httpget = new HttpGet("http://192.168.2.2/MVics/Mappserver/v1/polygons/group_id/" + OverlayManager.getGroupId());
 			UsernamePasswordCredentials creds = new UsernamePasswordCredentials("test@example.com", "098f6bcd4621d373cade4e832627b4f6");
@@ -151,7 +135,7 @@ public class ServerSync implements Runnable
 			}
 
 		    //Log.v(Mapp.TAG, result);
-			
+			*/
 			return "Ok";
 		}
 		

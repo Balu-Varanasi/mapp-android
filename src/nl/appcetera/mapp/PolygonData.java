@@ -1,5 +1,4 @@
 package nl.appcetera.mapp;
-import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -24,6 +23,7 @@ public class PolygonData extends SQLiteOpenHelper
 	public static final String POLYGON_CLOSED		= "is_closed";
 	public static final String POLYGON_GROUP		= "groupid";
 	public static final String POLYGON_IS_NEW		= "new";
+	public static final String POLYGON_NAME			= "name";
 	
 	public static final String POLYGON_POINTS_TABLE_NAME 	= "polygon_points";
 	public static final String POLYGON_POINTS_ID			= "polygon_id";
@@ -66,6 +66,7 @@ public class PolygonData extends SQLiteOpenHelper
 		      + POLYGON_LAST_EDITED + " INTEGER, "
 		      + POLYGON_CLOSED + " INTEGER, "
 		      + POLYGON_GROUP + " INTEGER NOT NULL, "
+		      + POLYGON_NAME + " TEXT, "
 		      + POLYGON_IS_NEW + " INTEGER NOT NULL, "
 		      + "FOREIGN KEY(" + POLYGON_GROUP + ") REFERENCES " + GROUPS_TABLE_NAME 
 		      + "(" + GROUPS_ID + ") ON UPDATE CASCADE ON DELETE CASCADE"
@@ -130,13 +131,14 @@ public class PolygonData extends SQLiteOpenHelper
 	 * @param color de kleur van de polygoon, als integer
 	 * @param isClosed of de polygoon gesloten is of niet
 	 */
-	public void editPolygon(int polygonid, int color, boolean isClosed)
+	public void editPolygon(int polygonid, int color, boolean isClosed, String name)
 	{
 		SQLiteDatabase db = getWritableDatabase();
 		ContentValues values = new ContentValues();
 		values.put(POLYGON_COLOR, color);
 		values.put(POLYGON_LAST_EDITED, System.currentTimeMillis()/1000);
 		values.put(POLYGON_CLOSED, isClosed == true ? 1 : 0);
+		values.put(POLYGON_NAME, name);
 		db.update(POLYGON_TABLE_NAME, values, POLYGON_ID + "=" + polygonid, null);
 	}
 	
@@ -144,12 +146,24 @@ public class PolygonData extends SQLiteOpenHelper
 	 * Geeft alle polygonen terug, gesorteerd op bewerkdatum
 	 * @return een cursor met alle polygonen, gesorteerd op bewerkdatum
 	 */
-	public Cursor getAllPolygons(Activity activity, int group)
+	public Cursor getAllPolygons(int group)
 	{
 		SQLiteDatabase db = getReadableDatabase();
-		Cursor c = db.query(POLYGON_TABLE_NAME, new String[]{POLYGON_ID, POLYGON_COLOR, POLYGON_CLOSED}, 
+		Cursor c = db.query(POLYGON_TABLE_NAME, new String[]{POLYGON_ID, POLYGON_COLOR, POLYGON_CLOSED, POLYGON_IS_NEW, POLYGON_NAME}, 
 				POLYGON_GROUP + "=" + group, null, null, null, POLYGON_LAST_EDITED);
-		activity.startManagingCursor(c);
+		return c;
+	}
+	
+	/**
+	 * Geeft alle nieuwe, nog niet gesynchroniseerde polygonen terug
+	 * @param group het groepnummer waar polygonen uit gesynct moeten worden
+	 * @return een cursor met alle nieuwe polygonen
+	 */
+	public Cursor getNewPolygons(int group)
+	{
+		SQLiteDatabase db = getReadableDatabase();
+		Cursor c = db.query(POLYGON_TABLE_NAME, new String[]{POLYGON_ID, POLYGON_COLOR, POLYGON_NAME, POLYGON_GROUP}, 
+				POLYGON_GROUP + "=" + group + " AND " + POLYGON_IS_NEW + "=1" + " AND POLYGON_CLOSED=1", null, null, null, null);
 		return c;
 	}
 	
@@ -276,13 +290,12 @@ public class PolygonData extends SQLiteOpenHelper
 	 * @param polygonid het id van de polygoon waar je de punten bij wilt hebben
 	 * @return een cursor met alle polygoonpunten
 	 */
-	public Cursor getAllPolygonPoints(Activity activity, int polygonid)
+	public Cursor getAllPolygonPoints(int polygonid)
 	{
 		SQLiteDatabase db = getReadableDatabase();
 		Cursor c = db.query(POLYGON_POINTS_TABLE_NAME, 
 				new String[]{POLYGON_POINTS_X, POLYGON_POINTS_Y, POLYGON_POINTS_ORDERING},
 				POLYGON_POINTS_ID + " = " + polygonid, null, null, null, POLYGON_POINTS_ORDERING);
-		activity.startManagingCursor(c);
 		return c;
 	}
 	
