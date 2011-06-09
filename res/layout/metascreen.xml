@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+  android:id="@+id/textview"
+  android:layout_width="fill_parent"
+  android:layout_height="fill_parent"
+  android:text="Hier komt nog het een en ander dat te maken gaat hebben met het editen van Meta-data. Nu moet je gewoon even de back-knop gebruiken om terug te keren naar het hoofdscherm van de app."/>
