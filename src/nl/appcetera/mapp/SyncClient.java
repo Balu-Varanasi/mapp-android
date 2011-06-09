@@ -24,6 +24,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.util.Log;
 
@@ -57,12 +58,14 @@ public class SyncClient
 	 * @param group de groep om te syncen
 	 * @return true indien synchronisatie geslaagd is, false bij problemen
 	 */
-	public boolean sync(int group)
+	public synchronized boolean sync(int group, SharedPreferences settings)
 	{
 		try
 		{
 			deletePolygons(group);
 			putPolygons(group);
+			postPolygons(group, settings.getLong("lastSync", 0));
+			settings.edit().putLong("lastSync", System.currentTimeMillis()).apply();
 		}
 		catch(SyncException s)
 		{
@@ -85,7 +88,6 @@ public class SyncClient
 	/**
 	 * Synchroniseert verwijderde polygonen met de server
 	 * @param group groupid om polygonen uit te syncen
-	 * @return "Ok" indien alles goed ging, of een foutmelding als er iets mis was
 	 * @throws SyncException 
 	 */
 	private void deletePolygons(int group) throws SyncException
@@ -165,7 +167,6 @@ public class SyncClient
 	/**
 	 * Synchroniseert nieuwe polygonen met de server
 	 * @param group het id van de groep waaruit polygonen gesynct moeten worden
-	 * @return "Ok" indien alles goed ging, of een foutmelding indien er wat mis ging
 	 * @throws SyncException 
 	 */
 	private void putPolygons(int group) throws SyncException
@@ -256,6 +257,7 @@ public class SyncClient
 				else
 				{
 					db.updatePolygonId(polygonid, result.getInt("polygon_id"));
+					db.setPolygonIsSynced(polygonid);
 				}
 			}
 	        catch (ClientProtocolException e)
@@ -278,51 +280,117 @@ public class SyncClient
 	}
 	
 	/**
-	 * Verstuurt alle opgeslagen polygonen uit de huidige groep naar de server
-	 * @return http statuscode, of 0 indien er een andere fout optrad
+	 * Synchroniseert gewijzigde polygonen met de server
+	 * @param group het id van de groep waaruit polygonen gesynct moeten worden
+	 * @throws SyncException 
 	 */
-	public int submitPolygons()
+	private void postPolygons(int group, long lastSync) throws SyncException
 	{
-		HttpPost httppost = new HttpPost("http://192.168.2.2/MVics/Mappserver/v1/polygon/");
-		UsernamePasswordCredentials creds = new UsernamePasswordCredentials("test@example.com", "098f6bcd4621d373cade4e832627b4f6");
+		Cursor c = db.getChangedPolygons(group, lastSync);
+		int polygonid 	= 0;
+		String name 	= "";
+		String color 	= "";
 		
-		try
+		if(!c.moveToFirst())
 		{
-			httppost.addHeader(new BasicScheme().authenticate(creds, httppost));
-		} 
-		catch (AuthenticationException e1)
-		{
-			return 0;
+			return; // Niks te syncen, dus gelijk klaar!
 		}
 		
-		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-        nameValuePairs.add(new BasicNameValuePair("name", "12345"));
-        nameValuePairs.add(new BasicNameValuePair("color", "12345"));
-        
-        try
-        {
-			httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-		}
-        catch (UnsupportedEncodingException e)
+		do
 		{
-			return 0;
+			HttpPost httpp = new HttpPost(serverUrl + "polygon");
+			UsernamePasswordCredentials creds = new UsernamePasswordCredentials(mappUser, mappPass);
+			
+			polygonid 	= c.getInt(0);
+			name 		= c.getString(2);
+			color		= c.getString(1);
+			
+			List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+			nameValuePairs.add(new BasicNameValuePair("id", polygonid + ""));
+	        nameValuePairs.add(new BasicNameValuePair("name", name));
+	        nameValuePairs.add(new BasicNameValuePair("group_id", group + ""));
+	        nameValuePairs.add(new BasicNameValuePair("color", color));
+
+	        // Nu de punten van de polygoon ophalen en die bijvoegen
+	        Cursor points = db.getAllPolygonPoints(polygonid);
+	        if(!points.moveToFirst())
+	        {
+	        	// Hier klopt iets niet, de polygoon heeft geen punten!
+	        	db.removePolygon(polygonid);
+	        	return;
+	        }
+	        
+	        do
+	        {
+	        	nameValuePairs.add(new BasicNameValuePair("points[]", 
+	        			points.getString(0) + "," 
+	        			+ points.getString(1) + "," 
+	        			+ points.getString(2)));
+	        }
+	        while(points.moveToNext());
+			
+			try
+			{
+				httpp.addHeader(new BasicScheme().authenticate(creds, httpp));
+				httpp.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+			} 
+			catch (AuthenticationException e1)
+			{
+				Log.e(Mapp.TAG, e1.getStackTrace().toString());
+				throw new SyncException("Authentication failed");
+			}
+			catch (UnsupportedEncodingException e)
+			{
+				Log.e(Mapp.TAG, e.getStackTrace().toString());
+				throw new SyncException("Failed to encode data");
+			}
+			
+	        HttpResponse response;
+	        
+	        try
+	        {
+				response = httpclient.execute(httpp);
+				
+				// Lees het resultaat van de actie in
+				JSONObject result = null;
+				InputStream is = response.getEntity().getContent();
+			    BufferedReader r = new BufferedReader(new InputStreamReader(is));
+			    StringBuilder total = new StringBuilder();
+			    String line;
+			    while((line = r.readLine()) != null)
+			    {
+			        total.append(line);
+			    }
+			    Log.v("APPC", total.toString());
+			    result = new JSONObject(total.toString());
+				
+				if(response.getStatusLine().getStatusCode() != 200)
+		        {
+					// Er is iets mis gegaan.
+			        Log.e(Mapp.TAG, "Sync error: " + result.getString("message"));
+			        throw new SyncException(result.getString("message"));
+		        }
+				else
+				{
+					db.updatePolygonId(polygonid, result.getInt("polygon_id"));
+				}
+			}
+	        catch (ClientProtocolException e)
+	        {
+				Log.e(Mapp.TAG, e.getStackTrace().toString());
+				throw new SyncException("Epic HTTP failure");
+			}
+	        catch (IOException e)
+	        {
+	        	Log.e(Mapp.TAG, e.getStackTrace().toString());
+	        	throw new SyncException("Exception during server synchronisation");
+			}
+	        catch (JSONException e)
+			{
+				Log.e(Mapp.TAG, "Sync failed. Response is no valid JSON or expected variable not found.");
+				throw new SyncException("Invalid server response");
+			}
 		}
-		
-        HttpResponse response;
-        
-        try
-        {
-			response = httpclient.execute(httppost);
-		}
-        catch (ClientProtocolException e)
-        {
-			return 0;
-		}
-        catch (IOException e)
-        {
-			return 0;
-		}
-        
-		return response.getStatusLine().getStatusCode();
+		while(c.moveToNext());
 	}
 }

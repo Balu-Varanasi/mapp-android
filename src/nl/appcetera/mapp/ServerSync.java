@@ -139,7 +139,7 @@ public class ServerSync implements Runnable
 
 		    //Log.v(Mapp.TAG, result);
 			*/
-			if(!syncClient.sync(OverlayManager.getGroupId()))
+			if(!syncClient.sync(OverlayManager.getGroupId(), Mapp.instance.settings))
 			{
 				return syncClient.getError();
 			}

@@ -28,6 +28,7 @@ public class Mapp extends MapActivity
 	private OverlayManager om;
 	private static MetaPopupOverlay metaPopupOverlay;
 	private ServerSync s;
+	public SharedPreferences settings;
 	public static final int pointPixelTreshold = 25; // Maximaal verschil tussen 2 punten in pixels voor ze als gelijk worden beschouwd
 	public static final String TAG = "AppCetera"; // Log-tag
 	public static final int maxTouchDuration = 500;
@@ -70,6 +71,9 @@ public class Mapp extends MapActivity
         metaPopupOverlay = new MetaPopupOverlay(mapView, getApplicationContext(), this);
         mapView.getOverlays().add(metaPopupOverlay);
         mapView.invalidate();
+        
+		// Settings ophalen
+		settings = getPreferences(MODE_PRIVATE);
     }
 	
 	/**
@@ -90,9 +94,6 @@ public class Mapp extends MapActivity
 	public void onResume()
 	{
 		super.onResume();
-		
-		// Settings ophalen
-		SharedPreferences settings = getPreferences(MODE_PRIVATE);
 		
 		// Naar de juiste plaats op de kaart gaan
 		mapController = mapView.getController();

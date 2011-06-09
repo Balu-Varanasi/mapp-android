@@ -182,6 +182,33 @@ public class PolygonData extends SQLiteOpenHelper
 	}
 	
 	/**
+	 * Geeft alle polygonen in de gegeven groep die zijn gewijzigd sinds het gegeven tijdstip
+	 * @param group het id van de groep waaruit we willen lezen
+	 * @param lastSync het tijdstip vanaf wanneer polygonen gewijzigd moeten zijn om terug gegeven te worden
+	 * @return een Cursor met de polygonen
+	 */
+	public Cursor getChangedPolygons(int group, long lastSync)
+	{
+		SQLiteDatabase db = getReadableDatabase();
+		Cursor c = db.query(POLYGON_TABLE_NAME, new String[]{POLYGON_ID, POLYGON_COLOR, POLYGON_NAME}, 
+				POLYGON_GROUP + "=" + group + " AND " + POLYGON_IS_NEW + "=0" + " " +
+				"AND UNIX_TIMESTAMP(" + POLYGON_LAST_EDITED + ")>" + lastSync, null, null, null, null);
+		return c;
+	}
+	
+	/**
+	 * Zet de 'nieuw' vlag van een polygoon op 0 om aan te geven dat hij nu bekend is bij de server
+	 * @param polygonid het id van de polygoon
+	 */
+	public void setPolygonIsSynced(int polygonid)
+	{
+		SQLiteDatabase db = getWritableDatabase();
+		ContentValues values = new ContentValues();
+		values.put(POLYGON_IS_NEW, 0);
+		db.update(POLYGON_TABLE_NAME, values, POLYGON_ID + "=" + polygonid, null);
+	}
+	
+	/**
 	 * Geeft een polygoon een nieuw id
 	 * @param oldid het oude id
 	 * @param newid het nieuwe id
