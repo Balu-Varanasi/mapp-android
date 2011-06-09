@@ -11,6 +11,7 @@ import android.graphics.Paint.Cap;
 import android.graphics.Paint.Style;
 import android.graphics.RectF;
 import android.graphics.Region;
+import android.util.Log;
 import android.view.MotionEvent;
 
 import com.google.android.maps.GeoPoint;
@@ -187,14 +188,15 @@ class PolygonOverlay extends com.google.android.maps.Overlay
      * @return boolean
      */
     public boolean onTouchEvent(MotionEvent event, MapView mapView) 
-    {       	
+    {   
+    	Log.v(Mapp.TAG,"Enter");
     	// Wanneer de gebruiker zijn vinger op het touchscreen drukt
     	if(event.getAction() == MotionEvent.ACTION_DOWN)
     	{   
     		this.eventConsumed = notifyTouchDown(event);
+    		Log.v(Mapp.TAG,"Consumed");
     		return eventConsumed;
     	}
-    	
     	if(event.getAction() == MotionEvent.ACTION_MOVE)
     	{
     		boolean consumeEvent = false;
@@ -235,6 +237,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
      */
     public boolean notifyTouchUp(MotionEvent event)
     {
+    	Log.v(Mapp.TAG, "Up");
     	if(this.movingPoint)
     	{
     		// We waren een punt aan het verplaatsen maar hebben het scherm losgelaten
@@ -337,21 +340,27 @@ class PolygonOverlay extends com.google.android.maps.Overlay
      */
     public boolean notifyTouchDown(MotionEvent event)
     {    	
+    	Log.v(Mapp.TAG, "Reach down");
     	// We starten een tijdsmeting, omdat we alleen een touch willen registreren
 		// als deze korter duurt dan een bepaalde tijdsduur
 		timer = System.currentTimeMillis();
 		
-		// Testen of we in een polygoon getapped hebben
+		// Testen of we in deze polygoon getapped hebben
 		if(this.pathRegion != null && !this.polygonEditMode && this.polygon.getIsClosed())
 		{
+			Log.v(Mapp.TAG, "Reach outer IF");
 	    	if(this.pathRegion.contains((int) event.getX(), (int) event.getY()))
 	    	{
+	    		Log.v(Mapp.TAG, "Reach inner IF");
 	    		// Ja dus, schakel editmode in en toon een metapopupje
 	    		if(OverlayManager.editModeMutex(true))
 	    		{
 	    			this.polygonEditMode = true;
-		    		Mapp.instance.showMetaPopup((int) event.getX(), (int) event.getY());
+	    			//Mapp.instance.showMetaPopup((int) event.getX(), (int) event.getY());
+	    			//this.polygon.editMetaData(Mapp.instance);
+		    		Log.v(Mapp.TAG, "Reach inner IF 1");
 		    		Mapp.moveToFront(this);
+		    		Log.v(Mapp.TAG, "Reach inner IF 2");
 		    		return true;
 	    		}
 	    		
@@ -409,7 +418,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
     		// anders schakelen we de editmode weer uit.
     		this.polygonEditMode = false;
     		OverlayManager.editModeMutex(false);
-    		Mapp.instance.hideMetaPopup();
+    		//Mapp.instance.hideMetaPopup();
     		return true;
 		}
     	

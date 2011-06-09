@@ -2,6 +2,10 @@ package nl.appcetera.mapp;
 
 import java.util.ArrayList;
 
+import android.content.Intent;
+import android.os.Bundle;
+import android.util.Log;
+
 import com.google.android.maps.GeoPoint;
 
 /**
@@ -16,7 +20,8 @@ public class PolygonManager
 	private boolean isClosed = false;
 	private int polygonId = 0;
 	private int color;
-	private String name;
+	private String name = "";
+	private String description = "";
 	private boolean dbEnable = true;
 	
 	/**
@@ -303,8 +308,56 @@ public class PolygonManager
 	 * Geef de huidige naam van deze polygoon terug
 	 * @return de naam van de polygoon
 	 */
+	public String getDescription()
+	{
+		return this.description;
+	}
+	
+	/**
+	 * Stelt de naam van deze polygoon in op de gegeven string
+	 * @param name de nieuwe naam
+	 */
+	public void setDescription(String description)
+	{
+		this.description = description;
+		
+		if(dbEnable)
+		{
+			//Mapp.getDatabase().editPolygon(polygonId, color, isClosed, name);
+		}
+	}
+	
+	/**
+	 * Geef de huidige naam van deze polygoon terug
+	 * @return de naam van de polygoon
+	 */
 	public String getName()
 	{
 		return this.name;
+	}
+
+	/**
+	 * Deze functie begint een nieuwe activity waarmee we metadata kunnen aanpassen
+	 * @param instance 
+	 */
+	public void editMetaData(Mapp instance) {
+		/*
+		Intent intent = new Intent(instance, MetaEditScreen.class);
+	
+		//Next create the bundle and initialize it
+		Bundle bundle = new Bundle();
+	
+		//Add the parameters to bundle as
+		bundle.putInt("ID",polygonId);
+		bundle.putInt("COLOR",color);
+		bundle.putString("NAME",name);
+		bundle.putString("DESCRIPTION",description);
+		
+		//Add this bundle to the intent
+		intent.putExtras(bundle);
+		
+		//Start next activity
+		instance.startActivity(intent);
+		Log.v(Mapp.TAG, "checkpoint 6");*/
 	}
 }
