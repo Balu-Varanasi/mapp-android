@@ -8,6 +8,7 @@ public class MetaEditScreen extends Activity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
 		//First Extract the bundle from intent
 		Log.v(Mapp.TAG, "Activity started");
 		//Bundle bundle = getIntent().getExtras();

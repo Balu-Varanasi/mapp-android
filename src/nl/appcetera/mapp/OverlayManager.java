@@ -68,14 +68,7 @@ public class OverlayManager
 		else
 		{
 			List<Overlay> listOfOverlays = mv.getOverlays();
-			int i = 0;
-			while (i < listOfOverlays.size())
-			{
-				if (listOfOverlays.get(i).getClass().getName().equals("PolygonOverlay"))
-					listOfOverlays.remove(i);
-				else
-					i++;
-			}
+			clearOverlays();
 	        
 			do
 			{
@@ -109,6 +102,16 @@ public class OverlayManager
 			}
 			while(c.moveToNext());
 		}
+	}
+	
+	/**
+	 * Verwijdert alle overlays die in de lijst zitten
+	 */
+	public void clearOverlays()
+	{
+		
+		List<Overlay> listOfOverlays = mv.getOverlays();
+		listOfOverlays.clear();
 	}
 	
 	/**

@@ -305,8 +305,8 @@ public class PolygonManager
 	}
 	
 	/**
-	 * Geef de huidige naam van deze polygoon terug
-	 * @return de naam van de polygoon
+	 * Geef de huidige omschrijving van deze polygoon terug
+	 * @return de omschrijving van de polygoon
 	 */
 	public String getDescription()
 	{
@@ -314,8 +314,8 @@ public class PolygonManager
 	}
 	
 	/**
-	 * Stelt de naam van deze polygoon in op de gegeven string
-	 * @param name de nieuwe naam
+	 * Stelt de omschrijving van deze polygoon in op de gegeven string
+	 * @param description de nieuwe omschrijving
 	 */
 	public void setDescription(String description)
 	{
@@ -341,7 +341,8 @@ public class PolygonManager
 	 * @param instance 
 	 */
 	public void editMetaData(Mapp instance) {
-		/*
+		
+		Log.v(Mapp.TAG, "checkpoint 1");
 		Intent intent = new Intent(instance, MetaEditScreen.class);
 	
 		//Next create the bundle and initialize it
@@ -358,6 +359,6 @@ public class PolygonManager
 		
 		//Start next activity
 		instance.startActivity(intent);
-		Log.v(Mapp.TAG, "checkpoint 6");*/
+		Log.v(Mapp.TAG, "checkpoint 6");
 	}
 }

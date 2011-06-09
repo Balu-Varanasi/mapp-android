@@ -15,10 +15,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <!--  <activity android:name=".MetaEditScreen"
+        <activity android:name=".MetaEditScreen"
 			android:label="@string/app_name">
 
-		</activity>-->
+		</activity>
     </application>
     
     <uses-permission android:name="android.permission.INTERNET" />

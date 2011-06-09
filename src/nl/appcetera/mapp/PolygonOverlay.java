@@ -340,7 +340,6 @@ class PolygonOverlay extends com.google.android.maps.Overlay
      */
     public boolean notifyTouchDown(MotionEvent event)
     {    	
-    	Log.v(Mapp.TAG, "Reach down");
     	// We starten een tijdsmeting, omdat we alleen een touch willen registreren
 		// als deze korter duurt dan een bepaalde tijdsduur
 		timer = System.currentTimeMillis();
@@ -348,19 +347,15 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 		// Testen of we in deze polygoon getapped hebben
 		if(this.pathRegion != null && !this.polygonEditMode && this.polygon.getIsClosed())
 		{
-			Log.v(Mapp.TAG, "Reach outer IF");
 	    	if(this.pathRegion.contains((int) event.getX(), (int) event.getY()))
 	    	{
-	    		Log.v(Mapp.TAG, "Reach inner IF");
 	    		// Ja dus, schakel editmode in en toon een metapopupje
 	    		if(OverlayManager.editModeMutex(true))
 	    		{
 	    			this.polygonEditMode = true;
 	    			//Mapp.instance.showMetaPopup((int) event.getX(), (int) event.getY());
-	    			//this.polygon.editMetaData(Mapp.instance);
-		    		Log.v(Mapp.TAG, "Reach inner IF 1");
+	    			this.polygon.editMetaData(Mapp.instance);
 		    		Mapp.moveToFront(this);
-		    		Log.v(Mapp.TAG, "Reach inner IF 2");
 		    		return true;
 	    		}
 	    		

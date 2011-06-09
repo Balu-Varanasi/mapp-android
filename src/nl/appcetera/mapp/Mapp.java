@@ -4,6 +4,7 @@ import java.util.List;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MotionEvent;
 
 import nl.appcetera.mapp.R;
@@ -68,8 +69,8 @@ public class Mapp extends MapActivity
         //s = new ServerSync(getApplicationContext());
         
         //MetaPopupManager maken
-       // metaPopupOverlay = new MetaPopupOverlay(mapView, getApplicationContext(), this);
-      //  mapView.getOverlays().add(metaPopupOverlay);
+        metaPopupOverlay = new MetaPopupOverlay(mapView, getApplicationContext(), this);
+        //mapView.getOverlays().add(metaPopupOverlay);
         mapView.invalidate();
         
 		// Settings ophalen
@@ -206,21 +207,21 @@ public class Mapp extends MapActivity
 	 * Bekijkt of we op dit moment een metapopup aan het tonen zijn
 	 * @return de visible-state van de metapopup
 	 */
-	public boolean displayingMetaPopup() {
-		return metaPopupOverlay.isVisible();
-	}
+	//public boolean displayingMetaPopup() {
+	//	return metaPopupOverlay.isVisible();
+	//}
 
 	/**
 	 * Verbergt de metapopup
 	 */
-	public void hideMetaPopup() {
-		metaPopupOverlay.makeInvisible();
-	}
+	//public void hideMetaPopup() {
+	//	metaPopupOverlay.makeInvisible();
+	//}
 
 	/**
 	 * Toont de metapopup
 	 */
-	public void showMetaPopup(int x, int y) {
-		metaPopupOverlay.makeVisible(x, y);
-	}
+	//public void showMetaPopup(int x, int y) {
+	//	metaPopupOverlay.makeVisible(x, y);
+	//}
 }
