@@ -1,5 +1,7 @@
 package nl.appcetera.mapp;
 
+import java.util.Timer;
+
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -11,6 +13,7 @@ import android.graphics.Paint.Cap;
 import android.graphics.Paint.Style;
 import android.graphics.RectF;
 import android.graphics.Region;
+import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
 
@@ -26,6 +29,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 {
 	private PolygonManager polygon;
 	private Long timer = (long) 0;
+	private Handler metaHandler = new Handler();
 	private boolean movingPoint = false;
 	private int movingPointId = 0;
 	private boolean polygonEditMode = false;
@@ -37,6 +41,12 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 	private Paint shapeLinePaint;
 	private Region pathRegion = null;
 	private boolean eventConsumed = false;
+	//Runnable om de Handler van de timer iets te doen te geven
+	private Runnable editMetaCallback = new Runnable() {
+		public void run() {
+			polygon.editMetaData(Mapp.instance);
+	   }
+	};
 	
 	/**
 	 * Constructor
@@ -237,7 +247,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
      */
     public boolean notifyTouchUp(MotionEvent event)
     {
-    	Log.v(Mapp.TAG, "Up");
+    	metaHandler.removeCallbacks(editMetaCallback);
     	if(this.movingPoint)
     	{
     		// We waren een punt aan het verplaatsen maar hebben het scherm losgelaten
@@ -354,11 +364,11 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 	    		{
 	    			this.polygonEditMode = true;
 	    			//Mapp.instance.showMetaPopup((int) event.getX(), (int) event.getY());
-	    			this.polygon.editMetaData(Mapp.instance);
+	    			//MetaTimer.schedule(task, Mapp.metaTouchDuration);
+	    			metaHandler.postDelayed(editMetaCallback, Mapp.metaTouchDuration);
 		    		Mapp.moveToFront(this);
 		    		return true;
 	    		}
-	    		
 	    		return false;
 	    	}
 		}
@@ -410,10 +420,16 @@ class PolygonOverlay extends com.google.android.maps.Overlay
     	           	return true;
         		}
         	}
-    		// anders schakelen we de editmode weer uit.
-    		this.polygonEditMode = false;
-    		OverlayManager.editModeMutex(false);
-    		//Mapp.instance.hideMetaPopup();
+        	if(!this.pathRegion.contains((int) event.getX(), (int) event.getY()))
+	    	{
+	    		// anders schakelen we de editmode weer uit.
+	    		this.polygonEditMode = false;
+	    		OverlayManager.editModeMutex(false);
+	    		//Mapp.instance.hideMetaPopup();
+	    	}
+        	else {
+        		metaHandler.postDelayed(editMetaCallback, Mapp.metaTouchDuration);
+        	}
     		return true;
 		}
     	
@@ -427,6 +443,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
      */
     public boolean notifyTouchMove(MotionEvent event)
     {
+    	metaHandler.removeCallbacks(editMetaCallback);
     	// We zijn een punt aan het verplaatsen
     	if(this.movingPoint)
 		{
@@ -439,7 +456,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 		}
     	
     	return false;
-    }
+    } 
     
     /**
      * Geeft de polygonmanager van deze overlay
