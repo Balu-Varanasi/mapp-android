@@ -66,7 +66,7 @@ public class Mapp extends MapActivity
         om = new OverlayManager(mapView, database);
         
         // Syncservice starten
-        //s = new ServerSync(getApplicationContext());
+        s = new ServerSync(getApplicationContext());
         
         //MetaPopupManager maken
         metaPopupOverlay = new MetaPopupOverlay(mapView, getApplicationContext(), this);
@@ -85,7 +85,7 @@ public class Mapp extends MapActivity
 	{
 		super.onDestroy();
 		database.close();
-		//s.stopSync();
+		s.stopSync();
 	}
 	
 	/**
@@ -107,7 +107,7 @@ public class Mapp extends MapActivity
         database = new PolygonData(this);
         
         // Syncservice hervatten
-        //s.startSync();
+        s.startSync();
         
         // Juiste groep ophalen en polygonen laden
         //om.setGroup(settings.getInt("group", 1));
@@ -136,7 +136,7 @@ public class Mapp extends MapActivity
 		database.close();
 		
 		// Syncservice stoppen
-		//s.stopSync();
+		s.stopSync();
 		
 		OverlayManager.editModeMutex(false);
 	}

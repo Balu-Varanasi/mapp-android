@@ -192,7 +192,7 @@ public class PolygonData extends SQLiteOpenHelper
 		SQLiteDatabase db = getReadableDatabase();
 		Cursor c = db.query(POLYGON_TABLE_NAME, new String[]{POLYGON_ID, POLYGON_COLOR, POLYGON_NAME}, 
 				POLYGON_GROUP + "=" + group + " AND " + POLYGON_IS_NEW + "=0" + " " +
-				"AND UNIX_TIMESTAMP(" + POLYGON_LAST_EDITED + ")>" + lastSync, null, null, null, null);
+				"AND " + POLYGON_LAST_EDITED + ">" + (lastSync/1000), null, null, null, null);
 		return c;
 	}
 	
