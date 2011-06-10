@@ -1,7 +1,5 @@
 package nl.appcetera.mapp;
 
-import java.util.Timer;
-
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;

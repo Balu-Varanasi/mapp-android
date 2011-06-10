@@ -4,7 +4,6 @@ import java.util.List;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MotionEvent;
 
 import nl.appcetera.mapp.R;
@@ -96,7 +95,7 @@ public class Mapp extends MapActivity
 	public void onResume()
 	{
 		super.onResume();
-		
+
 		// Naar de juiste plaats op de kaart gaan
 		mapController = mapView.getController();
 	    point = new GeoPoint(settings.getInt("pos_lat", 51824167),

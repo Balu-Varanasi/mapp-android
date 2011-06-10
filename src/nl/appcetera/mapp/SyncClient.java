@@ -65,7 +65,7 @@ public class SyncClient
 			deletePolygons(group);
 			putPolygons(group);
 			postPolygons(group, settings.getLong("lastSync", 0));
-			settings.edit().putLong("lastSync", System.currentTimeMillis()).apply();
+			settings.edit().putLong("lastSync", System.currentTimeMillis()/1000).commit();
 		}
 		catch(SyncException s)
 		{
@@ -147,12 +147,12 @@ public class SyncClient
 			}
 	        catch (ClientProtocolException e)
 	        {
-				Log.e(Mapp.TAG, e.getStackTrace().toString());
+				Log.e(Mapp.TAG, e.getMessage());
 				throw new SyncException("Epic HTTP failure");
 			}
 	        catch (IOException e)
 	        {
-	        	Log.e(Mapp.TAG, e.getStackTrace().toString());
+	        	Log.e(Mapp.TAG, e.getMessage());
 	        	throw new SyncException("Exception during server synchronisation");
 			}
 	        catch (JSONException e)
@@ -245,7 +245,7 @@ public class SyncClient
 			    {
 			        total.append(line);
 			    }
-			    Log.v("APPC", total.toString());
+			    
 			    result = new JSONObject(total.toString());
 				
 				if(response.getStatusLine().getStatusCode() != 200)
@@ -257,17 +257,17 @@ public class SyncClient
 				else
 				{
 					db.updatePolygonId(polygonid, result.getInt("polygon_id"));
-					db.setPolygonIsSynced(polygonid);
+					db.setPolygonIsSynced(result.getInt("polygon_id"));
 				}
 			}
 	        catch (ClientProtocolException e)
 	        {
-				Log.e(Mapp.TAG, e.getStackTrace().toString());
+				Log.e(Mapp.TAG, e.getMessage());
 				throw new SyncException("Epic HTTP failure");
 			}
 	        catch (IOException e)
 	        {
-	        	Log.e(Mapp.TAG, e.getStackTrace().toString());
+	        	Log.e(Mapp.TAG, e.getMessage());
 	        	throw new SyncException("Exception during server synchronisation");
 			}
 	        catch (JSONException e)
@@ -336,12 +336,12 @@ public class SyncClient
 			} 
 			catch (AuthenticationException e1)
 			{
-				Log.e(Mapp.TAG, e1.getStackTrace().toString());
+				Log.e(Mapp.TAG, e1.getMessage());
 				throw new SyncException("Authentication failed");
 			}
 			catch (UnsupportedEncodingException e)
 			{
-				Log.e(Mapp.TAG, e.getStackTrace().toString());
+				Log.e(Mapp.TAG, e.getMessage());
 				throw new SyncException("Failed to encode data");
 			}
 			
@@ -351,38 +351,35 @@ public class SyncClient
 	        {
 				response = httpclient.execute(httpp);
 				
-				// Lees het resultaat van de actie in
-				JSONObject result = null;
-				InputStream is = response.getEntity().getContent();
-			    BufferedReader r = new BufferedReader(new InputStreamReader(is));
-			    StringBuilder total = new StringBuilder();
-			    String line;
-			    while((line = r.readLine()) != null)
-			    {
-			        total.append(line);
-			    }
-			    Log.v("APPC", total.toString());
-			    result = new JSONObject(total.toString());
-				
 				if(response.getStatusLine().getStatusCode() != 200)
 		        {
 					// Er is iets mis gegaan.
+					
+					// Lees het resultaat van de actie in
+					JSONObject result = null;
+					InputStream is = response.getEntity().getContent();
+				    BufferedReader r = new BufferedReader(new InputStreamReader(is));
+				    StringBuilder total = new StringBuilder();
+				    String line;
+				    while((line = r.readLine()) != null)
+				    {
+				        total.append(line);
+				    }
+				    //Log.v("sertrtfghj", total.toString());
+				    result = new JSONObject(total.toString());
+				    
 			        Log.e(Mapp.TAG, "Sync error: " + result.getString("message"));
 			        throw new SyncException(result.getString("message"));
 		        }
-				else
-				{
-					db.updatePolygonId(polygonid, result.getInt("polygon_id"));
-				}
 			}
 	        catch (ClientProtocolException e)
 	        {
-				Log.e(Mapp.TAG, e.getStackTrace().toString());
+				Log.e(Mapp.TAG, e.getMessage());
 				throw new SyncException("Epic HTTP failure");
 			}
 	        catch (IOException e)
 	        {
-	        	Log.e(Mapp.TAG, e.getStackTrace().toString());
+	        	Log.e(Mapp.TAG, e.getMessage());
 	        	throw new SyncException("Exception during server synchronisation");
 			}
 	        catch (JSONException e)

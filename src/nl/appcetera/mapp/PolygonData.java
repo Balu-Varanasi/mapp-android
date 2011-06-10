@@ -14,7 +14,7 @@ import android.provider.BaseColumns;
 public class PolygonData extends SQLiteOpenHelper
 {
 	private static final String DATABASE_NAME = "mapp.db";
-	private static final int DATABASE_VERSION = 7;
+	private static final int DATABASE_VERSION = 12;
 	
 	private static final String POLYGON_TABLE_NAME 	= "polygondata";
 	private static final String POLYGON_ID 			= BaseColumns._ID;
@@ -192,7 +192,7 @@ public class PolygonData extends SQLiteOpenHelper
 		SQLiteDatabase db = getReadableDatabase();
 		Cursor c = db.query(POLYGON_TABLE_NAME, new String[]{POLYGON_ID, POLYGON_COLOR, POLYGON_NAME}, 
 				POLYGON_GROUP + "=" + group + " AND " + POLYGON_IS_NEW + "=0" + " " +
-				"AND " + POLYGON_LAST_EDITED + ">" + (lastSync/1000), null, null, null, null);
+				"AND " + POLYGON_LAST_EDITED + ">" + lastSync, null, null, null, null);
 		return c;
 	}
 	
@@ -219,6 +219,12 @@ public class PolygonData extends SQLiteOpenHelper
 		ContentValues values = new ContentValues();
 		values.put(POLYGON_ID, newid);
 		db.update(POLYGON_TABLE_NAME, values, POLYGON_ID + "=" + oldid, null);
+		
+		// Maar ook van de punten!
+		// Want ja, dat kostte Mathijs 2 uur om dat te bedenken!
+		values = new ContentValues();
+		values.put(POLYGON_POINTS_ID, newid);
+		db.update(POLYGON_POINTS_TABLE_NAME, values, POLYGON_POINTS_ID + "=" + oldid, null);
 	}
 	
 	/**

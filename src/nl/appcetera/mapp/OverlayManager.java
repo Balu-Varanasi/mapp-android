@@ -68,7 +68,7 @@ public class OverlayManager
 		else
 		{
 			List<Overlay> listOfOverlays = mv.getOverlays();
-			clearOverlays();
+			listOfOverlays.clear();
 	        
 			do
 			{
@@ -102,16 +102,6 @@ public class OverlayManager
 			}
 			while(c.moveToNext());
 		}
-	}
-	
-	/**
-	 * Verwijdert alle overlays die in de lijst zitten
-	 */
-	public void clearOverlays()
-	{
-		
-		List<Overlay> listOfOverlays = mv.getOverlays();
-		listOfOverlays.clear();
 	}
 	
 	/**
