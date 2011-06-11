@@ -20,6 +20,7 @@ public class OverlayManager
 	private PolygonData db;
 	private int group = 1;
 	private static final String newPolygonNamePrefix = "New Polygon";
+	private static final String newPolygonDescription = "<No description yet>";
 	private static int groupId = 1;
 	private static boolean editModeMutex = false; //False indien niemand in editmode zit, true indien dat wel 't geval is
 	
@@ -148,6 +149,7 @@ public class OverlayManager
         
         po.getManager().setDbEnable(true);
         po.getManager().setName(newPolygonNamePrefix + " " + Mapp.getDatabase().getNumPolygons(group));
+        po.getManager().setDescription(newPolygonDescription);
         listOfOverlays.add(po);
         
         return po;

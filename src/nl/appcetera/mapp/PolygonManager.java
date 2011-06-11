@@ -207,7 +207,7 @@ public class PolygonManager
 	{
 		if(dbEnable)
 		{
-			Mapp.getDatabase().editPolygon(polygonId, color, val, name);
+			Mapp.getDatabase().editPolygon(polygonId, color, val, name, description);
 		}
 		isClosed = val;
 	}
@@ -247,7 +247,7 @@ public class PolygonManager
 	{
 		if(dbEnable)
 		{
-			Mapp.getDatabase().editPolygon(polygonId, color, isClosed, name);
+			Mapp.getDatabase().editPolygon(polygonId, color, isClosed, name, description);
 		}
 		this.color = color;
 	}
@@ -300,7 +300,7 @@ public class PolygonManager
 		
 		if(dbEnable)
 		{
-			Mapp.getDatabase().editPolygon(polygonId, color, isClosed, name);
+			Mapp.getDatabase().editPolygon(polygonId, color, isClosed, name, description);
 		}
 	}
 	
@@ -323,7 +323,7 @@ public class PolygonManager
 		
 		if(dbEnable)
 		{
-			//Mapp.getDatabase().editPolygon(polygonId, color, isClosed, name);
+			Mapp.getDatabase().editPolygon(polygonId, color, isClosed, name, description);
 		}
 	}
 	

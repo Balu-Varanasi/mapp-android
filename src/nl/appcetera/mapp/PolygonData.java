@@ -14,7 +14,7 @@ import android.provider.BaseColumns;
 public class PolygonData extends SQLiteOpenHelper
 {
 	private static final String DATABASE_NAME = "mapp.db";
-	private static final int DATABASE_VERSION = 12;
+	private static final int DATABASE_VERSION = 14;
 	
 	private static final String POLYGON_TABLE_NAME 	= "polygondata";
 	private static final String POLYGON_ID 			= BaseColumns._ID;
@@ -23,7 +23,8 @@ public class PolygonData extends SQLiteOpenHelper
 	private static final String POLYGON_CLOSED		= "is_closed";
 	private static final String POLYGON_GROUP		= "groupid";
 	private static final String POLYGON_IS_NEW		= "new";
-	private static final String POLYGON_NAME			= "name";
+	private static final String POLYGON_NAME		= "name";
+	private static final String POLYGON_DESCRIPTION = "description";
 	
 	private static final String POLYGON_POINTS_TABLE_NAME 	= "polygon_points";
 	private static final String POLYGON_POINTS_ID			= "polygon_id";
@@ -67,6 +68,7 @@ public class PolygonData extends SQLiteOpenHelper
 		      + POLYGON_CLOSED + " INTEGER, "
 		      + POLYGON_GROUP + " INTEGER NOT NULL, "
 		      + POLYGON_NAME + " TEXT, "
+		      + POLYGON_DESCRIPTION + " TEXT, "
 		      + POLYGON_IS_NEW + " INTEGER NOT NULL, "
 		      + "FOREIGN KEY(" + POLYGON_GROUP + ") REFERENCES " + GROUPS_TABLE_NAME 
 		      + "(" + GROUPS_ID + ") ON UPDATE CASCADE ON DELETE CASCADE"
@@ -132,7 +134,7 @@ public class PolygonData extends SQLiteOpenHelper
 	 * @param color de kleur van de polygoon, als integer
 	 * @param isClosed of de polygoon gesloten is of niet
 	 */
-	public void editPolygon(int polygonid, int color, boolean isClosed, String name)
+	public void editPolygon(int polygonid, int color, boolean isClosed, String name, String description)
 	{
 		SQLiteDatabase db = getWritableDatabase();
 		ContentValues values = new ContentValues();
@@ -140,6 +142,7 @@ public class PolygonData extends SQLiteOpenHelper
 		values.put(POLYGON_LAST_EDITED, System.currentTimeMillis()/1000);
 		values.put(POLYGON_CLOSED, isClosed == true ? 1 : 0);
 		values.put(POLYGON_NAME, name);
+		values.put(POLYGON_DESCRIPTION, description);
 		db.update(POLYGON_TABLE_NAME, values, POLYGON_ID + "=" + polygonid, null);
 	}
 	
@@ -150,7 +153,7 @@ public class PolygonData extends SQLiteOpenHelper
 	public Cursor getAllPolygons(int group)
 	{
 		SQLiteDatabase db = getReadableDatabase();
-		Cursor c = db.query(POLYGON_TABLE_NAME, new String[]{POLYGON_ID, POLYGON_COLOR, POLYGON_CLOSED, POLYGON_IS_NEW, POLYGON_NAME}, 
+		Cursor c = db.query(POLYGON_TABLE_NAME, new String[]{POLYGON_ID, POLYGON_COLOR, POLYGON_CLOSED, POLYGON_IS_NEW, POLYGON_NAME, POLYGON_DESCRIPTION}, 
 				POLYGON_GROUP + "=" + group, null, null, null, POLYGON_LAST_EDITED);
 		return c;
 	}
@@ -163,7 +166,7 @@ public class PolygonData extends SQLiteOpenHelper
 	public Cursor getNewPolygons(int group)
 	{
 		SQLiteDatabase db = getReadableDatabase();
-		Cursor c = db.query(POLYGON_TABLE_NAME, new String[]{POLYGON_ID, POLYGON_COLOR, POLYGON_NAME}, 
+		Cursor c = db.query(POLYGON_TABLE_NAME, new String[]{POLYGON_ID, POLYGON_COLOR, POLYGON_NAME, POLYGON_DESCRIPTION}, 
 				POLYGON_GROUP + "=" + group + " AND " + POLYGON_IS_NEW + "=1" + " AND " + POLYGON_CLOSED + "=1", null, null, null, null);
 		return c;
 	}
@@ -190,7 +193,7 @@ public class PolygonData extends SQLiteOpenHelper
 	public Cursor getChangedPolygons(int group, long lastSync)
 	{
 		SQLiteDatabase db = getReadableDatabase();
-		Cursor c = db.query(POLYGON_TABLE_NAME, new String[]{POLYGON_ID, POLYGON_COLOR, POLYGON_NAME}, 
+		Cursor c = db.query(POLYGON_TABLE_NAME, new String[]{POLYGON_ID, POLYGON_COLOR, POLYGON_NAME, POLYGON_DESCRIPTION}, 
 				POLYGON_GROUP + "=" + group + " AND " + POLYGON_IS_NEW + "=0" + " " +
 				"AND " + POLYGON_LAST_EDITED + ">" + lastSync, null, null, null, null);
 		return c;
