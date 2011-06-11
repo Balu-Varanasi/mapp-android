@@ -155,6 +155,7 @@ public class ServerSync implements Runnable
 		{
 			if(result == "Ok")
 			{				
+				Mapp.reload();
 				CharSequence text = "Sync complete";
 				int duration = Toast.LENGTH_LONG;
 				Toast toast = Toast.makeText(ServerSync.c, text, duration);

@@ -22,6 +22,7 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -72,7 +73,7 @@ public class SyncClient
 		{
 			deletePolygons(group);
 			putPolygons(group);
-			postPolygons(group, settings.getLong("lastSync", 0));
+			postPolygons(group);
 			getPolygons(group, settings.getLong("lastSync", 0));
 			settings.edit().putLong("lastSync", System.currentTimeMillis()/1000).commit();
 		}
@@ -98,6 +99,7 @@ public class SyncClient
 	 * Synchroniseert verwijderde polygonen met de server
 	 * @param group groupid om polygonen uit te syncen
 	 * @throws SyncException 
+	 * TODO polygonen die niet meer op de server zijn verwijderen
 	 */
 	private void deletePolygons(int group) throws SyncException
 	{
@@ -131,7 +133,11 @@ public class SyncClient
 	        {
 				response = httpclient.execute(httpd);
 				
-				if(response.getStatusLine().getStatusCode() != 200)
+				if(response.getStatusLine().getStatusCode() == 418)
+				{
+					throw new SyncException("Unable to synchronize because the server is a teapot.");
+				}
+				else if(response.getStatusLine().getStatusCode() != 200)
 		        {
 					// Er is iets mis gegaan.
 		        	// Lees de uitvoer
@@ -149,10 +155,6 @@ public class SyncClient
 			        Log.e(Mapp.TAG, "Sync error: " + result.getString("message"));
 			        throw new SyncException(result.getString("message"));
 		        }
-				else if(response.getStatusLine().getStatusCode() == 418)
-				{
-					throw new SyncException("Unable to synchronize because the server is a teapot.");
-				}
 				else
 				{
 					db.removeRemovedPolygon(polygonid);
@@ -216,7 +218,7 @@ public class SyncClient
 	        if(!points.moveToFirst())
 	        {
 	        	// Hier klopt iets niet, de polygoon heeft geen punten!
-	        	db.removePolygon(polygonid);
+	        	db.removePolygon(polygonid, true);
 	        	return;
 	        }
 	        
@@ -261,23 +263,22 @@ public class SyncClient
 			    {
 			        total.append(line);
 			    }
-
+Log.v("APC",total.toString());
 			    result = new JSONObject(total.toString());
 				
-				if(response.getStatusLine().getStatusCode() != 200)
+			    if(response.getStatusLine().getStatusCode() == 418)
+				{
+					throw new SyncException("Unable to synchronize because the server is a teapot.");
+				}
+			    else if(response.getStatusLine().getStatusCode() != 200)
 		        {
 					// Er is iets mis gegaan.
 			        Log.e(Mapp.TAG, "Sync error: " + result.getString("message"));
 			        throw new SyncException(result.getString("message"));
 		        }
-				else if(response.getStatusLine().getStatusCode() == 418)
-				{
-					throw new SyncException("Unable to synchronize because the server is a teapot.");
-				}
 				else
 				{
 					// De polygoon een nieuw id geven en het 'nieuw'-vlaggetje verwijderen
-					Log.v("Polygonid", result.getInt("polygon_id") + "");
 					db.updatePolygonId(polygonid, result.getInt("polygon_id"));
 					db.setPolygonIsSynced(result.getInt("polygon_id"));
 				}
@@ -306,9 +307,9 @@ public class SyncClient
 	 * @param group het id van de groep waaruit polygonen gesynct moeten worden
 	 * @throws SyncException 
 	 */
-	private void postPolygons(int group, long lastSync) throws SyncException
+	private void postPolygons(int group) throws SyncException
 	{
-		Cursor c = db.getChangedPolygons(group, lastSync);
+		Cursor c = db.getChangedPolygons(group);
 		int polygonid 	= 0;
 		String name 	= "";
 		String color 	= "";
@@ -341,7 +342,7 @@ public class SyncClient
 	        if(!points.moveToFirst())
 	        {
 	        	// Hier klopt iets niet, de polygoon heeft geen punten!
-	        	db.removePolygon(polygonid);
+	        	db.removePolygon(polygonid, true);
 	        	return;
 	        }
 	        
@@ -375,7 +376,12 @@ public class SyncClient
 	        try
 	        {
 				response = httpclient.execute(httpp);
-				if(response.getStatusLine().getStatusCode() != 200)
+				
+				if(response.getStatusLine().getStatusCode() == 418)
+				{
+					throw new SyncException("Unable to synchronize because the server is a teapot.");
+				}
+				else if(response.getStatusLine().getStatusCode() != 200)
 		        {
 					// Er is iets mis gegaan.
 					
@@ -389,15 +395,15 @@ public class SyncClient
 				    {
 				        total.append(line);
 				    }
-				    //Log.v("sertrtfghj", total.toString());
+				    
 				    result = new JSONObject(total.toString());
 				    
 			        Log.e(Mapp.TAG, "Sync error: " + result.getString("message"));
 			        throw new SyncException(result.getString("message"));
 		        }
-				else if(response.getStatusLine().getStatusCode() == 418)
+				else
 				{
-					throw new SyncException("Unable to synchronize because the server is a teapot.");
+					db.setPolygonIsSynced(polygonid);
 				}
 			}
 	        catch (ClientProtocolException e)
@@ -446,7 +452,7 @@ public class SyncClient
 	    	response = httpclient.execute(httpg);
 				
 			// Lees het resultaat van de actie in
-			JSONObject result = null;
+			JSONArray result = null;
 			InputStream is = response.getEntity().getContent();
 			BufferedReader r = new BufferedReader(new InputStreamReader(is));
 			StringBuilder total = new StringBuilder();
@@ -455,17 +461,47 @@ public class SyncClient
 			{
 			    total.append(line);
 			}
-			result = new JSONObject(total.toString());
-			    
-			if(response.getStatusLine().getStatusCode() != 200)
-		    {
-				// Er is iets mis gegaan.
-				Log.e(Mapp.TAG, "Sync error: " + result.getString("message"));
-			    throw new SyncException(result.getString("message"));
-		    }
-			else if(response.getStatusLine().getStatusCode() == 418)
+			result = new JSONArray(total.toString());
+			
+			if(response.getStatusLine().getStatusCode() == 418)
 			{
 				throw new SyncException("Unable to synchronize because the server is a teapot.");
+			}
+			else if(response.getStatusLine().getStatusCode() == 404)
+			{
+				// Geen polygonen hier
+				db.removePolygonsFromGroup(group, false);
+			}
+			else if(response.getStatusLine().getStatusCode() != 200)
+		    {
+				// Er is iets mis gegaan.
+				Log.e(Mapp.TAG, "Sync error: " + result.getString(0));
+			    throw new SyncException(result.getString(0));
+		    }
+			else
+			{
+				// Alles is blijkbaar goed gegaan
+				// Loop over de polygonen heen
+				for(int i = 0; i < result.length(); i++)
+				{
+					JSONObject polygon = result.getJSONObject(i);
+
+					if(polygon.getInt("created") > lastSync)
+					{
+						// Deze polygoon is nieuw of gewijzigd dus we updaten 'm of voeren 'm in
+						db.addPolygonFromServer(polygon.getInt("id"), polygon.getInt("group_id"), polygon.getInt("color"),
+								polygon.getString("name"), polygon.optString("description"), polygon.getLong("created"));
+						
+						// Nu de punten invoeren
+						JSONArray points = result.getJSONObject(i).getJSONArray("points");
+						for(int j = 0; j < points.length(); j++)
+						{
+							JSONObject point = points.getJSONObject(j);
+							db.addPolygonPoint(polygon.getInt("id"), point.getLong("latitude"), 
+									point.getLong("longitude"), point.getInt("order"));
+						}
+					}
+				}
 			}
 		}
 	    catch (ClientProtocolException e)

@@ -202,6 +202,14 @@ public class Mapp extends MapActivity
 	{
 		return Mapp.instance.database;
 	}
+	
+	/**
+	 * Herlaad overlays
+	 */
+	public static void reload()
+	{
+		Mapp.instance.om.loadOverlays();
+	}
 
 	/**
 	 * Bekijkt of we op dit moment een metapopup aan het tonen zijn

@@ -14,7 +14,7 @@ import android.provider.BaseColumns;
 public class PolygonData extends SQLiteOpenHelper
 {
 	private static final String DATABASE_NAME = "mapp.db";
-	private static final int DATABASE_VERSION = 14;
+	private static final int DATABASE_VERSION = 2;
 	
 	private static final String POLYGON_TABLE_NAME 	= "polygondata";
 	private static final String POLYGON_ID 			= BaseColumns._ID;
@@ -23,6 +23,7 @@ public class PolygonData extends SQLiteOpenHelper
 	private static final String POLYGON_CLOSED		= "is_closed";
 	private static final String POLYGON_GROUP		= "groupid";
 	private static final String POLYGON_IS_NEW		= "new";
+	private static final String POLYGON_HAS_CHANGED = "changed";
 	private static final String POLYGON_NAME		= "name";
 	private static final String POLYGON_DESCRIPTION = "description";
 	
@@ -70,6 +71,7 @@ public class PolygonData extends SQLiteOpenHelper
 		      + POLYGON_NAME + " TEXT, "
 		      + POLYGON_DESCRIPTION + " TEXT, "
 		      + POLYGON_IS_NEW + " INTEGER NOT NULL, "
+		      + POLYGON_HAS_CHANGED + " INTEGER NOT NULL, "
 		      + "FOREIGN KEY(" + POLYGON_GROUP + ") REFERENCES " + GROUPS_TABLE_NAME 
 		      + "(" + GROUPS_ID + ") ON UPDATE CASCADE ON DELETE CASCADE"
 		      + ");";
@@ -125,6 +127,7 @@ public class PolygonData extends SQLiteOpenHelper
 		values.put(POLYGON_CLOSED, isClosed == true ? 1 : 0);
 		values.put(POLYGON_GROUP, group);
 		values.put(POLYGON_IS_NEW, 1);
+		values.put(POLYGON_HAS_CHANGED, 0);
 		return (int) db.insertOrThrow(POLYGON_TABLE_NAME, null, values);
 	}
 	
@@ -133,6 +136,8 @@ public class PolygonData extends SQLiteOpenHelper
 	 * @param polygonid het id van de polygoon
 	 * @param color de kleur van de polygoon, als integer
 	 * @param isClosed of de polygoon gesloten is of niet
+	 * @param name de naam van de polygoon
+	 * @param description de beschrijving van de polygoon
 	 */
 	public void editPolygon(int polygonid, int color, boolean isClosed, String name, String description)
 	{
@@ -140,10 +145,43 @@ public class PolygonData extends SQLiteOpenHelper
 		ContentValues values = new ContentValues();
 		values.put(POLYGON_COLOR, color);
 		values.put(POLYGON_LAST_EDITED, System.currentTimeMillis()/1000);
+		values.put(POLYGON_HAS_CHANGED, 1);
 		values.put(POLYGON_CLOSED, isClosed == true ? 1 : 0);
 		values.put(POLYGON_NAME, name);
 		values.put(POLYGON_DESCRIPTION, description);
 		db.update(POLYGON_TABLE_NAME, values, POLYGON_ID + "=" + polygonid, null);
+	}
+	
+	/**
+	 * Bewerkt de polygoon met het gegeven id of voert hem in als ie nog niet bestaat. Verwijdert bovendien alle opgeslagen punten.
+	 * @param polygonid het id van de polygoon
+	 * @param group het id van de group waat de polygoon in hoort
+	 * @param color de kleur van de polygoon, als integer
+	 * @param name de naam van de polygoon
+	 * @param description de beschrijving van de polygoon
+	 */
+	public void addPolygonFromServer(int polygonid, int group, int color, String name, String description, long created)
+	{
+		SQLiteDatabase db = getWritableDatabase();
+		Cursor c = db.query(POLYGON_TABLE_NAME, new String[]{POLYGON_ID}, 
+				POLYGON_ID + "=" + polygonid, null, null, null, null);
+		
+		if(c.getCount() > 0)
+		{
+			removePolygon(polygonid, false);
+		}
+		
+		ContentValues values = new ContentValues();
+		values.put(POLYGON_ID, polygonid);
+		values.put(POLYGON_GROUP, group);
+		values.put(POLYGON_COLOR, color);
+		values.put(POLYGON_LAST_EDITED, created);
+		values.put(POLYGON_CLOSED, 1);
+		values.put(POLYGON_NAME, name);
+		values.put(POLYGON_IS_NEW, 0);
+		values.put(POLYGON_HAS_CHANGED, 0);
+		values.put(POLYGON_DESCRIPTION, description);
+		db.insertOrThrow(POLYGON_TABLE_NAME, null, values);
 	}
 	
 	/**
@@ -190,17 +228,17 @@ public class PolygonData extends SQLiteOpenHelper
 	 * @param lastSync het tijdstip vanaf wanneer polygonen gewijzigd moeten zijn om terug gegeven te worden
 	 * @return een Cursor met de polygonen
 	 */
-	public Cursor getChangedPolygons(int group, long lastSync)
+	public Cursor getChangedPolygons(int group)
 	{
 		SQLiteDatabase db = getReadableDatabase();
 		Cursor c = db.query(POLYGON_TABLE_NAME, new String[]{POLYGON_ID, POLYGON_COLOR, POLYGON_NAME, POLYGON_DESCRIPTION}, 
 				POLYGON_GROUP + "=" + group + " AND " + POLYGON_IS_NEW + "=0" + " " +
-				"AND " + POLYGON_LAST_EDITED + ">" + lastSync, null, null, null, null);
+				"AND " + POLYGON_HAS_CHANGED + "=1", null, null, null, null);
 		return c;
 	}
 	
 	/**
-	 * Zet de 'nieuw' vlag van een polygoon op 0 om aan te geven dat hij nu bekend is bij de server
+	 * Geeft aan dat de polygoon gesynct is en dus niet meer nieuw is
 	 * @param polygonid het id van de polygoon
 	 */
 	public void setPolygonIsSynced(int polygonid)
@@ -208,6 +246,7 @@ public class PolygonData extends SQLiteOpenHelper
 		SQLiteDatabase db = getWritableDatabase();
 		ContentValues values = new ContentValues();
 		values.put(POLYGON_IS_NEW, 0);
+		values.put(POLYGON_HAS_CHANGED, 0);
 		db.update(POLYGON_TABLE_NAME, values, POLYGON_ID + "=" + polygonid, null);
 	}
 	
@@ -231,10 +270,11 @@ public class PolygonData extends SQLiteOpenHelper
 	}
 	
 	/**
-	 * Verwijder de polygoon met het gegeven id
+	 * Verwijder de polygoon en zijn punten met het gegeven id
 	 * @param polygonid het id van de te verwijderen polygoon
+	 * @param local of de polygoon lokaal is verwijderd of op de server (in 't laatste geval niet op de synclijst zetten)
 	 */
-	public void removePolygon(int polygonid)
+	public void removePolygon(int polygonid, boolean local)
 	{
 		SQLiteDatabase db = getWritableDatabase();
 		
@@ -243,14 +283,40 @@ public class PolygonData extends SQLiteOpenHelper
 				POLYGON_ID + "=" + polygonid, null, null, null, POLYGON_LAST_EDITED);
 		c.moveToFirst();
 		
+		// Punten verwijderen
+		removePolygonPoints(polygonid);
+		
 		// Polygoon verwijderen
 		db.delete(POLYGON_TABLE_NAME, POLYGON_ID + "=" + polygonid, null);
 		
-		// Toevoegen aan de verwijderlijst t.b.v. synchronisatie
-		ContentValues values = new ContentValues();
-		values.put(POLYGON_ID, polygonid);
-		values.put(POLYGON_GROUP, c.getInt(0));
-		db.insertOrThrow(POLYGON_REMOVAL_TABLE_NAME, null, values);
+		if(local)
+		{
+			// Toevoegen aan de verwijderlijst t.b.v. synchronisatie
+			ContentValues values = new ContentValues();
+			values.put(POLYGON_ID, polygonid);
+			values.put(POLYGON_GROUP, c.getInt(0));
+			db.insertOrThrow(POLYGON_REMOVAL_TABLE_NAME, null, values);
+		}
+	}
+	
+	/**
+	 * Verwijdert alle polygonen uit een groep
+	 * @param group het id van de groep waar polygonen uit verwijdert moeten worden
+	 * @param local geeft aan of de verwijdering lokaal of op de server gebeurde
+	 */
+	public void removePolygonsFromGroup(int group, boolean local)
+	{
+		Cursor c = getAllPolygons(group);
+		if(!c.moveToFirst())
+		{
+			return; // Lege groep dus niks te verwijderen
+		}
+		
+		do
+		{
+			removePolygon(c.getInt(0), local);
+		}
+		while(c.moveToNext());
 	}
 	
 	/**
@@ -293,6 +359,7 @@ public class PolygonData extends SQLiteOpenHelper
 		
 		// Laatst-bewerkt datum bijwerken
 		values = new ContentValues();
+		values.put(POLYGON_HAS_CHANGED, 1);
 		values.put(POLYGON_LAST_EDITED, System.currentTimeMillis()/1000);
 		db.update(POLYGON_TABLE_NAME, values, POLYGON_ID + "=" + polygonid, null);
 	}
@@ -316,6 +383,7 @@ public class PolygonData extends SQLiteOpenHelper
 
 		// Laatst-bewerkt datum bijwerken
 		values = new ContentValues();
+		values.put(POLYGON_HAS_CHANGED, 1);
 		values.put(POLYGON_LAST_EDITED, System.currentTimeMillis()/1000);
 		db.update(POLYGON_TABLE_NAME, values, POLYGON_ID + "=" + polygonid, null);
 	}
@@ -333,19 +401,9 @@ public class PolygonData extends SQLiteOpenHelper
 		
 		// Laatst-bewerkt datum bijwerken
 		ContentValues values = new ContentValues();
+		values.put(POLYGON_HAS_CHANGED, 1);
 		values.put(POLYGON_LAST_EDITED, System.currentTimeMillis()/1000);
 		db.update(POLYGON_TABLE_NAME, values, POLYGON_ID + "=" + polygonid, null);
-	}
-	
-	/**
-	 * Verwijder alle bij een polygoon behorende punten
-	 * @param polygonid het id van de polygoon waar alle punten van weg moeten
-	 */
-	public void removePolygonPoints(int polygonid)
-	{
-		SQLiteDatabase db = getWritableDatabase();
-		db.delete(POLYGON_POINTS_TABLE_NAME, POLYGON_POINTS_ID + " = " 
-				+ polygonid, null);
 	}
 
 	/**
@@ -376,5 +434,16 @@ public class PolygonData extends SQLiteOpenHelper
 				+ "=(" + POLYGON_POINTS_ORDERING + "+" + diff + ") WHERE "
 				+ POLYGON_POINTS_ORDERING + ">=" + index + " AND " + POLYGON_POINTS_ID
 				+ "=" + polygonid);
+	}
+	
+	/**
+	 * Verwijder alle bij een polygoon behorende punten
+	 * @param polygonid het id van de polygoon waar alle punten van weg moeten
+	 */
+	private void removePolygonPoints(int polygonid)
+	{
+		SQLiteDatabase db = getWritableDatabase();
+		db.delete(POLYGON_POINTS_TABLE_NAME, POLYGON_POINTS_ID + " = " 
+				+ polygonid, null);
 	}
 }

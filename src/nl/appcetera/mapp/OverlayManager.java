@@ -103,6 +103,8 @@ public class OverlayManager
 			}
 			while(c.moveToNext());
 		}
+		
+		this.mv.invalidate();
 	}
 	
 	/**
