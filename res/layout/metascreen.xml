@@ -23,7 +23,7 @@
 				android:id="@+id/namelabelview"
 				style="@style/Label"
 				android:text="@string/meta_namelabel" />
-			<EditText android:id="@+id/edtInput"
+			<EditText android:id="@+id/edtInputName"
 				style="@style/TextInput"
 				android:hint="@string/meta_name_hint" />
 			<View style="@style/MediumSeparator" />
@@ -31,7 +31,7 @@
 				android:id="@+id/descriptionlabelview"
 				style="@style/Label"
 				android:text="@string/meta_descriptionlabel" />
-			<EditText android:id="@+id/edtInput"
+			<EditText android:id="@+id/edtInputDescription"
 				style="@style/BigTextInput"
 				android:hint="@string/meta_description_hint" />	
 			<View style="@style/MediumSeparator" />

@@ -18,31 +18,39 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.EditText;
 
 public class MetaEditScreen extends Activity {
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.metascreen);
-
-		OnColorChangedListener l = new OnColorChangedListener() {
-            public void colorChanged(int color) {
-            	Log.v(Mapp.TAG, "De kleur is nu"+color);
-            }
-        };
-        
+		setContentView(R.layout.metascreen);      
+		
         Bundle bundle = getIntent().getExtras();
         int initialColor = bundle.getInt("COLOR");
 		String name = bundle.getString("NAME");
 		String description = bundle.getString("DESCRIPTION");
 		LinearLayout layout = (LinearLayout) findViewById(R.id.colorpickerlayout);
-        Log.v(Mapp.TAG, "Kleur is aan het begin"+initialColor);
+		if (name != null && name != "")
+		{
+			EditText nameField = (EditText) findViewById(R.id.edtInputName);
+			nameField.setText(name);
+		}
+		if (description != null && description != "")
+		{
+			EditText descriptionField = (EditText) findViewById(R.id.edtInputDescription);
+			descriptionField.setText(description);
+		}
+		
+		OnColorChangedListener l = new OnColorChangedListener() {
+            public void colorChanged(int color) {
+            	Log.v(Mapp.TAG, "De kleur is nu"+color);
+            }
+        };
 		ColorPickerView colorPickerView = new ColorPickerView(getApplicationContext(), l, initialColor);
 		layout.addView(colorPickerView);
 	}
-
-	
 	
 	
 	/*
