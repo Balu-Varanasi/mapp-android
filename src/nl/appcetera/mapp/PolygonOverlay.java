@@ -150,7 +150,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
             {
                	path.lineTo(screenPts.x, screenPts.y);
                	// Toch maar een lijntje om de gesloten polygoon heen tekenen,
-               	// omdat Joël dat leuk vindt
+               	// omdat Jo‘l dat leuk vindt
                	if (i < polygon.getNumPoints() && !this.polygonEditMode)
                	{
                		canvas.drawLine(screenPts2.x, screenPts2.y, screenPts.x, screenPts.y, this.shapeLinePaint);
@@ -223,7 +223,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
         {
         	boolean consumeEvent = false;
         	consumeEvent = notifyTouchUp(event);
-        	// Het event is niet opgeëist door een listener, en de touch duurde minder lang
+        	// Het event is niet opge‘ist door een listener, en de touch duurde minder lang
         	// dan maxTouchDuration
         	if(!consumeEvent && !this.eventConsumed && Mapp.isFirstOverlay(this)
         			&& (System.currentTimeMillis()-timer < Mapp.maxTouchDuration))
@@ -327,18 +327,6 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 	    	
 	    	return false;
     	}
-    	/*
-    	else if (polygon.getIsClosed() && (this.pathRegion.contains((int) event.getX(), (int) event.getY()))) {
-    		if (!this.polygonEditMode && Mapp.instance.displayingMetaPopup()) {
-    			Mapp.instance.hideMetaPopup();
-    			return true;
-    		}
-    		else {
-    			Mapp.instance.showMetaPopup((int) event.getX(), (int) event.getY());
-    			return true;
-    		}
-    	}
-    	*/
     	return false;
     }
     

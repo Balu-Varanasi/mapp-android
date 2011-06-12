@@ -11,7 +11,7 @@
 	/>
 	<View style="@style/TopSeparator" />
 	<ScrollView
-		android:id="@+id/widget30"
+		android:id="@+id/scrollview"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		xmlns:android="http://schemas.android.com/apk/res/android">
@@ -39,24 +39,25 @@
 				android:id="@+id/colorlabelview"
 				style="@style/Label"
 				android:text="@string/meta_colorlabel" />
-			<Button xmlns:android="http://schemas.android.com/apk/res/android"
-				android:id="@+id/colorview"
-				style="@style/ColorField"
-				android:text="@string/meta_colortip" />
+			<LinearLayout
+				android:id="@+id/colorpickerlayout"
+				style="@style/ColorpickerLayout"/>
+			<View style="@style/BottomSeparator" />
+			<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+				android:orientation="horizontal"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:gravity="center"
+				android:layout_alignParentBottom="true">
+				
+				<Button android:id="@+id/button"
+					style="@style/Button"
+		            android:text="@string/meta_savebutton" />
+		        <Button android:id="@+id/button"
+					style="@style/Button"
+		            android:text="@string/meta_cancelbutton" />
+		   	</LinearLayout>
 		</LinearLayout>
-	</ScrollView>
-	<View style="@style/BottomSeparator" />
-	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-		android:orientation="horizontal"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:gravity="center">
-		<Button android:id="@+id/button"
-			style="@style/Button"
-            android:text="@string/meta_savebutton" />
-        <Button android:id="@+id/button"
-			style="@style/Button"
-            android:text="@string/meta_cancelbutton" />
-   	</LinearLayout>
+   	</ScrollView>
 </LinearLayout>
 

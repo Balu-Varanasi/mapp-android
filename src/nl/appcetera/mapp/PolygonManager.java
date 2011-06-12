@@ -342,7 +342,7 @@ public class PolygonManager
 	 */
 	public void editMetaData(Mapp instance) {
 		
-		Log.v(Mapp.TAG, "checkpoint 1");
+		Log.v(Mapp.TAG, "Getting ready to launch Meta Activity");
 		Intent intent = new Intent(instance, MetaEditScreen.class);
 	
 		//Next create the bundle and initialize it
@@ -359,6 +359,6 @@ public class PolygonManager
 		
 		//Start next activity
 		instance.startActivity(intent);
-		Log.v(Mapp.TAG, "checkpoint 6");
+		Log.v(Mapp.TAG, "Launched MetaActivity");
 	}
 }
