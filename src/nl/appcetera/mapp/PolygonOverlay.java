@@ -245,6 +245,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
      */
     public boolean notifyTouchUp(MotionEvent event)
     {
+    	//stop eventueel met wachten om in de metapopup-editmode te gaan
     	metaHandler.removeCallbacks(editMetaCallback);
     	if(this.movingPoint)
     	{
@@ -426,6 +427,8 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 	    		//Mapp.instance.hideMetaPopup();
 	    	}
         	else {
+        		//maar als we wel in de polygoon tapten, kunnen we een timer starten
+        		//als we de polygoon getapt houden voor de duur van de timer, komen we in de editmode van de metadata
         		metaHandler.postDelayed(editMetaCallback, Mapp.metaTouchDuration);
         	}
     		return true;
@@ -441,6 +444,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
      */
     public boolean notifyTouchMove(MotionEvent event)
     {
+    	//als er bewogen wordt, stoppen we de timer die de metadata-editmode opstart sowieso
     	metaHandler.removeCallbacks(editMetaCallback);
     	// We zijn een punt aan het verplaatsen
     	if(this.movingPoint)

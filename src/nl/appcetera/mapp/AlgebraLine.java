@@ -4,7 +4,7 @@ import android.util.Log;
 import android.graphics.Point;
 
 /**
- * Line-class die algebra uitvoert betreffende een lijn
+ * Line-class die algebra uitvoert die hoort bij een lijn
  * Lijnen in de vorm y = ax + b
  * @author Joost
  */
@@ -15,6 +15,8 @@ public class AlgebraLine {
 	
 	/**
 	 * Constructor voor lijn uit 2 punten
+	 * @param start Het beginpunt van de lijn
+	 * @param end 	Het eindpunt van de lijn
 	 */
 	public AlgebraLine(Point start, Point end) {
 		//a = (Ay - By) / (Ax - Bx)
@@ -33,6 +35,8 @@ public class AlgebraLine {
 	
 	/**
 	 * Constructor voor lijn van vorm y = ax + b
+	 * @param a de richtingscoefficient van de lijn
+	 * @param b de 'offset' van de lijn
 	 */
 	public AlgebraLine(int a, int b) {
 		Point start = new Point(0, b);

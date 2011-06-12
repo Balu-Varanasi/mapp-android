@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<style name="Fullwidth">
+		<item name="android:layout_width">fill_parent</item>
+		<item name="android:layout_height">fill_parent</item>
+	</style>
+    <style name="Heading" parent="Fullwidth">
+		<item name="android:textSize">24sp</item>
+		<item name="android:gravity">center_horizontal</item>
+    </style>
+</resources>

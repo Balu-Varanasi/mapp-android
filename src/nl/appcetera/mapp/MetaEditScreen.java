@@ -12,6 +12,8 @@ public class MetaEditScreen extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.metascreen);
 
+		
+		
 		//First Extract the bundle from intent
 		Log.v(Mapp.TAG, "META-Activity started");
 		//Bundle bundle = getIntent().getExtras();
