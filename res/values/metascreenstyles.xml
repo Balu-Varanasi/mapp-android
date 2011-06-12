@@ -2,10 +2,51 @@
 <resources>
 	<style name="Fullwidth">
 		<item name="android:layout_width">fill_parent</item>
-		<item name="android:layout_height">fill_parent</item>
 	</style>
-    <style name="Heading" parent="Fullwidth">
+	<style name="TextViewStyle" parent="Fullwidth">
+		<item name="android:layout_height">wrap_content</item>
+	</style>
+	<style name="BigSeparator" parent="Fullwidth">
+		<item name="android:background">#FF909090</item>
+		<item name="android:layout_height">1dip</item>
+		<item name="android:layout_gravity">center</item>
+	</style>
+	<style name="TopSeparator" parent="BigSeparator">
+		<item name="android:layout_marginBottom">10dip</item>
+	</style>
+	<style name="BottomSeparator" parent="BigSeparator">
+		<item name="android:layout_marginTop">25dip</item>
+		<item name="android:layout_marginBottom">5dip</item>
+	</style>
+	<style name="MediumSeparator" parent="BigSeparator">
+		<item name="android:layout_width">125dip</item>
+		<item name="android:layout_marginBottom">20dip</item>
+		<item name="android:layout_marginTop">25dip</item>
+	</style>
+    <style name="Label" parent="TextViewStyle">
+    	<item name="android:gravity">left</item>
+		<item name="android:paddingBottom">5sp</item>
+		<item name="android:textSize">16sp</item>
+    </style>
+    <style name="Heading" parent="TextViewStyle">
 		<item name="android:textSize">24sp</item>
 		<item name="android:gravity">center_horizontal</item>
+		<item name="android:paddingBottom">5sp</item>
     </style>
+   	<style name="TextInput" parent="TextViewStyle">
+		<item name="android:inputType">textShortMessage|textAutoCorrect|textCapSentences</item>
+		<item name="android:imeOptions">actionSend|flagNoEnterAction</item>
+		<item name="android:maxLength">100</item>
+   	</style>
+   	<style name="BigTextInput" parent="TextInput">
+		<item name="android:inputType">textShortMessage|textAutoCorrect|textCapSentences|textMultiLine</item>
+        <item name="android:maxLines">5</item>
+        <item name="android:minLines">5</item>
+        <item name="android:maxLength">500</item>
+       	<item name="android:gravity">top|left</item>
+   	</style>
+   	<style name="Button">
+		<item name="android:layout_width">100dip</item>
+		<item name="android:layout_height">wrap_content</item>
+	</style>
 </resources>

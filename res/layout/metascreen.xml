@@ -1,24 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- @author Joost -->
-<ScrollView
-	android:id="@+id/widget30"
-	android:layout_width="fill_parent"
-	android:layout_height="fill_parent"
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  		android:orientation="vertical"
+    	android:layout_width="fill_parent"
+    	android:layout_height="fill_parent">
+	<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+		android:id="@+id/headingview"
+		style="@style/Heading"
+		android:text="@string/meta_heading"
+	/>
+	<View style="@style/TopSeparator" />
+	<ScrollView
+		android:id="@+id/widget30"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		xmlns:android="http://schemas.android.com/apk/res/android">
+		<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  			android:orientation="vertical"
+    		android:layout_width="fill_parent"
+    		android:layout_height="fill_parent">
+			<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+				android:id="@+id/namelabelview"
+				style="@style/Label"
+				android:text="@string/meta_namelabel" />
+			<EditText android:id="@+id/edtInput"
+				style="@style/TextInput"
+				android:hint="@string/meta_name_hint" />
+			<View style="@style/MediumSeparator" />
+			<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+				android:id="@+id/descriptionlabelview"
+				style="@style/Label"
+				android:text="@string/meta_descriptionlabel" />
+			<EditText android:id="@+id/edtInput"
+				style="@style/BigTextInput"
+				android:hint="@string/meta_description_hint" />	
+			<View style="@style/MediumSeparator" />
+			<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+				android:id="@+id/colorlabelview"
+				style="@style/Label"
+				android:text="@string/meta_colorlabel" />
+		</LinearLayout>
+	</ScrollView>
+	<View style="@style/BottomSeparator" />
 	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-   		android:orientation="vertical"
-     	android:layout_width="fill_parent"
-     	android:layout_height="fill_parent">
-		<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-			android:id="@+id/headingview"
-			style="@style/Heading"
-			android:text="@string/meta_heading"
-		/>
-		<LinearLayout
-			android:layout_width="fill_parent"
-			android:layout_height="1sp"
-			android:padding="3dip"
-			android:background="#FF909090" />
-	</LinearLayout>
-</ScrollView>
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:gravity="center">
+		<Button android:id="@+id/button"
+			style="@style/Button"
+            android:text="@string/meta_savebutton" />
+        <Button android:id="@+id/button"
+			style="@style/Button"
+            android:text="@string/meta_cancelbutton" />
+   	</LinearLayout>
+</LinearLayout>
+
