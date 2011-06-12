@@ -39,6 +39,10 @@
 				android:id="@+id/colorlabelview"
 				style="@style/Label"
 				android:text="@string/meta_colorlabel" />
+			<Button xmlns:android="http://schemas.android.com/apk/res/android"
+				android:id="@+id/colorview"
+				style="@style/ColorField"
+				android:text="@string/meta_colortip" />
 		</LinearLayout>
 	</ScrollView>
 	<View style="@style/BottomSeparator" />

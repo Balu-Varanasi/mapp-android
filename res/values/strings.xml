@@ -3,8 +3,9 @@
     <string name="app_name">Mapp</string>
     <string name="meta_heading">Polygon Properties</string>
     <string name="meta_namelabel">Polygon name</string>
-    <string name="meta_descriptionlabel">Description</string>
-    <string name="meta_colorlabel">Color</string>
+    <string name="meta_descriptionlabel">Polygon description</string>
+    <string name="meta_colorlabel">Polygon color</string>
+    <string name="meta_colortip">(Tap to change)</string>
     <string name="meta_name_hint">Name</string>
     <string name="meta_description_hint">Description</string>
     <string name="meta_savebutton">Save</string>

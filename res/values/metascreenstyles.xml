@@ -15,15 +15,23 @@
 		<item name="android:layout_marginBottom">10dip</item>
 	</style>
 	<style name="BottomSeparator" parent="BigSeparator">
-		<item name="android:layout_marginTop">25dip</item>
-		<item name="android:layout_marginBottom">5dip</item>
+		<item name="android:layout_marginTop">20dip</item>
+		<item name="android:layout_marginBottom">10dip</item>
 	</style>
 	<style name="MediumSeparator" parent="BigSeparator">
 		<item name="android:layout_width">125dip</item>
-		<item name="android:layout_marginBottom">20dip</item>
-		<item name="android:layout_marginTop">25dip</item>
+		<item name="android:layout_marginBottom">15dip</item>
+		<item name="android:layout_marginTop">15dip</item>
 	</style>
-    <style name="Label" parent="TextViewStyle">
+	<style name="ColorField">
+		<item name="android:layout_width">fill_parent</item>
+		<item name="android:layout_height">40dip</item>
+		<item name="android:layout_gravity">center</item>
+		<item name="android:gravity">center</item>
+		<item name="android:textSize">12sp</item>
+		<item name="android:background">#FF990000</item>
+	</style>
+	<style name="Label" parent="TextViewStyle">
     	<item name="android:gravity">left</item>
 		<item name="android:paddingBottom">5sp</item>
 		<item name="android:textSize">16sp</item>
