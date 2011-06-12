@@ -1,7 +1,5 @@
 package nl.appcetera.mapp;
 
-import com.google.android.maps.MapView;
-
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -13,11 +11,9 @@ import android.graphics.Shader;
 import android.graphics.SweepGradient;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.EditText;
 
 public class MetaEditScreen extends Activity {
@@ -247,31 +243,5 @@ public class MetaEditScreen extends Activity {
             }
             return true;
         }
-    }
-/*
-	    public ColorPickerDialog(Context context,
-	                             OnColorChangedListener listener,
-	                             int initialColor) {
-	        super(context);
-
-	        mListener = listener;
-	        mInitialColor = initialColor;
-	    }
-
-	    @Override
-	    protected void onCreate(Bundle savedInstanceState) {
-	        super.onCreate(savedInstanceState);
-	        OnColorChangedListener l = new OnColorChangedListener() {
-	            public void colorChanged(int color) {
-	                mListener.colorChanged(color);
-	                dismiss();
-	            }
-	        };
-
-	        setContentView(new ColorPickerView(getContext(), l, mInitialColor));
-	        setTitle("Pick a Color");
-	    }
-
-	*/
-	
+    }	
 }

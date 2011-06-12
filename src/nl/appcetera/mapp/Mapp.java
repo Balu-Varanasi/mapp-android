@@ -210,26 +210,4 @@ public class Mapp extends MapActivity
 	{
 		Mapp.instance.om.loadOverlays();
 	}
-
-	/**
-	 * Bekijkt of we op dit moment een metapopup aan het tonen zijn
-	 * @return de visible-state van de metapopup
-	 */
-	//public boolean displayingMetaPopup() {
-	//	return metaPopupOverlay.isVisible();
-	//}
-
-	/**
-	 * Verbergt de metapopup
-	 */
-	//public void hideMetaPopup() {
-	//	metaPopupOverlay.makeInvisible();
-	//}
-
-	/**
-	 * Toont de metapopup
-	 */
-	//public void showMetaPopup(int x, int y) {
-	//	metaPopupOverlay.makeVisible(x, y);
-	//}
 }
