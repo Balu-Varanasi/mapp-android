@@ -14,7 +14,7 @@ import android.provider.BaseColumns;
 public class PolygonData extends SQLiteOpenHelper
 {
 	private static final String DATABASE_NAME = "mapp.db";
-	private static final int DATABASE_VERSION = 2;
+	private static final int DATABASE_VERSION = 4;
 	
 	private static final String POLYGON_TABLE_NAME 	= "polygondata";
 	private static final String POLYGON_ID 			= BaseColumns._ID;
@@ -34,13 +34,18 @@ public class PolygonData extends SQLiteOpenHelper
 	private static final String POLYGON_POINTS_ORDERING		= "ordering";
 	
 	private static final String GROUPS_TABLE_NAME	= "groups";
-	private static final String GROUPS_ID			= BaseColumns._ID;
+	private static final String GROUPS_ID			= "groupid";
+	private static final String GROUPS_OWNER		= "owner";
 	private static final String GROUPS_NAME			= "group_name";
 	
+	private static final String GROUP_MEMBERS_TABLE_NAME = "group_members";
+	
+	private static final String USERS_TABLE_NAME = "users";
+	private static final String USERS_ID 		 = "userid";
+	private static final String USERS_EMAIL 	 = "email";
+	
 	private static final String POLYGON_REMOVAL_TABLE_NAME = "removed_polygons";
-	
-	
-	
+
 	public PolygonData(Context context)
 	{
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -53,15 +58,36 @@ public class PolygonData extends SQLiteOpenHelper
 	@Override
 	public void onCreate(SQLiteDatabase db)
 	{
-		String sql3 =
+		String sql = "";
+		
+		sql =
+			"CREATE TABLE " + USERS_TABLE_NAME + " ("
+			+ USERS_ID + " INTEGER NOT NULL, "
+			+ USERS_EMAIL + " TEXT NOT NULL "
+			+ ");";
+		db.execSQL(sql);
+		
+		sql =
 		    "CREATE TABLE " + GROUPS_TABLE_NAME + " ("
 		      + GROUPS_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+		      + GROUPS_OWNER + " TEXT NOT NULL, "
 		      + GROUPS_NAME + " TEXT"
 		      + ");";
-		db.execSQL(sql3);
-		db.execSQL("INSERT INTO " + GROUPS_TABLE_NAME + " (" + GROUPS_NAME + ") VALUES ('Default')");
+		db.execSQL(sql);
+		db.execSQL("INSERT INTO " + GROUPS_TABLE_NAME + " (" + GROUPS_NAME + "," + GROUPS_OWNER + ") VALUES ('Default','info@mathijsvos.nl')");
 		
-		String sql =
+		sql =
+			"CREATE TABLE " + GROUP_MEMBERS_TABLE_NAME + " ("
+				+ GROUPS_ID + " INTEGER NOT NULL, "
+				+ USERS_ID + " INTEGER NOT NULL, " 
+				+ "FOREIGN KEY(" + GROUPS_ID + ") REFERENCES " + GROUPS_TABLE_NAME 
+			      + "(" + GROUPS_ID + ") ON UPDATE CASCADE ON DELETE CASCADE, "
+			    + "FOREIGN KEY(" + USERS_ID + ") REFERENCES " + USERS_TABLE_NAME 
+			      + "(" + USERS_ID + ") ON UPDATE CASCADE ON DELETE CASCADE"
+				+ ");";
+		db.execSQL(sql);
+		
+		sql =
 		    "CREATE TABLE " + POLYGON_TABLE_NAME + " ("
 		      + POLYGON_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
 		      + POLYGON_COLOR + " INTEGER NOT NULL, "
@@ -78,7 +104,7 @@ public class PolygonData extends SQLiteOpenHelper
 		 
 		db.execSQL(sql);
 		  
-		String sql2 =
+		sql =
 			"CREATE TABLE " + POLYGON_POINTS_TABLE_NAME + " ("
 			  + POLYGON_POINTS_ID + " INTEGER, "
 			  + POLYGON_POINTS_X + " INTEGER, "
@@ -88,14 +114,14 @@ public class PolygonData extends SQLiteOpenHelper
 			  + "(" + POLYGON_ID + ") ON UPDATE CASCADE ON DELETE CASCADE"
 			  + ");";
 			 
-		db.execSQL(sql2);
+		db.execSQL(sql);
 		
-		String sql4 = 
+		sql = 
 			"CREATE TABLE " + POLYGON_REMOVAL_TABLE_NAME + " ("
 			  + POLYGON_ID + " INTEGER NOT NULL, "
 			  + POLYGON_GROUP + " INTEGER NOT NULL"
 			  + ");";
-		db.execSQL(sql4);
+		db.execSQL(sql);
 	}
 
 	/**
