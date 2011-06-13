@@ -349,16 +349,16 @@ public class PolygonManager
 		Bundle bundle = new Bundle();
 	
 		//Add the parameters to bundle as
-		bundle.putInt("ID",polygonId);
-		bundle.putInt("COLOR",color);
-		bundle.putString("NAME",name);
-		bundle.putString("DESCRIPTION",description);
+		bundle.putInt(MetaEditScreen.ID_KEY, polygonId);
+		bundle.putInt(MetaEditScreen.COLOR_KEY, color);
+		bundle.putString(MetaEditScreen.NAME_KEY, name);
+		bundle.putString(MetaEditScreen.DESCRIPTION_KEY, description);
 		
 		//Add this bundle to the intent
 		intent.putExtras(bundle);
 		
 		//Start next activity
-		instance.startActivity(intent);
+		instance.startActivityForResult(intent, Mapp.META_EDITSCREEN_ACTIVITYCODE);
 		Log.v(Mapp.TAG, "Launched MetaActivity");
 	}
 }

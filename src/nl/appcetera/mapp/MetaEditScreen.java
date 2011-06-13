@@ -2,9 +2,9 @@ package nl.appcetera.mapp;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.ColorMatrix;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.Shader;
@@ -13,39 +13,80 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.EditText;
 
 public class MetaEditScreen extends Activity {
 	
+	private int polyID;
+	private int polyColor;
+	private EditText nameField;
+	private EditText descriptionField;
+	
+	public final static String ID_KEY = "ID";
+	public final static String COLOR_KEY = "COLOR";
+	public final static String NAME_KEY = "NAME";
+	public final static String DESCRIPTION_KEY = "DESCRIPTION";
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.metascreen);      
-		
+		//de bundle wordt uitgelezen zodat we de gegevens van de polygoon in kunnen vullen
         Bundle bundle = getIntent().getExtras();
-        int initialColor = bundle.getInt("COLOR");
-		String name = bundle.getString("NAME");
-		String description = bundle.getString("DESCRIPTION");
-		LinearLayout layout = (LinearLayout) findViewById(R.id.colorpickerlayout);
+        polyColor = bundle.getInt(COLOR_KEY);
+        polyID = bundle.getInt(ID_KEY);
+		String name = bundle.getString(NAME_KEY);
+		String description = bundle.getString(DESCRIPTION_KEY);
+		//we vullen de naam in in het editscherm, als we een naam hebben
+		nameField = (EditText) findViewById(R.id.edtInputName);
 		if (name != null && name != "")
 		{
-			EditText nameField = (EditText) findViewById(R.id.edtInputName);
 			nameField.setText(name);
 		}
+		//en we vullen de description in, als er een description is
+		descriptionField = (EditText) findViewById(R.id.edtInputDescription);
 		if (description != null && description != "")
 		{
-			EditText descriptionField = (EditText) findViewById(R.id.edtInputDescription);
 			descriptionField.setText(description);
 		}
-		
+		//we zetten een listener klaar die reageert op een verandering van kleur in de colorpicker
 		OnColorChangedListener l = new OnColorChangedListener() {
             public void colorChanged(int color) {
-            	Log.v(Mapp.TAG, "De kleur is nu"+color);
+            	polyColor = color;
             }
         };
-		ColorPickerView colorPickerView = new ColorPickerView(getApplicationContext(), l, initialColor);
+        //Ook voegen we een nieuwe colorpicker toe aan een layout die daarvoor klaar staat
+		ColorPickerView colorPickerView = new ColorPickerView(getApplicationContext(), l, polyColor);
+		LinearLayout layout = (LinearLayout) findViewById(R.id.colorpickerlayout);
 		layout.addView(colorPickerView);
+		
+		//listener toevoegen aan de savebutton
+		final Button savebutton = (Button) findViewById(R.id.savebutton);
+		savebutton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+            	Bundle bundle = new Bundle();
+
+            	bundle.putInt(ID_KEY, polyID);
+        		bundle.putInt(COLOR_KEY, polyColor);
+        		bundle.putString(NAME_KEY, nameField.getText().toString());
+        		bundle.putString(DESCRIPTION_KEY,descriptionField.getText().toString());
+            	
+            	Intent mIntent = new Intent();
+            	mIntent.putExtras(bundle);
+            	setResult(RESULT_OK, mIntent);
+            	finish();
+            }
+        });
+		
+		//listener toevoegen aan de closebutton
+		final Button cancelbutton = (Button) findViewById(R.id.cancelbutton);
+		cancelbutton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                
+            }
+        });
 	}
 	
 	
@@ -106,7 +147,7 @@ public class MetaEditScreen extends Activity {
             canvas.drawOval(new RectF(-r, -r, r, r), mPaint);
             canvas.drawCircle(0, 0, CENTER_RADIUS, mCenterPaint);
 
-            if (mTrackingCenter) {
+            /*if (mTrackingCenter) {
                 int c = mCenterPaint.getColor();
                 mCenterPaint.setStyle(Paint.Style.STROKE);
 
@@ -121,7 +162,7 @@ public class MetaEditScreen extends Activity {
 
                 mCenterPaint.setStyle(Paint.Style.FILL);
                 mCenterPaint.setColor(c);
-            }
+            }*/
         }
 
         @Override
@@ -132,7 +173,8 @@ public class MetaEditScreen extends Activity {
         private static final int CENTER_X = 100;
         private static final int CENTER_Y = 100;
         private static final int CENTER_RADIUS = 32;
-
+        
+        /*
         private int floatToByte(float x) {
             int n = java.lang.Math.round(x);
             return n;
@@ -144,7 +186,7 @@ public class MetaEditScreen extends Activity {
                 n = 255;
             }
             return n;
-        }
+        }*/
 
         private int ave(int s, int d, float p) {
             return s + java.lang.Math.round(p * (d - s));
@@ -173,7 +215,7 @@ public class MetaEditScreen extends Activity {
             return Color.argb(a, r, g, b);
         }
 
-        private int rotateColor(int color, float rad) {
+        /*private int rotateColor(int color, float rad) {
             float deg = rad * 180 / 3.1415927f;
             int r = Color.red(color);
             int g = Color.green(color);
@@ -196,7 +238,7 @@ public class MetaEditScreen extends Activity {
 
             return Color.argb(Color.alpha(color), pinToByte(ir),
                               pinToByte(ig), pinToByte(ib));
-        }
+        }*/
 
         private static final float PI = 3.1415926f;
 
@@ -204,7 +246,7 @@ public class MetaEditScreen extends Activity {
         public boolean onTouchEvent(MotionEvent event) {
             float x = event.getX() - CENTER_X;
             float y = event.getY() - CENTER_Y;
-            boolean inCenter = java.lang.Math.sqrt(x*x + y*y) <= CENTER_RADIUS;
+            boolean inCenter = java.lang.Math.sqrt(x*x + y*y) <= CENTER_RADIUS*2;
 
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
@@ -228,18 +270,20 @@ public class MetaEditScreen extends Activity {
                             unit += 1;
                         }
                         mCenterPaint.setColor(interpColor(mColors, unit));
+                        mListener.colorChanged(mCenterPaint.getColor());
                         invalidate();
                     }
                     break;
-                case MotionEvent.ACTION_UP:
+                /*case MotionEvent.ACTION_UP:
                     if (mTrackingCenter) {
                         if (inCenter) {
+                        	Log.v(Mapp.TAG, "Reached inCenter");
                             mListener.colorChanged(mCenterPaint.getColor());
                         }
                         mTrackingCenter = false;    // so we draw w/o halo
                         invalidate();
                     }
-                    break;
+                    break;*/
             }
             return true;
         }

@@ -2,8 +2,10 @@ package nl.appcetera.mapp;
 
 import java.util.List;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MotionEvent;
 
 import nl.appcetera.mapp.R;
@@ -36,7 +38,7 @@ public class Mapp extends MapActivity
 	public static final int syncInterval = 60*1000; // Interval tussen synchronisaties in milliseconden
 	public static final int offlineRetryInterval = 30*60*1000; // Interval tussen sync-attempts als toestel offline is
 	public static final int metaTouchDuration = 1000; //touch-duration waarna we naar de meta-activity gaan
-	
+	public static final int META_EDITSCREEN_ACTIVITYCODE = 42;
 	public static Mapp instance;
 	
 	/**
@@ -209,5 +211,27 @@ public class Mapp extends MapActivity
 	public static void reload()
 	{
 		Mapp.instance.om.loadOverlays();
+	}
+	
+	/**
+	 * Deze functie wordt aangeroepen wanneer een Activity die vanuit Mapp is aangeroepen zn setResult aanroept
+	 * @param requestCode een int die aangeeft om welke Activity het gaat
+	 * @param resultCode een int die de status van terminatie van de Activity aangeeft
+	 * @param data een intent die eventuele result-data bevat
+	 */
+	protected void onActivityResult (int requestCode, int resultCode, Intent data)
+	{
+		super.onActivityResult(requestCode, resultCode, data);
+		Bundle bundle = data.getExtras();
+
+		switch(requestCode) {
+			case META_EDITSCREEN_ACTIVITYCODE:
+				int id = bundle.getInt(MetaEditScreen.ID_KEY);
+				int color = bundle.getInt(MetaEditScreen.COLOR_KEY);
+				String name = bundle.getString(MetaEditScreen.NAME_KEY);
+				String description = bundle.getString(MetaEditScreen.DESCRIPTION_KEY);
+				database.editPolygon(id, color, true, name, description);
+				break;
+		}	
 	}
 }
