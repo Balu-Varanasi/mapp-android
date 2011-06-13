@@ -28,6 +28,8 @@ public class MetaEditScreen extends Activity {
 	public final static String COLOR_KEY = "COLOR";
 	public final static String NAME_KEY = "NAME";
 	public final static String DESCRIPTION_KEY = "DESCRIPTION";
+	public final static int RESULT_SAVE = 42;
+	public final static int RESULT_CANCEL = 41;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -39,6 +41,7 @@ public class MetaEditScreen extends Activity {
         polyID = bundle.getInt(ID_KEY);
 		String name = bundle.getString(NAME_KEY);
 		String description = bundle.getString(DESCRIPTION_KEY);
+		Log.v(Mapp.TAG, "Incoming: "+description);
 		//we vullen de naam in in het editscherm, als we een naam hebben
 		nameField = (EditText) findViewById(R.id.edtInputName);
 		if (name != null && name != "")
@@ -73,9 +76,11 @@ public class MetaEditScreen extends Activity {
         		bundle.putString(NAME_KEY, nameField.getText().toString());
         		bundle.putString(DESCRIPTION_KEY,descriptionField.getText().toString());
             	
+        		Log.v(Mapp.TAG, "Outgoing: "+descriptionField.getText().toString());
+        		
             	Intent mIntent = new Intent();
             	mIntent.putExtras(bundle);
-            	setResult(RESULT_OK, mIntent);
+            	setResult(RESULT_SAVE, mIntent);
             	finish();
             }
         });
@@ -84,7 +89,8 @@ public class MetaEditScreen extends Activity {
 		final Button cancelbutton = (Button) findViewById(R.id.cancelbutton);
 		cancelbutton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                
+            	setResult(RESULT_CANCEL);
+            	finish();
             }
         });
 	}

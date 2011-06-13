@@ -226,11 +226,15 @@ public class Mapp extends MapActivity
 
 		switch(requestCode) {
 			case META_EDITSCREEN_ACTIVITYCODE:
-				int id = bundle.getInt(MetaEditScreen.ID_KEY);
-				int color = bundle.getInt(MetaEditScreen.COLOR_KEY);
-				String name = bundle.getString(MetaEditScreen.NAME_KEY);
-				String description = bundle.getString(MetaEditScreen.DESCRIPTION_KEY);
-				database.editPolygon(id, color, true, name, description);
+				if (resultCode == MetaEditScreen.RESULT_SAVE)
+				{
+					int id = bundle.getInt(MetaEditScreen.ID_KEY);
+					int color = bundle.getInt(MetaEditScreen.COLOR_KEY);
+					String name = bundle.getString(MetaEditScreen.NAME_KEY);
+					String description = bundle.getString(MetaEditScreen.DESCRIPTION_KEY);
+					Log.v(Mapp.TAG, "Received: "+description);
+					database.editPolygon(id, color, true, name, description);
+				}
 				break;
 		}	
 	}
