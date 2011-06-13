@@ -31,6 +31,10 @@ public class MetaEditScreen extends Activity {
 	public final static int RESULT_SAVE = 42;
 	public final static int RESULT_CANCEL = 41;
 	
+	/**
+	 * Wordt aangeroepen wanneer deze activity wordt aangemaakt
+	 * @param savedInstanceState de bundle die de activity meekrijgt wanneer hij wordt gemaakt
+	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -68,6 +72,10 @@ public class MetaEditScreen extends Activity {
 		//listener toevoegen aan de savebutton
 		final Button savebutton = (Button) findViewById(R.id.savebutton);
 		savebutton.setOnClickListener(new View.OnClickListener() {
+			/**
+			 * Wordt aangeroepen wanneer er op de savebutton wordt getapt
+			 * @param v de savebutton
+			 */
             public void onClick(View v) {
             	Bundle bundle = new Bundle();
 
@@ -88,6 +96,10 @@ public class MetaEditScreen extends Activity {
 		//listener toevoegen aan de closebutton
 		final Button cancelbutton = (Button) findViewById(R.id.cancelbutton);
 		cancelbutton.setOnClickListener(new View.OnClickListener() {
+			/**
+			 * Wordt aangeroepen wanneer er op de cancelbutton wordt getapt
+			 * @param v de cancelbutton
+			 */
             public void onClick(View v) {
             	setResult(RESULT_CANCEL);
             	finish();
@@ -95,7 +107,19 @@ public class MetaEditScreen extends Activity {
         });
 	}
 	
-	
+	/**
+	 * Interface die een listener beschrijft die reageert op een colorchange-event van de colorpickerview
+	 */
+	public interface OnColorChangedListener {
+		 void colorChanged(int color);
+	}
+
+	/**
+	 * De klasse die een colorpicker tekent en beheert
+	 * @author Joost
+	 * Deze klasse is gebasseerd op delen van de ColorPickerDialog, zoals aangeleverd in de Android SDK
+	 * http://developer.android.com/resources/samples/ApiDemos/src/com/example/android/apis/graphics/ColorPickerDialog.html
+	 */
 	/*
 	 * Copyright (C) 2007 The Android Open Source Project
 	 *
@@ -111,17 +135,18 @@ public class MetaEditScreen extends Activity {
 	 * See the License for the specific language governing permissions and
 	 * limitations under the License.
 	 */
-
-	public interface OnColorChangedListener {
-		 void colorChanged(int color);
-	}
-
     private static class ColorPickerView extends View {
         private Paint mPaint;
         private Paint mCenterPaint;
         private final int[] mColors;
         private OnColorChangedListener mListener;
 
+        /**
+         * Constructor
+         * @param c de context waarin de colorpicker zich begeeft
+         * @param l de listener die moet worden aangeroepen wanneer er een kleur gekozen wordt
+         * @param color de initi‘le kleur
+         */
         ColorPickerView(Context c, OnColorChangedListener l, int color) {
             super(c);
             mListener = l;
@@ -141,36 +166,21 @@ public class MetaEditScreen extends Activity {
             mCenterPaint.setStrokeWidth(5);
         }
 
-        private boolean mTrackingCenter;
-        private boolean mHighlightCenter;
-
+        /**
+         * De functie die wordt aangeroepen wanneer het midden colorpicker opnieuw getekend dient te worden
+         * @param canvas het canvas waarop de colorpicker wordt getekend
+         */
         @Override
         protected void onDraw(Canvas canvas) {
             float r = CENTER_X - mPaint.getStrokeWidth()*0.5f;
-
             canvas.translate(CENTER_X, CENTER_X);
-
             canvas.drawOval(new RectF(-r, -r, r, r), mPaint);
             canvas.drawCircle(0, 0, CENTER_RADIUS, mCenterPaint);
-
-            /*if (mTrackingCenter) {
-                int c = mCenterPaint.getColor();
-                mCenterPaint.setStyle(Paint.Style.STROKE);
-
-                if (mHighlightCenter) {
-                    mCenterPaint.setAlpha(0xFF);
-                } else {
-                    mCenterPaint.setAlpha(0x80);
-                }
-                canvas.drawCircle(0, 0,
-                                  CENTER_RADIUS + mCenterPaint.getStrokeWidth(),
-                                  mCenterPaint);
-
-                mCenterPaint.setStyle(Paint.Style.FILL);
-                mCenterPaint.setColor(c);
-            }*/
         }
 
+        /**
+         * Een override van de onMeasure functie die een View verplicht moet implementeren
+         */
         @Override
         protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
             setMeasuredDimension(CENTER_X*2, CENTER_Y*2);
@@ -179,25 +189,17 @@ public class MetaEditScreen extends Activity {
         private static final int CENTER_X = 100;
         private static final int CENTER_Y = 100;
         private static final int CENTER_RADIUS = 32;
-        
-        /*
-        private int floatToByte(float x) {
-            int n = java.lang.Math.round(x);
-            return n;
-        }
-        private int pinToByte(int n) {
-            if (n < 0) {
-                n = 0;
-            } else if (n > 255) {
-                n = 255;
-            }
-            return n;
-        }*/
 
         private int ave(int s, int d, float p) {
             return s + java.lang.Math.round(p * (d - s));
         }
 
+        /**
+         * Functie die een punt tussen twee basiskleuren omzet in een enkele kleur 
+         * @param colors de basiskleuren op het colorwheel waartussen getapt is
+         * @param unit de afstand tot de basiskleuren
+         * @return de gecombineerde kleur
+         */
         private int interpColor(int colors[], float unit) {
             if (unit <= 0) {
                 return colors[0];
@@ -221,33 +223,14 @@ public class MetaEditScreen extends Activity {
             return Color.argb(a, r, g, b);
         }
 
-        /*private int rotateColor(int color, float rad) {
-            float deg = rad * 180 / 3.1415927f;
-            int r = Color.red(color);
-            int g = Color.green(color);
-            int b = Color.blue(color);
-
-            ColorMatrix cm = new ColorMatrix();
-            ColorMatrix tmp = new ColorMatrix();
-
-            cm.setRGB2YUV();
-            tmp.setRotate(0, deg);
-            cm.postConcat(tmp);
-            tmp.setYUV2RGB();
-            cm.postConcat(tmp);
-
-            final float[] a = cm.getArray();
-
-            int ir = floatToByte(a[0] * r +  a[1] * g +  a[2] * b);
-            int ig = floatToByte(a[5] * r +  a[6] * g +  a[7] * b);
-            int ib = floatToByte(a[10] * r + a[11] * g + a[12] * b);
-
-            return Color.argb(Color.alpha(color), pinToByte(ir),
-                              pinToByte(ig), pinToByte(ib));
-        }*/
-
         private static final float PI = 3.1415926f;
-
+        private boolean mTrackingCenter;
+        
+        /**
+         * Wanneer er op de buitenste ring getapd wordt, moet de kleur binnenin verspringen
+         * Als je over de ring sleept moet dit ook blijven gebeuren
+         * De onColorChangedListener wordt hier aangeroepen, zodra de kleur verandert
+         */
         @Override
         public boolean onTouchEvent(MotionEvent event) {
             float x = event.getX() - CENTER_X;
@@ -257,18 +240,8 @@ public class MetaEditScreen extends Activity {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     mTrackingCenter = inCenter;
-                    if (inCenter) {
-                        mHighlightCenter = true;
-                        invalidate();
-                        break;
-                    }
                 case MotionEvent.ACTION_MOVE:
-                    if (mTrackingCenter) {
-                        if (mHighlightCenter != inCenter) {
-                            mHighlightCenter = inCenter;
-                            invalidate();
-                        }
-                    } else {
+                    if (!mTrackingCenter) {
                         float angle = (float)java.lang.Math.atan2(y, x);
                         // need to turn angle [-PI ... PI] into unit [0....1]
                         float unit = angle/(2*PI);
@@ -280,16 +253,6 @@ public class MetaEditScreen extends Activity {
                         invalidate();
                     }
                     break;
-                /*case MotionEvent.ACTION_UP:
-                    if (mTrackingCenter) {
-                        if (inCenter) {
-                        	Log.v(Mapp.TAG, "Reached inCenter");
-                            mListener.colorChanged(mCenterPaint.getColor());
-                        }
-                        mTrackingCenter = false;    // so we draw w/o halo
-                        invalidate();
-                    }
-                    break;*/
             }
             return true;
         }

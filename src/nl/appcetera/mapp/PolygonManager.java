@@ -338,26 +338,26 @@ public class PolygonManager
 
 	/**
 	 * Deze functie begint een nieuwe activity waarmee we metadata kunnen aanpassen
-	 * @param instance 
+	 * @param instance de activity waarnaar we terug moeten keren wanneer de editscreen-activity afloopt
 	 */
 	public void editMetaData(Mapp instance) {
 		
 		Log.v(Mapp.TAG, "Getting ready to launch Meta Activity");
 		Intent intent = new Intent(instance, MetaEditScreen.class);
 	
-		//Next create the bundle and initialize it
+		//We maken een nieuwe bundle om data in mee te sturen
 		Bundle bundle = new Bundle();
 	
-		//Add the parameters to bundle as
+		//De data wordt aan de bundle toegevoegd
 		bundle.putInt(MetaEditScreen.ID_KEY, polygonId);
 		bundle.putInt(MetaEditScreen.COLOR_KEY, color);
 		bundle.putString(MetaEditScreen.NAME_KEY, name);
 		bundle.putString(MetaEditScreen.DESCRIPTION_KEY, description);
 		
-		//Add this bundle to the intent
+		//En we voegen de bundle bij de intend
 		intent.putExtras(bundle);
 		
-		//Start next activity
+		//We starten een nieuwe Activity
 		instance.startActivityForResult(intent, Mapp.META_EDITSCREEN_ACTIVITYCODE);
 		Log.v(Mapp.TAG, "Launched MetaActivity");
 	}

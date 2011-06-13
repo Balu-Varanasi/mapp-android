@@ -19,9 +19,6 @@ public class AlgebraLine {
 	 * @param end 	Het eindpunt van de lijn
 	 */
 	public AlgebraLine(Point start, Point end) {
-		//a = (Ay - By) / (Ax - Bx)
-		//b = Ay - (Ay - By) / (Ax - Bx) * Ax
-		//this(((double)start.y - end.y) / (start.x - end.x), start.y - ((double)start.y - end.y) / (start.x - end.x)*start.x, start, end);
 		if (start.x <= end.x) {
 			this.start = start;
 			this.end = end;
@@ -59,9 +56,6 @@ public class AlgebraLine {
 	 * @return true als het punt dichtbij genoeg ligt
 	 */
 	public boolean isNear(Point p, double d) {
-		//double[] proj = projection(p);
-		//Log.v(HelloGoogleMaps.TAG, "Projection: "+proj[0] + ' ' +proj[1]);
-		//double distance = distance(p, proj[0], proj[1]);
 		if (p.x > end.x + d || p.x < start.x - d) {
 			return false;
 		}

@@ -28,7 +28,6 @@ public class Mapp extends MapActivity
 	private GeoPoint point;
 	private PolygonData database;
 	private OverlayManager om;
-	private static MetaPopupOverlay metaPopupOverlay;
 	private ServerSync s;
 	public SharedPreferences settings;
 	public static final int pointPixelTreshold = 25; // Maximaal verschil tussen 2 punten in pixels voor ze als gelijk worden beschouwd
@@ -43,6 +42,7 @@ public class Mapp extends MapActivity
 	
 	/**
 	 * Wordt aangeroepen wanneer deze activity wordt aangemaakt
+	 * @param savedInstanceState de bundle die de activity meekrijgt wanneer hij wordt gemaakt
 	 */
 	@Override
     public void onCreate(Bundle savedInstanceState)
@@ -70,9 +70,6 @@ public class Mapp extends MapActivity
         // Syncservice starten
         s = new ServerSync(getApplicationContext());
         
-        //MetaPopupManager maken
-        metaPopupOverlay = new MetaPopupOverlay(mapView, getApplicationContext(), this);
-        //mapView.getOverlays().add(metaPopupOverlay);
         mapView.invalidate();
         
 		// Settings ophalen
@@ -150,10 +147,8 @@ public class Mapp extends MapActivity
 	public static void moveToFront(PolygonOverlay po)
 	{
 		List<Overlay> listOfOverlays = Mapp.instance.mapView.getOverlays();
-		listOfOverlays.remove(metaPopupOverlay);
 		listOfOverlays.remove(po);
 		listOfOverlays.add(po);
-		listOfOverlays.add(metaPopupOverlay);
 	}
 	
 	/**
@@ -164,9 +159,7 @@ public class Mapp extends MapActivity
 	public static boolean isFirstOverlay(PolygonOverlay po)
 	{
 		List<Overlay> listOfOverlays = Mapp.instance.mapView.getOverlays();
-		return (listOfOverlays.get(0).equals(po)) 
-			|| (listOfOverlays.get(0).equals(metaPopupOverlay) 
-					&& listOfOverlays.get(1).equals(po));
+		return (listOfOverlays.get(0).equals(po));
 	}
 	
 	/**
@@ -188,7 +181,7 @@ public class Mapp extends MapActivity
 	}
 	
 	/**
-	 * Meuk
+	 * MapActivities moeten deze functie verplicht overriden
 	 */
 	@Override
 	protected boolean isRouteDisplayed()
