@@ -45,7 +45,7 @@ public class MetaEditScreen extends Activity {
         polyID = bundle.getInt(ID_KEY);
 		String name = bundle.getString(NAME_KEY);
 		String description = bundle.getString(DESCRIPTION_KEY);
-		Log.v(Mapp.TAG, "Incoming: "+description);
+		Log.v(Mapp.TAG, "Incoming description: "+description);
 		//we vullen de naam in in het editscherm, als we een naam hebben
 		nameField = (EditText) findViewById(R.id.edtInputName);
 		if (name != null && name != "")
@@ -84,7 +84,7 @@ public class MetaEditScreen extends Activity {
         		bundle.putString(NAME_KEY, nameField.getText().toString());
         		bundle.putString(DESCRIPTION_KEY,descriptionField.getText().toString());
             	
-        		Log.v(Mapp.TAG, "Outgoing: "+descriptionField.getText().toString());
+        		Log.v(Mapp.TAG, "Outgoing description: "+descriptionField.getText().toString());
         		
             	Intent mIntent = new Intent();
             	mIntent.putExtras(bundle);
@@ -101,7 +101,10 @@ public class MetaEditScreen extends Activity {
 			 * @param v de cancelbutton
 			 */
             public void onClick(View v) {
-            	setResult(RESULT_CANCEL);
+            	Bundle bundle = new Bundle();
+            	Intent mIntent = new Intent();
+            	mIntent.putExtras(bundle);
+            	setResult(RESULT_CANCEL, mIntent);
             	finish();
             }
         });
