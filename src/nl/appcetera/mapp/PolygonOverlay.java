@@ -466,4 +466,15 @@ class PolygonOverlay extends com.google.android.maps.Overlay
     	return this.polygonEditMode;
     }
     
+    /**
+     * Stelt deze polygoon in op editmode
+     */
+    public void setIsEditMode()
+    {
+    	if(OverlayManager.editModeMutex(true))
+		{
+			this.polygonEditMode = true;
+		}
+    }
+    
 } 

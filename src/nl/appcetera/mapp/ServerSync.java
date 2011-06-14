@@ -86,59 +86,6 @@ public class ServerSync implements Runnable
 		@Override
 		protected String doInBackground(PolygonData... db)
 		{
-			/*HttpClient httpclient = new DefaultHttpClient();
-			
-			HttpGet httpget = new HttpGet("http://192.168.2.2/MVics/Mappserver/v1/polygons/group_id/" + OverlayManager.getGroupId());
-			UsernamePasswordCredentials creds = new UsernamePasswordCredentials("test@example.com", "098f6bcd4621d373cade4e832627b4f6");
-			
-			try
-			{
-				httpget.addHeader(new BasicScheme().authenticate(creds, httpget));
-			} 
-			catch (AuthenticationException e1)
-			{
-				return "Server authentication failed";
-			}
-
-			JSONObject result;
-			
-		    try
-		    {
-		        // Execute HTTP GET Request
-		        HttpResponse response = httpclient.execute(httpget);
-		        InputStream is = response.getEntity().getContent();
-		        
-		        // Lees de uitvoer
-			    BufferedReader r = new BufferedReader(new InputStreamReader(is));
-			    StringBuilder total = new StringBuilder();
-			    String line;
-			    while((line = r.readLine()) != null)
-			    {
-			        total.append(line);
-			    }
-
-			    Log.v("APPCRES", total.toString());
-			    Log.v("APPCRES", response.getStatusLine().getStatusCode() + "");
-			    result = new JSONObject(total.toString());
-		    }
-		    catch (ClientProtocolException e)
-		    {
-		    	Log.e(Mapp.TAG, "ClientProtocolException");
-		        return "Connecting to server failed";
-		    }
-		    catch (IOException e)
-		    {
-		    	Log.e(Mapp.TAG, "IOException");
-		        return "Connecting to server failed";
-		    } 
-		    catch (JSONException e)
-		    {
-		    	Log.e(Mapp.TAG, "JSONException");
-		        return "Invalid server response";
-			}
-
-		    //Log.v(Mapp.TAG, result);
-			*/
 			if(!syncClient.sync(OverlayManager.getGroupId(), Mapp.instance.settings))
 			{
 				return syncClient.getError();

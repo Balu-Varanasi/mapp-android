@@ -82,8 +82,8 @@ public class OverlayManager
 		        pm.setId(c.getInt(0));
 				pm.setColor(c.getInt(1));
 				pm.setName(c.getString(4));
-		        boolean isClosed = c.getInt(2) != 0;
-		        
+		        boolean isClosed = (c.getInt(2) == 1);
+
 		        // Punten ophalen en toevoegen aan de manager
 		        Cursor c2 = db.getAllPolygonPoints(pm.getId());
 		        
@@ -98,13 +98,17 @@ public class OverlayManager
 		        }
 		        
 		        pm.setIsClosed(isClosed);
+		        if(!isClosed)
+		        {
+		        	mapOverlay.setIsEditMode();
+		        }
 		        pm.setDbEnable(true);
 		        listOfOverlays.add(mapOverlay);
 			}
 			while(c.moveToNext());
 		}
 		
-		this.mv.invalidate();
+		this.mv.postInvalidate();
 	}
 	
 	/**

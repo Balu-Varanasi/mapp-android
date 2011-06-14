@@ -50,11 +50,11 @@ public class SyncClient
 {
 	private PolygonData db;
 	private HttpClient httpclient;
-	private String mappUser = "test@example.com";
-	private String mappPass = "098f6bcd4621d373cade4e832627b4f6";
-	//private static final String serverUrl = "http://192.168.2.2/MVics/Mappserver/v1/";
-	private static final String serverUrl = "http://mapp.joelcox.org/v1/";
-	private static final boolean development = true;
+	private String mappUser = "broodje_kroket@student.ru.nl";
+	private String mappPass = "585b1ac3cf671553e11f61fa6f1d5302";
+	private static final String serverUrl = "http://192.168.2.2/MVics/Mappserver/v1/";
+	//private static final String serverUrl = "http://mapp.joelcox.org/v1/";
+	private static final boolean development = false;
 	private String error = "";
 	private static HttpClient client = null;
 	
@@ -107,11 +107,13 @@ public class SyncClient
 		
 		try
 		{
+			int syncTime = getSyncTimeStamp();
 			deletePolygons(group);
+			removeDeletedPolygons(group);
 			putPolygons(group);
 			postPolygons(group);
 			getPolygons(group, settings.getLong("lastSync", 0));
-			settings.edit().putLong("lastSync", System.currentTimeMillis()/1000).commit();
+			settings.edit().putLong("lastSync", syncTime).commit();
 		}
 		catch(SyncException s)
 		{
@@ -135,7 +137,6 @@ public class SyncClient
 	 * Synchroniseert verwijderde polygonen met de server
 	 * @param group groupid om polygonen uit te syncen
 	 * @throws SyncException 
-	 * TODO polygonen die niet meer op de server zijn verwijderen
 	 */
 	private void deletePolygons(int group) throws SyncException
 	{
@@ -232,7 +233,7 @@ public class SyncClient
 		{
 			return; // Niks te syncen, dus gelijk klaar!
 		}
-		
+
 		do
 		{
 			HttpPut httpp = new HttpPut(serverUrl + "polygon");
@@ -299,7 +300,7 @@ public class SyncClient
 			    {
 			        total.append(line);
 			    }
-Log.v("APC",total.toString());
+
 			    result = new JSONObject(total.toString());
 				
 			    if(response.getStatusLine().getStatusCode() == 418)
@@ -334,6 +335,8 @@ Log.v("APC",total.toString());
 				Log.e(Mapp.TAG, "Sync failed. Response is no valid JSON or expected variable not found.");
 				throw new SyncException("Invalid server response");
 			}
+	        
+	        //c.requery();// Opnieuw laden omdat polygoonid's gewijzigd kunnen zijn inmiddels
 		}
 		while(c.moveToNext());
 	}
@@ -431,7 +434,7 @@ Log.v("APC",total.toString());
 				    {
 				        total.append(line);
 				    }
-				    
+
 				    result = new JSONObject(total.toString());
 				    
 			        Log.e(Mapp.TAG, "Sync error: " + result.getString("message"));
@@ -462,13 +465,24 @@ Log.v("APC",total.toString());
 	}
 	
 	/**
-	 * Synchroniseert gewijzigde polygonen met de server
-	 * @param group het id van de groep waaruit polygonen gesynct moeten worden
+	 * Verwijdert polygonen lokaal als ze niet meer op de server staan.
+	 * Naam van deze methode (C) Joost
+	 * Maar de inhoud van deze methode wel (C) Mathijs
+	 * @param polygonIds een lijstje met polygonid's die op de server voorkomen (in deze groep)
 	 * @throws SyncException 
 	 */
-	private void getPolygons(int group, long lastSync) throws SyncException
-	{		
-		HttpGet httpg = new HttpGet(serverUrl + "polygons/group_id/" + group);
+	private void removeDeletedPolygons(int group) throws SyncException
+	{
+		Cursor c = db.getAllPolygons(group);
+		if(!c.moveToFirst())
+		{
+			return; // Lokale db is al leeg
+		}
+		
+		// Lijstje maken met alle id's op de server
+		ArrayList<Integer> polygonIds = new ArrayList<Integer>();
+		
+		HttpGet httpg = new HttpGet(serverUrl + "polygons/group_id/" + group + "/since/1");
 		UsernamePasswordCredentials creds = new UsernamePasswordCredentials(mappUser, mappPass);
 
 		try
@@ -488,7 +502,6 @@ Log.v("APC",total.toString());
 	    	response = httpclient.execute(httpg);
 				
 			// Lees het resultaat van de actie in
-			JSONArray result = null;
 			InputStream is = response.getEntity().getContent();
 			BufferedReader r = new BufferedReader(new InputStreamReader(is));
 			StringBuilder total = new StringBuilder();
@@ -497,8 +510,107 @@ Log.v("APC",total.toString());
 			{
 			    total.append(line);
 			}
-			result = new JSONArray(total.toString());
-			
+
+			if(response.getStatusLine().getStatusCode() == 418)
+			{
+				throw new SyncException("Unable to synchronize because the server is a teapot.");
+			}
+			else if(response.getStatusLine().getStatusCode() == 404)
+			{
+				// Geen polygonen hier
+				do
+			    {
+			    	if(!(c.getInt(3) == 1))
+			    	{
+			    		db.removePolygon(c.getInt(0), false);
+			    	}
+			    }
+			    while(c.moveToNext());
+				return;
+			}
+			else if(response.getStatusLine().getStatusCode() != 200)
+		    {
+				// Er is iets mis gegaan.
+				JSONObject result = new JSONObject(total.toString());
+				Log.e(Mapp.TAG, "Sync error: " + result.getString("message"));
+			    throw new SyncException(result.getString("message"));
+		    }
+			else
+			{
+				// Alles is blijkbaar goed gegaan
+				JSONArray result = new JSONArray(total.toString());
+				
+				// Loop over de polygonen heen
+				for(int i = 0; i < result.length(); i++)
+				{
+					JSONObject polygon = result.getJSONObject(i);
+					polygonIds.add(polygon.getInt("id"));
+				}
+			}
+		}
+	    catch (ClientProtocolException e)
+	    {
+			Log.e(Mapp.TAG, e.getMessage());
+			throw new SyncException("Epic HTTP failure");
+		}
+	    catch (IOException e)
+	    {
+	       	Log.e(Mapp.TAG, e.getMessage());
+	       	throw new SyncException("Exception during server synchronisation");
+		}
+	    catch (JSONException e)
+		{
+			Log.e(Mapp.TAG, "Sync failed. Response is no valid JSON or expected variable not found.");
+			throw new SyncException("Invalid server response");
+		}
+	    
+	    // Nu we eindelijk alle id's hebben, kijken of er in de lokale db id's voorkomen die niet in onze nieuwe lijst zitten
+	    do
+	    {
+	    	if(!polygonIds.contains(c.getInt(0)) && c.getInt(3) != 1)
+	    	{
+	    		db.removePolygon(c.getInt(0), false);
+	    	}
+	    }
+	    while(c.moveToNext());
+	}
+
+	/**
+	 * Synchroniseert gewijzigde polygonen met de server
+	 * @param group het id van de groep waaruit polygonen gesynct moeten worden
+	 * @throws SyncException 
+	 */
+	private void getPolygons(int group, long lastSync) throws SyncException
+	{		
+		HttpGet httpg = new HttpGet(serverUrl + "polygons/group_id/" + group + "/since/" + lastSync);
+		UsernamePasswordCredentials creds = new UsernamePasswordCredentials(mappUser, mappPass);
+
+		try
+		{
+			httpg.addHeader(new BasicScheme().authenticate(creds, httpg));
+		} 
+		catch (AuthenticationException e1)
+		{
+			Log.e(Mapp.TAG, e1.getMessage());
+			throw new SyncException("Authentication failed");
+		}
+		
+	    HttpResponse response;
+	        
+	    try
+	    {
+	    	response = httpclient.execute(httpg);
+				
+			// Lees het resultaat van de actie in
+			InputStream is = response.getEntity().getContent();
+			BufferedReader r = new BufferedReader(new InputStreamReader(is));
+			StringBuilder total = new StringBuilder();
+			String line;
+			while((line = r.readLine()) != null)
+			{
+			    total.append(line);
+			}
+
 			if(response.getStatusLine().getStatusCode() == 418)
 			{
 				throw new SyncException("Unable to synchronize because the server is a teapot.");
@@ -511,33 +623,104 @@ Log.v("APC",total.toString());
 			else if(response.getStatusLine().getStatusCode() != 200)
 		    {
 				// Er is iets mis gegaan.
-				Log.e(Mapp.TAG, "Sync error: " + result.getString(0));
-			    throw new SyncException(result.getString(0));
+				JSONObject result = new JSONObject(total.toString());
+				Log.e(Mapp.TAG, "Sync error: " + result.getString("message"));
+			    throw new SyncException(result.getString("message"));
 		    }
 			else
 			{
 				// Alles is blijkbaar goed gegaan
+				JSONArray result = new JSONArray(total.toString());
+				
 				// Loop over de polygonen heen
 				for(int i = 0; i < result.length(); i++)
 				{
 					JSONObject polygon = result.getJSONObject(i);
 
-					if(polygon.getInt("created") > lastSync)
-					{
-						// Deze polygoon is nieuw of gewijzigd dus we updaten 'm of voeren 'm in
-						db.addPolygonFromServer(polygon.getInt("id"), polygon.getInt("group_id"), polygon.getInt("color"),
-								polygon.getString("name"), polygon.optString("description"), polygon.getLong("created"));
+					// Deze polygoon is nieuw of gewijzigd dus we updaten 'm of voeren 'm in
+					db.addPolygonFromServer(polygon.getInt("id"), polygon.getInt("group_id"), polygon.getInt("color"),
+							polygon.getString("name"), polygon.optString("description"), polygon.getLong("created"));
 						
-						// Nu de punten invoeren
-						JSONArray points = result.getJSONObject(i).getJSONArray("points");
-						for(int j = 0; j < points.length(); j++)
-						{
-							JSONObject point = points.getJSONObject(j);
-							db.addPolygonPoint(polygon.getInt("id"), point.getLong("latitude"), 
-									point.getLong("longitude"), point.getInt("order"));
-						}
+					// Nu de punten invoeren
+					JSONArray points = result.getJSONObject(i).getJSONArray("points");
+					for(int j = 0; j < points.length(); j++)
+					{
+						JSONObject point = points.getJSONObject(j);
+						db.addPolygonPoint(polygon.getInt("id"), point.getLong("latitude"), 
+								point.getLong("longitude"), point.getInt("order"));
 					}
 				}
+			}
+		}
+	    catch (ClientProtocolException e)
+	    {
+			Log.e(Mapp.TAG, e.getMessage());
+			throw new SyncException("Epic HTTP failure");
+		}
+	    catch (IOException e)
+	    {
+	       	Log.e(Mapp.TAG, e.getMessage());
+	       	throw new SyncException("Exception during server synchronisation");
+		}
+	    catch (JSONException e)
+		{
+			Log.e(Mapp.TAG, "Sync failed. Response is no valid JSON or expected variable not found.");
+			throw new SyncException("Invalid server response");
+		}
+	}
+
+	/**
+	 * Geeft de huidige servertijd terug
+	 * @return de huidige servertijd als unix-timestamp
+	 * @throws SyncException 
+	 */
+	private int getSyncTimeStamp() throws SyncException
+	{
+		HttpGet httpg = new HttpGet(serverUrl + "time/");
+		UsernamePasswordCredentials creds = new UsernamePasswordCredentials(mappUser, mappPass);
+
+		try
+		{
+			httpg.addHeader(new BasicScheme().authenticate(creds, httpg));
+		} 
+		catch (AuthenticationException e1)
+		{
+			Log.e(Mapp.TAG, e1.getMessage());
+			throw new SyncException("Authentication failed");
+		}
+		
+	    HttpResponse response;
+	        
+	    try
+	    {
+	    	response = httpclient.execute(httpg);
+				
+			// Lees het resultaat van de actie in
+			InputStream is = response.getEntity().getContent();
+			BufferedReader r = new BufferedReader(new InputStreamReader(is));
+			StringBuilder total = new StringBuilder();
+			String line;
+			while((line = r.readLine()) != null)
+			{
+			    total.append(line);
+			}
+
+			if(response.getStatusLine().getStatusCode() == 418)
+			{
+				throw new SyncException("Unable to synchronize because the server is a teapot.");
+			}
+			else if(response.getStatusLine().getStatusCode() != 200)
+		    {
+				// Er is iets mis gegaan.
+				JSONObject result = new JSONObject(total.toString());
+				Log.e(Mapp.TAG, "Sync error: " + result.getString("message"));
+			    throw new SyncException(result.getString("message"));
+		    }
+			else
+			{
+				// Alles is blijkbaar goed gegaan
+				JSONObject result = new JSONObject(total.toString());
+				return result.getInt("current_time");
 			}
 		}
 	    catch (ClientProtocolException e)

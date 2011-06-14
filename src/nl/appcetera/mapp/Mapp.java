@@ -49,7 +49,7 @@ public class Mapp extends MapActivity
     {
 		// Constructor van de parent aanroepen
         super.onCreate(savedInstanceState);
-        
+
         // Juiste layout (mapview) zetten
         setContentView(R.layout.main);
         

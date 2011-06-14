@@ -14,10 +14,11 @@ import android.provider.BaseColumns;
 public class PolygonData extends SQLiteOpenHelper
 {
 	private static final String DATABASE_NAME = "mapp.db";
-	private static final int DATABASE_VERSION = 4;
+	private static final int DATABASE_VERSION = 8;
 	
 	private static final String POLYGON_TABLE_NAME 	= "polygondata";
 	private static final String POLYGON_ID 			= BaseColumns._ID;
+	private static final String POLYGON_SERVER_ID	= "server_id";
 	private static final String POLYGON_COLOR 		= "color";
 	private static final String POLYGON_LAST_EDITED	= "last_edited";
 	private static final String POLYGON_CLOSED		= "is_closed";
@@ -90,6 +91,7 @@ public class PolygonData extends SQLiteOpenHelper
 		sql =
 		    "CREATE TABLE " + POLYGON_TABLE_NAME + " ("
 		      + POLYGON_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+		      + POLYGON_SERVER_ID + " INTEGER NULL, "
 		      + POLYGON_COLOR + " INTEGER NOT NULL, "
 		      + POLYGON_LAST_EDITED + " INTEGER, "
 		      + POLYGON_CLOSED + " INTEGER, "
@@ -136,6 +138,8 @@ public class PolygonData extends SQLiteOpenHelper
 		db.execSQL("DROP TABLE IF EXISTS " + POLYGON_POINTS_TABLE_NAME);
 		db.execSQL("DROP TABLE IF EXISTS " + GROUPS_TABLE_NAME);
 		db.execSQL("DROP TABLE IF EXISTS " + POLYGON_REMOVAL_TABLE_NAME);
+		db.execSQL("DROP TABLE IF EXISTS " + USERS_TABLE_NAME);
+		db.execSQL("DROP TABLE IF EXISTS " + GROUP_MEMBERS_TABLE_NAME);
 		onCreate(db);
 	}
 	
@@ -172,7 +176,7 @@ public class PolygonData extends SQLiteOpenHelper
 		values.put(POLYGON_COLOR, color);
 		values.put(POLYGON_LAST_EDITED, System.currentTimeMillis()/1000);
 		values.put(POLYGON_HAS_CHANGED, 1);
-		values.put(POLYGON_CLOSED, isClosed == true ? 1 : 0);
+		values.put(POLYGON_CLOSED, (isClosed == true ? 1 : 0));
 		values.put(POLYGON_NAME, name);
 		values.put(POLYGON_DESCRIPTION, description);
 		db.update(POLYGON_TABLE_NAME, values, POLYGON_ID + "=" + polygonid, null);
@@ -264,7 +268,7 @@ public class PolygonData extends SQLiteOpenHelper
 	}
 	
 	/**
-	 * Geeft aan dat de polygoon gesynct is en dus niet meer nieuw is
+	 * Geeft aan dat de polygoon gesynct is en dus niet meer nieuw/gewijzigd is
 	 * @param polygonid het id van de polygoon
 	 */
 	public void setPolygonIsSynced(int polygonid)
@@ -284,6 +288,15 @@ public class PolygonData extends SQLiteOpenHelper
 	public void updatePolygonId(int oldid, int newid)
 	{
 		SQLiteDatabase db = getWritableDatabase();
+		
+		// Als er al een polygoon bestaat met het nieuwe id, dan moet die even een ander id krijgen
+		Cursor c = db.query(POLYGON_TABLE_NAME, new String[]{POLYGON_ID}, POLYGON_ID + "=" + newid, null, null, null, null);
+		if(c.getCount() > 0)
+		{
+			//updatePolygonId(newid, newid+1);
+		} // TODO polygoon een serverid geven, en normale id vervangen door serverid
+		// om te voorkomen dat er dubbele ids komen
+		
 		ContentValues values = new ContentValues();
 		values.put(POLYGON_ID, newid);
 		db.update(POLYGON_TABLE_NAME, values, POLYGON_ID + "=" + oldid, null);
