@@ -617,8 +617,8 @@ public class SyncClient
 			}
 			else if(response.getStatusLine().getStatusCode() == 404)
 			{
-				// Geen polygonen hier
-				db.removePolygonsFromGroup(group, false);
+				// Geen nieuwe polygonen hier
+				return;
 			}
 			else if(response.getStatusLine().getStatusCode() != 200)
 		    {

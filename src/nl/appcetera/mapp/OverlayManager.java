@@ -59,6 +59,9 @@ public class OverlayManager
 	 */
 	public void loadOverlays()
 	{
+		List<Overlay> listOfOverlays = mv.getOverlays();
+		listOfOverlays.clear();
+        
 		Cursor c = db.getAllPolygons(group);
 		
 		// Er zijn geen polygonen opgeslagen
@@ -68,9 +71,6 @@ public class OverlayManager
 		}
 		else
 		{
-			List<Overlay> listOfOverlays = mv.getOverlays();
-			listOfOverlays.clear();
-	        
 			do
 			{
 				// Niewe laag + polygoon toevoegen
