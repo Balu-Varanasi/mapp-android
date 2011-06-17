@@ -82,6 +82,7 @@ public class OverlayManager
 		        pm.setId(c.getInt(0));
 				pm.setColor(c.getInt(1));
 				pm.setName(c.getString(4));
+				pm.setDescription(c.getString(5));
 		        boolean isClosed = (c.getInt(2) == 1);
 
 		        // Punten ophalen en toevoegen aan de manager
