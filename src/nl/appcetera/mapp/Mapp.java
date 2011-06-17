@@ -215,6 +215,12 @@ public class Mapp extends MapActivity
 	protected void onActivityResult (int requestCode, int resultCode, Intent data)
 	{
 		super.onActivityResult(requestCode, resultCode, data);
+		
+		if(data == null)
+		{
+			return;
+		}
+		
 		Bundle bundle = data.getExtras();
 
 		switch(requestCode) {
