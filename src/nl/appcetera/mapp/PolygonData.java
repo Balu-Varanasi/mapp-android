@@ -14,7 +14,7 @@ import android.provider.BaseColumns;
 public class PolygonData extends SQLiteOpenHelper
 {
 	private static final String DATABASE_NAME = "mapp.db";
-	private static final int DATABASE_VERSION = 13;
+	private static final int DATABASE_VERSION = 14;
 	
 	private static final String POLYGON_TABLE_NAME 	= "polygondata";
 	private static final String POLYGON_ID 			= BaseColumns._ID;
@@ -40,6 +40,7 @@ public class PolygonData extends SQLiteOpenHelper
 	private static final String GROUPS_NAME			= "group_name";
 	
 	private static final String GROUP_MEMBERS_TABLE_NAME = "group_members";
+	private static final String GROUP_MEMBERS_ACCEPTED   = "accepted";
 	
 	private static final String USERS_TABLE_NAME = "users";
 	private static final String USERS_ID 		 = "userid";
@@ -80,7 +81,8 @@ public class PolygonData extends SQLiteOpenHelper
 		sql =
 			"CREATE TABLE " + GROUP_MEMBERS_TABLE_NAME + " ("
 				+ GROUPS_ID + " INTEGER NOT NULL, "
-				+ USERS_ID + " INTEGER NOT NULL, " 
+				+ USERS_ID + " INTEGER NOT NULL, "
+				+ GROUP_MEMBERS_ACCEPTED + " INTEGER NOT NULL, "
 				+ "FOREIGN KEY(" + GROUPS_ID + ") REFERENCES " + GROUPS_TABLE_NAME 
 			      + "(" + GROUPS_ID + ") ON UPDATE CASCADE ON DELETE CASCADE, "
 			    + "FOREIGN KEY(" + USERS_ID + ") REFERENCES " + USERS_TABLE_NAME 
@@ -142,6 +144,12 @@ public class PolygonData extends SQLiteOpenHelper
 		db.execSQL("DROP TABLE IF EXISTS " + GROUP_MEMBERS_TABLE_NAME);
 		onCreate(db);
 	}
+	
+	/**
+	 **************************************************************
+	 * POLYGONS
+	 **************************************************************
+	 */
 	
 	/**
 	 * Maakt een nieuwe polygoon aan in de database en geeft het id terug
@@ -493,5 +501,141 @@ public class PolygonData extends SQLiteOpenHelper
 		SQLiteDatabase db = getWritableDatabase();
 		db.delete(POLYGON_POINTS_TABLE_NAME, POLYGON_POINTS_ID + " = " 
 				+ polygonid, null);
+	}
+	
+	
+	/**
+	 **************************************************************
+	 * USERS/GROUPS
+	 **************************************************************
+	 */
+	
+	/**
+	 * Voegt een nieuwe gebruiker toe
+	 * @param id het id van de gebruiker
+	 * @param email het e-mailadres van de gebruiker
+	 */
+	public synchronized void addUser(int id, String email)
+	{
+		SQLiteDatabase db = getWritableDatabase();
+		ContentValues values = new ContentValues();
+		values.put(USERS_ID, id);
+		values.put(USERS_EMAIL, email);
+		db.insertOrThrow(USERS_TABLE_NAME, null, values);
+	}
+	
+	/**
+	 * Geeft de gevraagde gebruiker terug
+	 * @param id het id van de gebruiker
+	 * @return Cursor-object met gegevens over gebruiker
+	 */
+	public synchronized Cursor getUser(int id)
+	{
+		SQLiteDatabase db = getReadableDatabase();
+		Cursor c = db.query(USERS_TABLE_NAME, new String[]{USERS_EMAIL}, USERS_ID + "=" + id, null, null, null, null);
+		return c;
+	}
+	
+	/**
+	 * Verwijder de gegeven gebruiker
+	 * @param id het id van de te verwijderen gebruiker
+	 */
+	public synchronized void deleteUser(int id)
+	{
+		SQLiteDatabase db = getWritableDatabase();
+		db.delete(USERS_TABLE_NAME, USERS_ID + "=" + id, null);
+	}
+
+	/**
+	 * Voegt een groep toe aan de database
+	 * @param id het id van de groep
+	 * @param owner het e-mailadres van de eigenaar van de groep
+	 * @param name de naam van de groep
+	 */
+	public synchronized void addGroup(int id, String owner, String name)
+	{
+		SQLiteDatabase db = getWritableDatabase();
+		ContentValues values = new ContentValues();
+		values.put(GROUPS_ID, id);
+		values.put(GROUPS_OWNER, owner);
+		values.put(GROUPS_NAME, name);
+		db.insertOrThrow(GROUPS_TABLE_NAME, null, values);
+	}
+
+	/**
+	 * Geeft info over een groep terug
+	 * @param id het id van de groep
+	 * @return een cursorobject met info over de groep
+	 */
+	public synchronized Cursor getGroup(int id)
+	{
+		SQLiteDatabase db = getReadableDatabase();
+		Cursor c = db.query(GROUPS_TABLE_NAME, new String[]{GROUPS_OWNER, GROUPS_NAME}, GROUPS_ID + "=" + id, null, null, null, null);
+		return c;
+	}
+	
+	/**
+	 * Verwijderd de gegeven groep
+	 * @param id het id van de te verwijderen groep
+	 */
+	public synchronized void deleteGroup(int id)
+	{
+		SQLiteDatabase db = getWritableDatabase();
+		db.delete(GROUPS_TABLE_NAME, GROUPS_ID + "=" + id, null);
+	}
+	
+	/**
+	 * Voegt een lidmaatschap toe van een gebruiker aan een groep
+	 * @param user het id van de gebruiker
+	 * @param group het id van de groep
+	 * @param accepted reeds geaccepteerd ja/nee
+	 */
+	public synchronized void addMembership(int user, int group, boolean accepted)
+	{
+		SQLiteDatabase db = getWritableDatabase();
+		ContentValues values = new ContentValues();
+		values.put(GROUPS_ID, group);
+		values.put(USERS_ID, user);
+		values.put(GROUP_MEMBERS_ACCEPTED, (accepted ? 1 : 0));
+		db.insertOrThrow(GROUP_MEMBERS_TABLE_NAME, null, values);
+	}
+	
+	/**
+	 * Verwijderd een lidmaatschap
+	 * @param user het id van de gebruiker
+	 * @param group het id van de groep
+	 */
+	public synchronized void deleteMembership(int user, int group)
+	{
+		SQLiteDatabase db = getWritableDatabase();
+		db.delete(GROUP_MEMBERS_TABLE_NAME, GROUPS_ID + "=" + group + " AND " + USERS_ID + "=" + user, null);
+	}
+	
+	/**
+	 * Geeft alle geaccepteerde memberships van de gegeven gebruiker terug
+	 * @param user het id van de gebruiker
+	 * @return een Cursorobject met alle groepid's van de gebruiker
+	 */
+	public synchronized Cursor getMemberShips(int user)
+	{
+		SQLiteDatabase db = getReadableDatabase();
+		Cursor c = db.query(GROUP_MEMBERS_TABLE_NAME, new String[]{GROUPS_ID}, 
+				USERS_ID + "=" + user + " AND " + GROUP_MEMBERS_ACCEPTED + "=1", null, null, null, null);
+		return c;
+	}
+	
+	/**
+	 * Accepteer een membership voor de gegeven gebruiker + groep
+	 * @param user het id van de gebruiker
+	 * @param group het id van de groep
+	 */
+	public synchronized void acceptMembership(int user, int group)
+	{
+		SQLiteDatabase db = getWritableDatabase();
+		ContentValues values = new ContentValues();
+		values.put(GROUPS_ID, group);
+		values.put(USERS_ID, user);
+		values.put(GROUP_MEMBERS_ACCEPTED, 1);
+		db.update(GROUP_MEMBERS_TABLE_NAME, values, null, null);
 	}
 }
