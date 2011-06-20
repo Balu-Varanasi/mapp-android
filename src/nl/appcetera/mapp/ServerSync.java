@@ -25,9 +25,9 @@ public class ServerSync implements Runnable
 	 * Constructor
 	 * @param db
 	 */
-	public ServerSync(Context c)
+	public ServerSync(Context c, PolygonData db)
 	{
-		this.db = new PolygonData(c);
+		this.db = db;
 		ServerSync.c = c;
 		this.syncClient = new SyncClient(db);
 	}

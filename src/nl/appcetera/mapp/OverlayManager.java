@@ -61,6 +61,8 @@ public class OverlayManager
 	{
 		List<Overlay> listOfOverlays = mv.getOverlays();
 		listOfOverlays.clear();
+		
+		OverlayManager.editModeMutex = false; // De mutex vrijgeven
         
 		Cursor c = db.getAllPolygons(group);
 		
@@ -108,7 +110,7 @@ public class OverlayManager
 			}
 			while(c.moveToNext());
 		}
-		
+
 		this.mv.postInvalidate();
 	}
 	

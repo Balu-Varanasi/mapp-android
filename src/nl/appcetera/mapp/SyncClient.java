@@ -54,7 +54,7 @@ public class SyncClient
 	private String mappPass = "585b1ac3cf671553e11f61fa6f1d5302";
 	//private static final String serverUrl = "http://192.168.2.2/MVics/Mappserver/v1/";
 	private static final String serverUrl = "http://mapp.joelcox.org/v1/";
-	private static final boolean development = true;
+	private static final boolean development = false;
 	private String error = "";
 	private static HttpClient client = null;
 	
@@ -151,7 +151,8 @@ public class SyncClient
 		do
 		{
 			polygonid = c.getInt(0);
-			HttpDelete httpd = new HttpDelete(serverUrl + "polygon/?id=" + polygonid);
+			Log.v("polyid", polygonid+"");
+			HttpDelete httpd = new HttpDelete(serverUrl + "polygon/id/" + polygonid);
 			UsernamePasswordCredentials creds = new UsernamePasswordCredentials(mappUser, mappPass);
 			
 			try
@@ -647,7 +648,7 @@ public class SyncClient
 					{
 						JSONObject point = points.getJSONObject(j);
 						db.addPolygonPoint(polygon.getInt("id"), point.getLong("latitude"), 
-								point.getLong("longitude"), point.getInt("order"));
+								point.getLong("longitude"), point.getInt("order"), false);
 					}
 				}
 			}

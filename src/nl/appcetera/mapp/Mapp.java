@@ -5,7 +5,6 @@ import java.util.List;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -72,7 +71,7 @@ public class Mapp extends MapActivity
         om = new OverlayManager(mapView, database);
         
         // Syncservice starten
-        s = new ServerSync(getApplicationContext());
+        s = new ServerSync(getApplicationContext(), database);
         
         mapView.invalidate();
         
