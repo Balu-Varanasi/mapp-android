@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MotionEvent;
 
 import nl.appcetera.mapp.R;
@@ -38,6 +40,7 @@ public class Mapp extends MapActivity
 	public static final int offlineRetryInterval = 30*60*1000; // Interval tussen sync-attempts als toestel offline is
 	public static final int metaTouchDuration = 1000; //touch-duration waarna we naar de meta-activity gaan
 	public static final int META_EDITSCREEN_ACTIVITYCODE = 42;
+	private static final int MENU1 = Menu.FIRST;
 	public static Mapp instance;
 	
 	/**
@@ -240,5 +243,12 @@ public class Mapp extends MapActivity
 				}
 				break;
 		}	
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+	    MenuInflater inflater = getMenuInflater();
+	    inflater.inflate(R.menu.mainmenu, menu);
+	    return true;
 	}
 }

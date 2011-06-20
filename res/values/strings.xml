@@ -15,4 +15,8 @@
     <string name="meta_deletedialogtext">Are you sure you want to delete the polygon?</string>
     <string name="meta_deleteyesbutton">Yes</string>
     <string name="meta_deletenobutton">No</string>
+    <string name="menu_account">Account</string>
+    <string name="menu_settings">Settings</string>
+    <string name="menu_groups">Groups</string>
+    <string name="menu_invites">Invites</string>
 </resources>

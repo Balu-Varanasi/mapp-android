@@ -54,7 +54,7 @@ public class SyncClient
 	private String mappPass = "585b1ac3cf671553e11f61fa6f1d5302";
 	//private static final String serverUrl = "http://192.168.2.2/MVics/Mappserver/v1/";
 	private static final String serverUrl = "http://mapp.joelcox.org/v1/";
-	private static final boolean development = false;
+	private static final boolean development = true;
 	private String error = "";
 	private static HttpClient client = null;
 	
