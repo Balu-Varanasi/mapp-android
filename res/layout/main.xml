@@ -5,10 +5,11 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:clickable="true"
-    android:apiKey="0hoppY2hjyX3LI-zdLARFRyABtikA4Nojy2ozGQ"
+    android:apiKey="0hoppY2hjyX10Jl7zJ7e_wgczjJJf6qUM5ISBCA"
 />
 <!--
 	Mathijs: android:apiKey="0hoppY2hjyX3LI-zdLARFRyABtikA4Nojy2ozGQ"
+	Mathijs: android:apiKey="0hoppY2hjyX10Jl7zJ7e_wgczjJJf6qUM5ISBCA" [voor application signing]
 	Joost: android:apiKey="0pvFh8Xh-G8hVX6MpifGF1o56YtywfIwrcMgP3Q"
 	Joël: android:apiKey="0jhBQvhKiMtd_tysa0-g0Ni-ubzWInmXgtrzE5Q"
 -->
