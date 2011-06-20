@@ -36,7 +36,7 @@ public class Mapp extends MapActivity
 	public static final String TAG = "AppCetera"; // Log-tag
 	public static final int maxTouchDuration = 500;
 	public static final int polygonMinDisplayWidth = 5; // Wanneer een polygoon smaller is dan dit wordt ie niet getoond
-	public static final int syncInterval = 60*1000; // Interval tussen synchronisaties in milliseconden
+	public static int syncInterval = 60*1000; // Interval tussen synchronisaties in milliseconden
 	public static final int offlineRetryInterval = 30*60*1000; // Interval tussen sync-attempts als toestel offline is
 	public static final int metaTouchDuration = 1000; //touch-duration waarna we naar de meta-activity gaan
 	public static final int META_EDITSCREEN_ACTIVITYCODE = 42;
@@ -77,6 +77,8 @@ public class Mapp extends MapActivity
         
 		// Settings ophalen
         settings = getPreferences(MODE_PRIVATE);
+        syncInterval = settings.getInt("syncInterval", syncInterval);
+        mapView.setSatellite(settings.getBoolean("satelliteMode", true));
     }
 	
 	/**
@@ -245,7 +247,14 @@ public class Mapp extends MapActivity
 			case SETTINGSSCREEN_ACTIVITYCODE:
 				if (resultCode == SettingsScreen.RESULT_SAVE)
 				{
-					mapView.setSatellite(bundle.getBoolean(SettingsScreen.SATMODE_KEY));
+					SharedPreferences settings = getPreferences(MODE_PRIVATE);
+					SharedPreferences.Editor editor = settings.edit();
+					editor.putBoolean("satelliteMode", bundle.getBoolean(SettingsScreen.SATMODE_KEY));
+					editor.putInt("syncInterval", bundle.getInt(SettingsScreen.SYNCINTERVAL_KEY));
+					editor.commit();
+					
+			        syncInterval = settings.getInt("syncInterval", syncInterval);
+			        mapView.setSatellite(settings.getBoolean("satelliteMode", true));
 				}
 				break;
 		}	
@@ -312,9 +321,9 @@ public class Mapp extends MapActivity
 		//We maken een nieuwe bundle om data in mee te sturen
 		Bundle bundle = new Bundle();
 
-		//De boolean wordt aan de bundle toegevoegd
+		//De data wordt aan de bundle toegevoegd
 		bundle.putBoolean(SettingsScreen.SATMODE_KEY, mapView.isSatellite());
-		
+		bundle.putInt(SettingsScreen.SYNCINTERVAL_KEY, syncInterval);
 		//En we voegen de bundle bij de intent
 		intent.putExtras(bundle);
 

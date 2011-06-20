@@ -11,9 +11,10 @@ import android.widget.RadioButton;
 public class SettingsScreen extends Activity  {
 
 	public static final String SATMODE_KEY = "SATMODE";
+	public static final String SYNCINTERVAL_KEY = "SYNCINTERVAL";
 	public static final int RESULT_SAVE = 42;
 	public static final int RESULT_CANCEL = 41;
-	
+	private int syncTime;
 	private boolean satelliteMode;
 	
 	/**
@@ -27,7 +28,8 @@ public class SettingsScreen extends Activity  {
 
 		Bundle bundle = getIntent().getExtras();
 		satelliteMode = bundle.getBoolean(SATMODE_KEY);
-
+		syncTime = bundle.getInt(SYNCINTERVAL_KEY);
+		
 		final RadioButton satbutton = (RadioButton) findViewById(R.id.settings_satbutton);
 		satbutton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
@@ -48,7 +50,8 @@ public class SettingsScreen extends Activity  {
             	Bundle bundle = new Bundle();
 
             	bundle.putBoolean(SATMODE_KEY, satelliteMode);
-        		
+            	bundle.putInt(SYNCINTERVAL_KEY, syncTime);
+            	
             	Intent mIntent = new Intent();
             	mIntent.putExtras(bundle);
             	setResult(RESULT_SAVE, mIntent);
