@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Mapp</string>
-    <string name="meta_heading">Polygon Properties</string>
+    <string name="meta_activitylabel">Polygon Properties</string>
     <string name="meta_namelabel">Polygon name</string>
     <string name="meta_descriptionlabel">Polygon description</string>
     <string name="meta_colorlabel">Polygon color</string>

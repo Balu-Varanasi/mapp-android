@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 	<item android:id="@+id/groupsbutton"
-          android:icon="@drawable/chat"
+          android:icon="@drawable/group"
           android:title="@string/menu_groups" />
     <item android:id="@+id/invitesbutton"
           android:icon="@drawable/chat"

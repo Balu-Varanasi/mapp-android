@@ -4,12 +4,6 @@
   		android:orientation="vertical"
     	android:layout_width="fill_parent"
     	android:layout_height="fill_parent">
-	<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-		android:id="@+id/headingview"
-		style="@style/Heading"
-		android:text="@string/meta_heading"
-	/>
-	<View style="@style/TopSeparator" />
 	<ScrollView
 		android:id="@+id/scrollview"
 		android:layout_width="fill_parent"
@@ -18,7 +12,8 @@
 		<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
   			android:orientation="vertical"
     		android:layout_width="fill_parent"
-    		android:layout_height="fill_parent">
+    		android:layout_height="fill_parent"
+    		android:paddingTop="5sp">
 			<TextView xmlns:android="http://schemas.android.com/apk/res/android"
 				android:id="@+id/namelabelview"
 				style="@style/Label"
