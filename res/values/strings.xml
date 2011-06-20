@@ -10,4 +10,9 @@
     <string name="meta_description_hint">Description</string>
     <string name="meta_savebutton">Save</string>
     <string name="meta_cancelbutton">Cancel</string>
+    <string name="meta_deletebutton">Delete Polygon</string>
+    <string name="meta_deletedialogtitle">Delete Polygon</string>
+    <string name="meta_deletedialogtext">Are you sure you want to delete the polygon?</string>
+    <string name="meta_deleteyesbutton">Yes</string>
+    <string name="meta_deletenobutton">No</string>
 </resources>

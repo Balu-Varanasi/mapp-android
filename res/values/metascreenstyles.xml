@@ -56,11 +56,16 @@
 		<item name="android:inputType">textShortMessage|textAutoCorrect|textCapSentences|textMultiLine</item>
         <item name="android:maxLines">5</item>
         <item name="android:minLines">5</item>
-        <item name="android:maxLength">500</item>
+        <item name="android:maxLength">500</item> 
        	<item name="android:gravity">top|left</item>
    	</style>
    	<style name="Button">
 		<item name="android:layout_width">100dip</item>
 		<item name="android:layout_height">wrap_content</item>
+	</style>
+	<style name="DeleteButton" parent="Button">
+		<item name="android:layout_width">200dip</item>
+		<item name="android:layout_height">wrap_content</item>
+		<item name="android:gravity">center</item>
 	</style>
 </resources>

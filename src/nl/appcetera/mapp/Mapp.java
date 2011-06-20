@@ -231,8 +231,12 @@ public class Mapp extends MapActivity
 					int color = bundle.getInt(MetaEditScreen.COLOR_KEY);
 					String name = bundle.getString(MetaEditScreen.NAME_KEY);
 					String description = bundle.getString(MetaEditScreen.DESCRIPTION_KEY);
-					Log.v(Mapp.TAG, "Received: "+description);
 					database.editPolygon(id, color, true, name, description);
+				}
+				else if (resultCode == MetaEditScreen.RESULT_DELETE)
+				{
+					int id = bundle.getInt(MetaEditScreen.ID_KEY);
+					database.removePolygon(id, true);
 				}
 				break;
 		}	

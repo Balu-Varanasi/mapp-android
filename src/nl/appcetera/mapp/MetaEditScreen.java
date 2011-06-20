@@ -1,7 +1,9 @@
 package nl.appcetera.mapp;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -23,13 +25,14 @@ public class MetaEditScreen extends Activity {
 	private int polyColor;
 	private EditText nameField;
 	private EditText descriptionField;
-	
+	private MetaEditScreen metaEditScreen;
 	public final static String ID_KEY = "ID";
 	public final static String COLOR_KEY = "COLOR";
 	public final static String NAME_KEY = "NAME";
 	public final static String DESCRIPTION_KEY = "DESCRIPTION";
 	public final static int RESULT_SAVE = 42;
 	public final static int RESULT_CANCEL = 41;
+	public final static int RESULT_DELETE = 40;
 	
 	/**
 	 * Wordt aangeroepen wanneer deze activity wordt aangemaakt
@@ -69,6 +72,8 @@ public class MetaEditScreen extends Activity {
 		LinearLayout layout = (LinearLayout) findViewById(R.id.colorpickerlayout);
 		layout.addView(colorPickerView);
 		
+		metaEditScreen = this;
+		
 		//listener toevoegen aan de savebutton
 		final Button savebutton = (Button) findViewById(R.id.savebutton);
 		savebutton.setOnClickListener(new View.OnClickListener() {
@@ -83,8 +88,6 @@ public class MetaEditScreen extends Activity {
         		bundle.putInt(COLOR_KEY, polyColor);
         		bundle.putString(NAME_KEY, nameField.getText().toString());
         		bundle.putString(DESCRIPTION_KEY,descriptionField.getText().toString());
-            	
-        		Log.v(Mapp.TAG, "Outgoing description: "+descriptionField.getText().toString());
         		
             	Intent mIntent = new Intent();
             	mIntent.putExtras(bundle);
@@ -93,12 +96,12 @@ public class MetaEditScreen extends Activity {
             }
         });
 		
-		//listener toevoegen aan de closebutton
+		//listener toevoegen aan de cancelbutton
 		final Button cancelbutton = (Button) findViewById(R.id.cancelbutton);
 		cancelbutton.setOnClickListener(new View.OnClickListener() {
 			/**
 			 * Wordt aangeroepen wanneer er op de cancelbutton wordt getapt
-			 * @param v de cancelbutton
+			 * @param v de deletebutton
 			 */
             public void onClick(View v) {
             	Bundle bundle = new Bundle();
@@ -106,6 +109,38 @@ public class MetaEditScreen extends Activity {
             	mIntent.putExtras(bundle);
             	setResult(RESULT_CANCEL, mIntent);
             	finish();
+            }
+        });
+		
+		//listener toevoegen aan de deletebutton
+		final Button deletebutton = (Button) findViewById(R.id.deletebutton);
+		deletebutton.setOnClickListener(new View.OnClickListener() {
+			/**
+			 * Wordt aangeroepen wanneer er op de deletebutton wordt getapt
+			 * @param v de cancelbutton
+			 */
+            public void onClick(View v) {
+            	//vraag de gebruiker of hij/zij het zeker weet
+                new AlertDialog.Builder(metaEditScreen)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setTitle(R.string.meta_deletedialogtitle)
+                .setMessage(R.string.meta_deletedialogtext)
+                .setPositiveButton(R.string.meta_deleteyesbutton, new DialogInterface.OnClickListener() {
+
+                    public void onClick(DialogInterface dialog, int which) {
+                    	Bundle bundle = new Bundle();
+                    	
+                    	bundle.putInt(ID_KEY, polyID);
+                    	
+                    	Intent mIntent = new Intent();
+                    	mIntent.putExtras(bundle);
+                    	setResult(RESULT_DELETE, mIntent);
+                    	finish();
+                    }
+
+                })
+                .setNegativeButton(R.string.meta_deletenobutton, null)
+                .show();
             }
         });
 	}
