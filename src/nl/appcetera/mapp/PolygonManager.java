@@ -354,7 +354,7 @@ public class PolygonManager
 		bundle.putString(MetaEditScreen.NAME_KEY, name);
 		bundle.putString(MetaEditScreen.DESCRIPTION_KEY, description);
 		
-		//En we voegen de bundle bij de intend
+		//En we voegen de bundle bij de intent
 		intent.putExtras(bundle);
 		
 		//We starten een nieuwe Activity

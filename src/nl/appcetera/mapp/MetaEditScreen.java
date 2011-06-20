@@ -26,13 +26,13 @@ public class MetaEditScreen extends Activity {
 	private EditText nameField;
 	private EditText descriptionField;
 	private MetaEditScreen metaEditScreen;
-	public final static String ID_KEY = "ID";
-	public final static String COLOR_KEY = "COLOR";
-	public final static String NAME_KEY = "NAME";
-	public final static String DESCRIPTION_KEY = "DESCRIPTION";
-	public final static int RESULT_SAVE = 42;
-	public final static int RESULT_CANCEL = 41;
-	public final static int RESULT_DELETE = 40;
+	public static final String ID_KEY = "ID";
+	public static final String COLOR_KEY = "COLOR";
+	public static final String NAME_KEY = "NAME";
+	public static final String DESCRIPTION_KEY = "DESCRIPTION";
+	public static final int RESULT_SAVE = 42;
+	public static final int RESULT_CANCEL = 41;
+	public static final int RESULT_DELETE = 40;
 	
 	/**
 	 * Wordt aangeroepen wanneer deze activity wordt aangemaakt

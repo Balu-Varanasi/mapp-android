@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- @author Joost -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+ 	android:orientation="vertical"
+   	android:layout_width="fill_parent"
+   	android:layout_height="fill_parent"
+   	android:paddingTop="5sp">
+   	<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+				android:id="@+id/satellitelabelview"
+				style="@style/Label"
+				android:text="@string/settings_mapmodelabel" />
+	<RadioGroup
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:orientation="vertical">
+	    <RadioButton android:id="@+id/settings_satbutton"
+	    	android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/settings_satellite" />
+		<RadioButton android:id="@+id/settings_mapbutton"
+    		android:layout_width="wrap_content"
+    		android:layout_height="wrap_content"
+    		android:text="@string/settings_map" />
+    </RadioGroup>
+  	<View style="@style/BottomSeparator" />
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:gravity="center"
+		android:layout_alignParentBottom="true">
+		<Button android:id="@+id/settings_savebutton"
+			style="@style/Button"
+            android:text="@string/savebutton" />
+        <Button android:id="@+id/settings_cancelbutton"
+			style="@style/Button"
+            android:text="@string/cancelbutton" />
+   	</LinearLayout>
+</LinearLayout>

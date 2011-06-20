@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- @author Joost -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-  		android:orientation="vertical"
-    	android:layout_width="fill_parent"
-    	android:layout_height="fill_parent">
+ 	android:orientation="vertical"
+   	android:layout_width="fill_parent"
+   	android:layout_height="fill_parent">
 	<ScrollView
 		android:id="@+id/scrollview"
 		android:layout_width="fill_parent"
@@ -46,10 +46,10 @@
 				android:layout_alignParentBottom="true">
 				<Button android:id="@+id/savebutton"
 					style="@style/Button"
-		            android:text="@string/meta_savebutton" />
+		            android:text="@string/savebutton" />
 		        <Button android:id="@+id/cancelbutton"
 					style="@style/Button"
-		            android:text="@string/meta_cancelbutton" />
+		            android:text="@string/cancelbutton" />
 		   	</LinearLayout>
 		    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 				android:orientation="horizontal"

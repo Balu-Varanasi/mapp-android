@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 
 import nl.appcetera.mapp.R;
@@ -40,7 +41,7 @@ public class Mapp extends MapActivity
 	public static final int offlineRetryInterval = 30*60*1000; // Interval tussen sync-attempts als toestel offline is
 	public static final int metaTouchDuration = 1000; //touch-duration waarna we naar de meta-activity gaan
 	public static final int META_EDITSCREEN_ACTIVITYCODE = 42;
-	private static final int MENU1 = Menu.FIRST;
+	public static final int SETTINGSSCREEN_ACTIVITYCODE = 314;
 	public static Mapp instance;
 	
 	/**
@@ -242,13 +243,83 @@ public class Mapp extends MapActivity
 					database.removePolygon(id, true);
 				}
 				break;
+			case SETTINGSSCREEN_ACTIVITYCODE:
+				if (resultCode == SettingsScreen.RESULT_SAVE)
+				{
+					mapView.setSatellite(bundle.getBoolean(SettingsScreen.SATMODE_KEY));
+				}
+				break;
 		}	
 	}
 	
 	@Override
+	/**
+	 * Deze functie wordt aangeroepen wanneer iemand op de menuknop duwt
+	 * Het menu uit mainmenu.xml wordt geopend
+	 */
 	public boolean onCreateOptionsMenu(Menu menu) {
 	    MenuInflater inflater = getMenuInflater();
 	    inflater.inflate(R.menu.mainmenu, menu);
 	    return true;
+	}
+	
+	@Override
+	/**
+	 * Deze functie wordt aangeroepen wanneer een item uit het main-menu wordt aangetapt
+	 * @param item het item van het menu dat is aangetapt
+	 */
+	public boolean onOptionsItemSelected(MenuItem item) {
+	    // Handle item selection
+	    switch (item.getItemId()) {
+	    case R.id.groupsbutton:
+	    	showGroupsMenu();
+	        return true;
+	    case R.id.invitesbutton:
+	    	showInvites();
+	        return true;
+	    case R.id.accountbutton:    
+	        showAccountMenu();
+	    	return true;
+	    case R.id.settingsbutton:    
+	        showSettings();
+	    	return true;
+	    default:
+	        return super.onOptionsItemSelected(item);
+	    }
+	}
+	
+	private void showGroupsMenu() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void showAccountMenu() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void showInvites() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	/**
+	 * Deze functie wordt aangeroepen wanneer de gebruiker het settingsmenu probeert te openen
+	 * De functie start een nieuwe activity, van het type SettingsScreen
+	 */
+	private void showSettings() {
+		Intent intent = new Intent(instance, SettingsScreen.class);
+		
+		//We maken een nieuwe bundle om data in mee te sturen
+		Bundle bundle = new Bundle();
+
+		//De boolean wordt aan de bundle toegevoegd
+		bundle.putBoolean(SettingsScreen.SATMODE_KEY, mapView.isSatellite());
+		
+		//En we voegen de bundle bij de intent
+		intent.putExtras(bundle);
+
+		//We starten een nieuwe Activity
+		instance.startActivityForResult(intent, Mapp.SETTINGSSCREEN_ACTIVITYCODE);
 	}
 }

@@ -18,6 +18,9 @@
         <activity android:name=".MetaEditScreen"
 				  android:label="@string/meta_activitylabel">
 		</activity>
+		<activity android:name=".SettingsScreen"
+				  android:label="@string/settings_activitylabel">
+		</activity>
     </application>
     
     <uses-permission android:name="android.permission.INTERNET" />
