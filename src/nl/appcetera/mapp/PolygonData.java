@@ -14,7 +14,7 @@ import android.provider.BaseColumns;
 public class PolygonData extends SQLiteOpenHelper
 {
 	private static final String DATABASE_NAME = "mapp.db";
-	private static final int DATABASE_VERSION = 8;
+	private static final int DATABASE_VERSION = 10;
 	
 	private static final String POLYGON_TABLE_NAME 	= "polygondata";
 	private static final String POLYGON_ID 			= BaseColumns._ID;
@@ -293,7 +293,7 @@ public class PolygonData extends SQLiteOpenHelper
 		Cursor c = db.query(POLYGON_TABLE_NAME, new String[]{POLYGON_ID}, POLYGON_ID + "=" + newid, null, null, null, null);
 		if(c.getCount() > 0)
 		{
-			//updatePolygonId(newid, newid+1);
+			updatePolygonId(newid, newid+1);
 		} // TODO polygoon een serverid geven, en normale id vervangen door serverid
 		// om te voorkomen dat er dubbele ids komen
 		
@@ -319,8 +319,12 @@ public class PolygonData extends SQLiteOpenHelper
 		
 		// Groep opvragen
 		Cursor c = db.query(POLYGON_TABLE_NAME, new String[]{POLYGON_GROUP}, 
-				POLYGON_ID + "=" + polygonid, null, null, null, POLYGON_LAST_EDITED);
-		c.moveToFirst();
+				POLYGON_ID + "=" + polygonid, null, null, null, null);
+		
+		if(!c.moveToFirst())
+		{
+			return;
+		}
 		
 		// Punten verwijderen
 		removePolygonPoints(polygonid);

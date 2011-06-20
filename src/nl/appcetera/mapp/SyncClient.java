@@ -151,7 +151,8 @@ public class SyncClient
 		do
 		{
 			polygonid = c.getInt(0);
-			HttpDelete httpd = new HttpDelete(serverUrl + "polygon/?id=" + polygonid);
+			Log.v("polyid", polygonid+"");
+			HttpDelete httpd = new HttpDelete(serverUrl + "polygon/id/" + polygonid);
 			UsernamePasswordCredentials creds = new UsernamePasswordCredentials(mappUser, mappPass);
 			
 			try
