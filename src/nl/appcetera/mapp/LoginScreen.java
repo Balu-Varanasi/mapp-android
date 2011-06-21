@@ -35,7 +35,7 @@ public class LoginScreen extends Activity {
 			 * en de username en password worden opgeleverd in een Bundle
 			 */
 			public void onClick(View v) {
-				SharedPreferences settings = getPreferences(MODE_PRIVATE);
+				SharedPreferences settings = getSharedPreferences(Mapp.SETTINGS_KEY, MODE_PRIVATE);
 				SharedPreferences.Editor editor = settings.edit();
 				editor.putString("username", usernameField.getText().toString());
 				editor.putString("password", passwordField.getText().toString());

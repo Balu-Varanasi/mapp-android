@@ -33,6 +33,7 @@ public class Mapp extends MapActivity
 	private OverlayManager om;
 	private ServerSync s;
 	public SharedPreferences settings;
+	public static final String SETTINGS_KEY = "MAPP_SETTINGS";
 	public static final int pointPixelTreshold = 25; // Maximaal verschil tussen 2 punten in pixels voor ze als gelijk worden beschouwd
 	public static final String TAG = "AppCetera"; // Log-tag
 	public static final int maxTouchDuration = 500;
@@ -63,7 +64,7 @@ public class Mapp extends MapActivity
         Mapp.instance = this;
         
 		// Settings ophalen
-        settings = getPreferences(MODE_PRIVATE);
+        settings = getSharedPreferences(SETTINGS_KEY, MODE_PRIVATE);
 
         // Mapview ophalen
         mapView = (MapView) findViewById(R.id.mapview);
@@ -139,7 +140,6 @@ public class Mapp extends MapActivity
 		super.onPause();
 		
 		// Settings opslaan
-		SharedPreferences settings = getPreferences(MODE_PRIVATE);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putInt("zoomlevel", mapView.getZoomLevel());
 		editor.putInt("pos_long", mapView.getMapCenter().getLongitudeE6());
@@ -270,7 +270,6 @@ public class Mapp extends MapActivity
 			case ACCOUNTSCREEN_ACTIVITYCODE:
 				if (resultCode == AccountScreen.RESULT_LOGOUT)
 				{
-					SharedPreferences settings = getPreferences(MODE_PRIVATE);
 					SharedPreferences.Editor editor = settings.edit();
 					editor.putString("username", null);
 					editor.putString("password", null);
