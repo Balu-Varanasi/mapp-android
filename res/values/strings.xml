@@ -3,6 +3,9 @@
     <string name="app_name">Mapp</string>
     <string name="savebutton">Save</string>
     <string name="cancelbutton">Cancel</string>
+    <string name="logoutbutton">Log out</string>
+    <string name="loginbutton">Log in</string>
+    <string name="registerbutton">Register</string>
     
     <string name="meta_activitylabel">Polygon Properties</string>
     <string name="meta_namelabel">Polygon name</string>
@@ -33,4 +36,9 @@
     <string name="groups_activitylabel">Groups</string>
     
     <string name="account_activitylabel">Account</string>
+    
+    <string name="login_username_hint">Username</string>
+    <string name="login_password_hint">Password</string>
+    <string name="login_header">Please register or log in</string>
+    
 </resources>

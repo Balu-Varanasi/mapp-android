@@ -21,6 +21,12 @@
 		<activity android:name=".SettingsScreen"
 				  android:label="@string/settings_activitylabel">
 		</activity>
+		<activity android:name=".AccountScreen"
+				  android:label="@string/account_activitylabel">
+		</activity>
+		<activity android:name=".LoginScreen"
+				  android:theme="@android:style/Theme.NoTitleBar">
+		</activity>
     </application>
     
     <uses-permission android:name="android.permission.INTERNET" />

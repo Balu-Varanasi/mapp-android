@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<style name="SyncLabel" parent="Label">
+	<style name="CenteredLabel" parent="Label">
     	<item name="android:gravity">center</item>
     </style>
 </resources>

@@ -33,7 +33,7 @@
         android:max="60" />
     <TextView xmlns:android="http://schemas.android.com/apk/res/android"
 		android:id="@+id/syncintervaldisplay"
-		style="@style/SyncLabel" /> 
+		style="@style/CenteredLabel" /> 
   	<View style="@style/BottomSeparator" />
 	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 		android:orientation="horizontal"

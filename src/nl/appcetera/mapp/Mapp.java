@@ -5,6 +5,7 @@ import java.util.List;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -41,6 +42,8 @@ public class Mapp extends MapActivity
 	public static final int metaTouchDuration = 1000; //touch-duration waarna we naar de meta-activity gaan
 	public static final int META_EDITSCREEN_ACTIVITYCODE = 42;
 	public static final int SETTINGSSCREEN_ACTIVITYCODE = 314;
+	public static final int ACCOUNTSCREEN_ACTIVITYCODE = 271;
+	public static final int LOGINSCREEN_ACTIVITYCODE = 404;
 	public static Mapp instance;
 	
 	/**
@@ -59,11 +62,12 @@ public class Mapp extends MapActivity
         // Instantie van deze klasse beschikbaar maken met een statische variabele
         Mapp.instance = this;
         
-        // Mapview dingetjes
-        mapView = (MapView) findViewById(R.id.mapview);
-	    mapView.setBuiltInZoomControls(true);
-	    mapView.setSatellite(true);
+		// Settings ophalen
+        settings = getPreferences(MODE_PRIVATE);
 
+        // Mapview ophalen
+        mapView = (MapView) findViewById(R.id.mapview);
+	    
         // Databaseklasse opstarten
         database = new PolygonData(this);
 
@@ -74,13 +78,15 @@ public class Mapp extends MapActivity
         s = new ServerSync(getApplicationContext(), database);
         
         mapView.invalidate();
-        
-		// Settings ophalen
-        settings = getPreferences(MODE_PRIVATE);
-        syncInterval = settings.getInt("syncInterval", syncInterval);
-        mapView.setSatellite(settings.getBoolean("satelliteMode", true));
+        applySettings();
     }
 	
+	private void applySettings() {
+		syncInterval = settings.getInt("syncInterval", syncInterval);
+		mapView.setBuiltInZoomControls(settings.getBoolean("zoomControls", true));
+	    mapView.setSatellite(settings.getBoolean("satelliteMode", true));
+	}
+
 	/**
 	 * Wanneer de app gekilled wordt
 	 */
@@ -99,24 +105,29 @@ public class Mapp extends MapActivity
 	public void onResume()
 	{
 		super.onResume();
-
-		// Naar de juiste plaats op de kaart gaan
-		mapController = mapView.getController();
-	    point = new GeoPoint(settings.getInt("pos_lat", 51824167),
-	    		settings.getInt("pos_long", 5867374));
-        mapController.setZoom(settings.getInt("zoomlevel", 10));
-        mapController.animateTo(point);
-        
-        // Database opstarten
-        database = new PolygonData(this);
-        
-        // Syncservice hervatten
-        s.startSync();
-        
-        // Juiste groep ophalen en polygonen laden
-        //om.setGroup(settings.getInt("group", 1));
-        om.setGroup(1);
-        om.loadOverlays();
+		Log.v(TAG, "In de onresume van Mapp");
+		if (isLoggedIn()) {
+			// Naar de juiste plaats op de kaart gaan
+			mapController = mapView.getController();
+		    point = new GeoPoint(settings.getInt("pos_lat", 51824167),
+		    		settings.getInt("pos_long", 5867374));
+	        mapController.setZoom(settings.getInt("zoomlevel", 10));
+	        mapController.animateTo(point);
+	        
+	        // Database opstarten
+	        database = new PolygonData(this);
+	        
+	        // Syncservice hervatten
+	        s.startSync();
+	        
+	        // Juiste groep ophalen en polygonen laden
+	        //om.setGroup(settings.getInt("group", 1));
+	        om.setGroup(1);
+	        om.loadOverlays();
+		}
+		else {
+			showLoginScreen();
+		}
 	}
 	
 	/**
@@ -247,14 +258,31 @@ public class Mapp extends MapActivity
 			case SETTINGSSCREEN_ACTIVITYCODE:
 				if (resultCode == SettingsScreen.RESULT_SAVE)
 				{
-					SharedPreferences settings = getPreferences(MODE_PRIVATE);
 					SharedPreferences.Editor editor = settings.edit();
 					editor.putBoolean("satelliteMode", bundle.getBoolean(SettingsScreen.SATMODE_KEY));
+					editor.putBoolean("zoomControls", bundle.getBoolean(SettingsScreen.ZOOMCONTROLS_KEY));
 					editor.putInt("syncInterval", bundle.getInt(SettingsScreen.SYNCINTERVAL_KEY));
 					editor.commit();
 					
-			        syncInterval = settings.getInt("syncInterval", syncInterval);
-			        mapView.setSatellite(settings.getBoolean("satelliteMode", true));
+					applySettings();
+				}
+				break;
+			case ACCOUNTSCREEN_ACTIVITYCODE:
+				if (resultCode == AccountScreen.RESULT_LOGOUT)
+				{
+					SharedPreferences settings = getPreferences(MODE_PRIVATE);
+					SharedPreferences.Editor editor = settings.edit();
+					editor.putString("username", null);
+					editor.putString("password", null);
+					editor.commit();
+					
+					showLoginScreen();
+				}
+				break;
+			case LOGINSCREEN_ACTIVITYCODE:
+				if (resultCode == LoginScreen.RESULT_OK)
+				{
+					//TODO
 				}
 				break;
 		}	
@@ -310,8 +338,11 @@ public class Mapp extends MapActivity
 	 * De functie start een nieuwe activity, van het type SettingsScreen
 	 */
 	private void showAccountMenu() {
-		// TODO Auto-generated method stub
-		
+		Intent intent = new Intent(instance, AccountScreen.class);
+		Bundle bundle = new Bundle();
+		bundle.putString(AccountScreen.USERNAME_KEY, settings.getString("username", "Joe"));
+		intent.putExtras(bundle);
+		instance.startActivityForResult(intent, Mapp.ACCOUNTSCREEN_ACTIVITYCODE);
 	}
 	
 	/**
@@ -335,11 +366,31 @@ public class Mapp extends MapActivity
 
 		//De data wordt aan de bundle toegevoegd
 		bundle.putBoolean(SettingsScreen.SATMODE_KEY, mapView.isSatellite());
+		bundle.putBoolean(SettingsScreen.ZOOMCONTROLS_KEY, settings.getBoolean("zoomControls", true));
+		
 		bundle.putInt(SettingsScreen.SYNCINTERVAL_KEY, syncInterval);
 		//En we voegen de bundle bij de intent
 		intent.putExtras(bundle);
 
 		//We starten een nieuwe Activity
 		instance.startActivityForResult(intent, Mapp.SETTINGSSCREEN_ACTIVITYCODE);
+	}
+	
+	/**
+	 * Deze functie kijkt of er op dit moment een gebruiker ingelogd is
+	 * @return true indien er een gebruiker ingelogd is
+	 */
+	private boolean isLoggedIn() {
+		Log.v(TAG, "Checking if logged");
+		return settings.getString("username", null) != null && settings.getString("password", null) != null;
+	}
+	
+	/**
+	 * Deze functie wordt aangeroepen wanneer de gebruiker nog niet ingelogd is
+	 * en we dus naar het loginscherm moeten
+	 */
+	private void showLoginScreen() {
+		Intent intent = new Intent(instance, LoginScreen.class);
+		instance.startActivityForResult(intent, Mapp.LOGINSCREEN_ACTIVITYCODE);
 	}
 }

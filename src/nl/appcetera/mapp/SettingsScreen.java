@@ -18,10 +18,12 @@ public class SettingsScreen extends Activity  {
 
 	public static final String SATMODE_KEY = "SATMODE";
 	public static final String SYNCINTERVAL_KEY = "SYNCINTERVAL";
+	public static final String ZOOMCONTROLS_KEY = "ZOOMCONTROLS";
 	public static final int RESULT_SAVE = 42;
 	public static final int RESULT_CANCEL = 41;
 	private int syncTime;
 	private boolean satelliteMode;
+	private boolean zoomControls;
 	
 	/**
 	 * Wordt aangeroepen wanneer deze activity wordt aangemaakt
@@ -35,6 +37,8 @@ public class SettingsScreen extends Activity  {
 		Bundle bundle = getIntent().getExtras();
 		satelliteMode = bundle.getBoolean(SATMODE_KEY);
 		syncTime = bundle.getInt(SYNCINTERVAL_KEY);
+		zoomControls = bundle.getBoolean(ZOOMCONTROLS_KEY);
+		
 		Log.v(Mapp.TAG, "Synctime"+syncTime);
 		
 		final RadioButton satbutton = (RadioButton) findViewById(R.id.settings_satbutton);
