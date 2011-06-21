@@ -296,16 +296,28 @@ public class Mapp extends MapActivity
 	    }
 	}
 	
+	/**
+	 * Deze functie wordt aangeroepen wanneer de gebruiker het groups-scherm probeert te openen
+	 * De functie start een nieuwe activity, van het type SettingsScreen
+	 */
 	private void showGroupsMenu() {
 		// TODO Auto-generated method stub
 		
 	}
 
+	/**
+	 * Deze functie wordt aangeroepen wanneer de gebruiker het accountscherm probeert te openen
+	 * De functie start een nieuwe activity, van het type SettingsScreen
+	 */
 	private void showAccountMenu() {
 		// TODO Auto-generated method stub
 		
 	}
-
+	
+	/**
+	 * Deze functie wordt aangeroepen wanneer de gebruiker het invitesmenu probeert te openen
+	 * De functie start een nieuwe activity, van het type SettingsScreen
+	 */
 	private void showInvites() {
 		// TODO Auto-generated method stub
 		

@@ -19,6 +19,10 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.EditText;
 
+/**
+ * De klasse het editscherm van metadata (naam, omschrijving, kleur etc)
+ * @author Joost
+ */
 public class MetaEditScreen extends Activity {
 	
 	private int polyID;

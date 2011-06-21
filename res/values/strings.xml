@@ -26,6 +26,7 @@
     <string name="settings_map">Map mode</string>
     <string name="settings_satellite">Satellite mode</string>
     <string name="settings_mapmodelabel">Display mode</string>
+    <string name="settings_syncintervallabel">Synchronization interval</string>
     
     <string name="invites_activitylabel">Invites</string>
     

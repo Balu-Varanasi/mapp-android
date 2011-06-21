@@ -245,6 +245,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
      */
     public boolean notifyTouchUp(MotionEvent event)
     {
+    	Log.v(Mapp.TAG,"Checkpoint 5");
     	//stop eventueel met wachten om in de metapopup-editmode te gaan
     	metaHandler.removeCallbacks(editMetaCallback);
     	if(this.movingPoint)
@@ -280,9 +281,13 @@ class PolygonOverlay extends com.google.android.maps.Overlay
         	}
     		return true;
     	}
+    	Log.v(Mapp.TAG,"Checkpoint 6");
+    	Log.v(Mapp.TAG,"Editmode"+this.polygonEditMode);
+    	Log.v(Mapp.TAG,"Poly"+polygon);
     	
     	if(!polygon.getIsClosed() && !this.polygonEditMode) // Nieuwe polygoon aan 't maken
     	{
+    		Log.v(Mapp.TAG,"Checkpoint 7");
 	    	// Alleen een punt tekenen als de touch minder dan maxTouchDuration duurde
 	    	long diff = System.currentTimeMillis()-timer;
 	    	GeoPoint p = mapView.getProjection().fromPixels(
@@ -291,6 +296,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 	    	
 	    	if(!movingPoint && diff < Mapp.maxTouchDuration)
 	    	{                
+	    		Log.v(Mapp.TAG,"Checkpoint 8");
 	    		// Check of dit punt ongeveer samenvalt met het eerste punt
 	            // Indien ja, sluiten we de polygoon
 		        polygon.reset();
@@ -341,6 +347,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 		// als deze korter duurt dan een bepaalde tijdsduur
 		timer = System.currentTimeMillis();
 		
+		Log.v(Mapp.TAG,"Checkpoint 1");
 		// Testen of we in deze polygoon getapped hebben
 		if(this.pathRegion != null && !this.polygonEditMode && this.polygon.getIsClosed())
 		{
@@ -360,6 +367,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 	    	}
 		}
 		
+		Log.v(Mapp.TAG,"Checkpoint 2");
 		// Checken of we hier toevallig op een al geplaatst punt touchen (en in editmode zijn)
     	polygon.reset();
     	while(polygon.hasNextPoint() && (this.polygonEditMode || !this.polygon.getIsClosed()))
@@ -385,6 +393,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 	        }
     	}
     	
+    	Log.v(Mapp.TAG,"Checkpoint 3");
     	// Als we ergens klikken, in editmode zijn, en geen punt hebben aangetapt,
     	if(this.pathRegion != null && this.polygonEditMode && !this.movingPoint)
 		{
@@ -421,7 +430,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
         	}
     		return true;
 		}
-    	
+    	Log.v(Mapp.TAG,"Checkpoint 4");
     	return false;
     }
     

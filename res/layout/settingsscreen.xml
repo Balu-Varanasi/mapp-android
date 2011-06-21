@@ -22,6 +22,18 @@
     		android:layout_height="wrap_content"
     		android:text="@string/settings_map" />
     </RadioGroup>
+    <View style="@style/MediumSeparator" />
+	<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+		android:id="@+id/syncintervallabelview"
+		style="@style/Label"
+		android:text="@string/settings_syncintervallabel" /> 
+    <SeekBar android:id="@+id/sync_seekbar"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:max="60" />
+    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+		android:id="@+id/syncintervaldisplay"
+		style="@style/SyncLabel" /> 
   	<View style="@style/BottomSeparator" />
 	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 		android:orientation="horizontal"
