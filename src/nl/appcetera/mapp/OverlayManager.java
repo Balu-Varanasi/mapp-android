@@ -101,10 +101,10 @@ public class OverlayManager
 		        }
 		        
 		        pm.setIsClosed(isClosed);
-		        if(!isClosed)
+		        /*if(!isClosed)
 		        {
 		        	mapOverlay.setIsEditMode();
-		        }
+		        }*/
 		        pm.setDbEnable(true);
 		        listOfOverlays.add(mapOverlay);
 			}
