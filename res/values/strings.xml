@@ -6,6 +6,8 @@
     <string name="logoutbutton">Log out</string>
     <string name="loginbutton">Start using Mapp</string>
     <string name="registerbutton">Register</string>
+    <string name="okbutton">OK</string>
+    <string name="underconstruction">This feature is still under construction.\nCheck back soon!</string>
     
     <string name="meta_activitylabel">Polygon Properties</string>
     <string name="meta_namelabel">Polygon name</string>
