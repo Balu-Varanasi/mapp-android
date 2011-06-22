@@ -14,7 +14,7 @@ import android.provider.BaseColumns;
 public class PolygonData extends SQLiteOpenHelper
 {
 	private static final String DATABASE_NAME = "mapp.db";
-	private static final int DATABASE_VERSION = 15;
+	private static final int DATABASE_VERSION = 16;
 	
 	private static final String POLYGON_TABLE_NAME 	= "polygondata";
 	private static final String POLYGON_ID 			= BaseColumns._ID;
@@ -571,6 +571,17 @@ public class PolygonData extends SQLiteOpenHelper
 	{
 		SQLiteDatabase db = getReadableDatabase();
 		Cursor c = db.query(GROUPS_TABLE_NAME, new String[]{GROUPS_OWNER, GROUPS_NAME}, GROUPS_ID + "=" + id, null, null, null, null);
+		return c;
+	}
+	
+	/**
+	 * Geeft alle groepen terug
+	 * @return cursorobject met alle groepen
+	 */
+	public synchronized Cursor getGroups()
+	{
+		SQLiteDatabase db = getReadableDatabase();
+		Cursor c = db.query(GROUPS_TABLE_NAME, new String[]{GROUPS_ID, GROUPS_OWNER, GROUPS_NAME}, null, null, null, null, null);
 		return c;
 	}
 	
