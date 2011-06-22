@@ -53,7 +53,7 @@ public class SyncClient
 	private String mappPass = "";
 	//private static final String serverUrl = "http://192.168.2.2/MVics/Mappserver/v1/";
 	public static final String serverUrl = "http://mapp.joelcox.org/v1/";
-	private static final boolean development = true;
+	private static final boolean development = false;
 	private String error = "";
 	private static HttpClient httpclient = null;
 	
@@ -117,6 +117,7 @@ public class SyncClient
 		try
 		{
 			int syncTime = getSyncTimeStamp();
+			updateUserInfo();
 			deletePolygons(group);
 			removeDeletedPolygons(group);
 			putPolygons(group);
@@ -160,7 +161,7 @@ public class SyncClient
 		do
 		{
 			polygonid = c.getInt(0);
-			Log.v("polyid", polygonid+"");
+
 			HttpDelete httpd = new HttpDelete(serverUrl + "polygon/id/" + polygonid);
 			UsernamePasswordCredentials creds = new UsernamePasswordCredentials(mappUser, mappPass);
 			
@@ -591,7 +592,7 @@ public class SyncClient
 	 * @throws SyncException 
 	 */
 	private void getPolygons(int group, long lastSync) throws SyncException
-	{		
+	{
 		HttpGet httpg = new HttpGet(serverUrl + "polygons/group_id/" + group + "/since/" + lastSync);
 		UsernamePasswordCredentials creds = new UsernamePasswordCredentials(mappUser, mappPass);
 
@@ -748,6 +749,98 @@ public class SyncClient
 			Log.e(Mapp.TAG, "Sync failed. Response is no valid JSON or expected variable not found.");
 			throw new SyncException("Invalid server response");
 		}
+	}
+	
+	private void updateUserInfo() throws SyncException
+	{		
+	    // Alle groepen die nog wel lokaal staan, maar waar volgens de server de gebruiker niet meer in zit,
+	    // keihard wegmikken.
+	    Cursor c = db.getGroups();
+	    if(!c.moveToFirst())
+	    {
+	    	return;// Snel klaar.
+	    }
+	    
+	    // Checken welke groepen op de server aangemeld zijn
+		HttpGet httpg = new HttpGet(serverUrl + "user");
+		UsernamePasswordCredentials creds = new UsernamePasswordCredentials(mappUser, mappPass);
+
+		try
+		{
+			httpg.addHeader(new BasicScheme().authenticate(creds, httpg));
+		} 
+		catch (AuthenticationException e1)
+		{
+			Log.e(Mapp.TAG, e1.getMessage());
+			throw new SyncException("Authentication failed");
+		}
+		
+	    HttpResponse response;
+	    ArrayList<Integer> userGroups = new ArrayList<Integer>();
+	        
+	    try
+	    {
+	    	response = httpclient.execute(httpg);
+				
+			// Lees het resultaat van de actie in
+			InputStream is = response.getEntity().getContent();
+			BufferedReader r = new BufferedReader(new InputStreamReader(is));
+			StringBuilder total = new StringBuilder();
+			String line;
+			while((line = r.readLine()) != null)
+			{
+			    total.append(line);
+			}
+
+			if(response.getStatusLine().getStatusCode() == 418)
+			{
+				throw new SyncException("Unable to synchronize because the server is a teapot.");
+			}
+			else if(response.getStatusLine().getStatusCode() != 200)
+		    {
+				// Er is iets mis gegaan.
+				JSONObject result = new JSONObject(total.toString());
+				Log.e(Mapp.TAG, "Sync error: " + result.getString("message"));
+			    throw new SyncException(result.getString("message"));
+		    }
+			else
+			{
+				// Alles is blijkbaar goed gegaan
+				JSONObject result = new JSONObject(total.toString());
+				JSONArray groups = result.getJSONArray("groups");
+				
+				for(int i = 0; i < groups.length(); i++)
+				{
+					JSONObject o = groups.getJSONObject(i);
+					userGroups.add(o.getInt("id"));
+				}
+			}
+		}
+	    catch (ClientProtocolException e)
+	    {
+			Log.e(Mapp.TAG, e.getMessage());
+			throw new SyncException("Epic HTTP failure");
+		}
+	    catch (IOException e)
+	    {
+	       	Log.e(Mapp.TAG, e.getMessage());
+	       	throw new SyncException("Exception during server synchronisation");
+		}
+	    catch (JSONException e)
+		{
+			Log.e(Mapp.TAG, "Sync failed. Response is no valid JSON or expected variable not found.");
+			throw new SyncException("Invalid server response");
+		}
+	    
+	    do
+	    {
+	    	if(!userGroups.contains(c.getInt(0)))
+	    	{
+	    		db.removePolygonsFromGroup(c.getInt(0), false);
+	    		db.deleteGroup(c.getInt(0));
+	    	}
+	    }
+	    while(c.moveToNext());
 	}
 }
  
