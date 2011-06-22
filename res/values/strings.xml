@@ -40,6 +40,6 @@
     
     <string name="login_email_hint">E-mail address</string>
     <string name="login_password_hint">Password</string>
-    <string name="login_text">If you do not have an account yet, fill in the above and we\'ll create one for you</string>
+    <string name="login_text">If you do not have an account yet,\nfill in the above and we\'ll create one for you</string>
     
 </resources>
