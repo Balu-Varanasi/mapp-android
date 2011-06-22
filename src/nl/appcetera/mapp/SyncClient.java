@@ -49,23 +49,22 @@ import android.util.Log;
 public class SyncClient
 {
 	private PolygonData db;
-	private HttpClient httpclient;
-	private String mappUser = "broodje_kroket@student.ru.nl";
-	private String mappPass = "585b1ac3cf671553e11f61fa6f1d5302";
+	private String mappUser = "";
+	private String mappPass = "";
 	//private static final String serverUrl = "http://192.168.2.2/MVics/Mappserver/v1/";
-	private static final String serverUrl = "http://mapp.joelcox.org/v1/";
+	public static final String serverUrl = "http://mapp.joelcox.org/v1/";
 	private static final boolean development = true;
 	private String error = "";
-	private static HttpClient client = null;
+	private static HttpClient httpclient = null;
 	
 	/**
-	 * Constructor
-	 * @param db instantie van de databaseklasse
+	 * Geeft een (Thread-safe) instantie van de httpclient
+	 * @return instantie van httpclient
 	 */
-	public SyncClient(PolygonData db)
+	public static HttpClient getClient()
 	{
 		// Er mag maar één instantie van de thread-safe httpclient zijn, dus we maken er ook maar één
-		if(SyncClient.client == null)
+		if(SyncClient.httpclient == null)
 		{
 			// Bron van onderstaande:
 			// http://svn.apache.org/repos/asf/httpcomponents/httpclient/branches/4.0.x/httpclient/src/examples/org/apache/http/examples/client/ClientMultiThreadedExecution.java
@@ -83,13 +82,20 @@ public class SyncClient
 	        // This connection manager must be used if more than one thread will
 	        // be using the HttpClient.
 	        ClientConnectionManager cm = new ThreadSafeClientConnManager(params, schemeRegistry);
-	        this.httpclient = new DefaultHttpClient(cm, params);
-		}
-		else
-		{
-			this.httpclient = SyncClient.client;
+	        SyncClient.httpclient = new DefaultHttpClient(cm, params);
 		}
 		
+		return SyncClient.httpclient;
+	}
+	
+	/**
+	 * Constructor
+	 * @param db instantie van de databaseklasse
+	 */
+	public SyncClient(PolygonData db)
+	{
+		
+		SyncClient.httpclient = SyncClient.getClient();
 		this.db = db;
 	}
 	
@@ -104,6 +110,9 @@ public class SyncClient
 		{
 			return true;
 		}
+		
+		mappUser = settings.getString("username", "");
+		mappPass = settings.getString("password", "");
 		
 		try
 		{

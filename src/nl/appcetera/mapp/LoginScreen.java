@@ -1,5 +1,8 @@
 package nl.appcetera.mapp;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -7,7 +10,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 
 /**
  * Klasse die het login-scherm beheert, waar de gebruiker kan registreren of inloggen
@@ -38,7 +40,7 @@ public class LoginScreen extends Activity {
 				SharedPreferences settings = getSharedPreferences(Mapp.SETTINGS_KEY, MODE_PRIVATE);
 				SharedPreferences.Editor editor = settings.edit();
 				editor.putString("username", usernameField.getText().toString());
-				editor.putString("password", passwordField.getText().toString());
+				editor.putString("password", md5(passwordField.getText().toString()));
 				editor.commit();
             	
             	Intent mIntent = new Intent();
@@ -46,5 +48,42 @@ public class LoginScreen extends Activity {
             	finish();
             }
 		});
+	}
+	
+	/**
+	 * Maakt een md5-string
+	 * @param s string om te md5'en
+	 * @return md5 van gegeven string
+	 * @source http://www.androidsnippets.com/create-a-md5-hash-and-dump-as-a-hex-string
+	 */
+	private String md5(String s) 
+	{
+		try
+	    {
+	        // Create MD5 Hash
+	        MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
+	        digest.update(s.getBytes());
+	        byte messageDigest[] = digest.digest();
+	        
+	        // Create Hex String
+	        StringBuffer hexString = new StringBuffer();
+	        for (int i=0; i<messageDigest.length; i++)
+	        {
+	        	if(((int) messageDigest[i] & 0xff) < 0x10)
+	        	{
+	        		hexString.append("0");
+	        	}
+	        	
+	        	hexString.append(Integer.toHexString(0xFF & messageDigest[i]));
+	        }
+	        return hexString.toString();
+	        
+	    }
+		catch (NoSuchAlgorithmException e)
+		{
+	        e.printStackTrace();
+	    }
+		
+	    return "";
 	}
 }
