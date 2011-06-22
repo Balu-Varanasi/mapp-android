@@ -45,6 +45,8 @@ public class Mapp extends MapActivity
 	public static final int SETTINGSSCREEN_ACTIVITYCODE = 314;
 	public static final int ACCOUNTSCREEN_ACTIVITYCODE = 271;
 	public static final int LOGINSCREEN_ACTIVITYCODE = 404;
+	private static final int GROUPSSCREEN_ACTIVITYCODE = 162;
+	private static final int INVITESSCREEN_ACTIVITYCODE = 505;
 	public static Mapp instance;
 	
 	/**
@@ -328,8 +330,8 @@ public class Mapp extends MapActivity
 	 * De functie start een nieuwe activity, van het type SettingsScreen
 	 */
 	private void showGroupsMenu() {
-		// TODO Auto-generated method stub
-		
+		Intent intent = new Intent(instance, GroupsScreen.class);
+		instance.startActivityForResult(intent, Mapp.GROUPSSCREEN_ACTIVITYCODE);
 	}
 
 	/**
@@ -349,8 +351,8 @@ public class Mapp extends MapActivity
 	 * De functie start een nieuwe activity, van het type SettingsScreen
 	 */
 	private void showInvites() {
-		// TODO Auto-generated method stub
-		
+		Intent intent = new Intent(instance, InvitesScreen.class);
+		instance.startActivityForResult(intent, Mapp.INVITESSCREEN_ACTIVITYCODE);
 	}
 
 	/**

@@ -27,6 +27,12 @@
 		<activity android:name=".LoginScreen"
 				  android:theme="@android:style/Theme.NoTitleBar">
 		</activity>
+		<activity android:name=".InvitesScreen"
+				  android:label="@string/invites_activitylabel">
+		</activity>
+		<activity android:name=".GroupsScreen"
+				  android:label="@string/groups_activitylabel">
+		</activity>
     </application>
     
     <uses-permission android:name="android.permission.INTERNET" />
