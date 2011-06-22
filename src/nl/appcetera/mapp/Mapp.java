@@ -1,14 +1,6 @@
 package nl.appcetera.mapp;
 
-import java.io.IOException;
 import java.util.List;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.auth.AuthenticationException;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.auth.BasicScheme;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -18,7 +10,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
-import android.widget.Toast;
 
 import nl.appcetera.mapp.R;
 import com.google.android.maps.GeoPoint;
@@ -389,58 +380,8 @@ public class Mapp extends MapActivity
 	 * @return true indien er een gebruiker ingelogd is
 	 */
 	private boolean isLoggedIn() {
-
-		HttpGet httpg = new HttpGet(SyncClient.serverUrl + "user/");
-		UsernamePasswordCredentials creds = new UsernamePasswordCredentials(
-				settings.getString("username", ""), settings.getString("password", ""));
-Log.v("User", settings.getString("username", ""));
-Log.v("Pass", settings.getString("password", ""));
-		try
-		{
-			httpg.addHeader(new BasicScheme().authenticate(creds, httpg));
-		} 
-		catch (AuthenticationException e1)
-		{
-			Log.e(Mapp.TAG, e1.getMessage());
-			CharSequence text = "Authentication failed. Please try again.";
-			Toast toast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG);
-			toast.show();
-			return false;
-		}
-		
-		HttpResponse response;
-		       
-		try
-		{
-			response = SyncClient.getClient().execute(httpg);
-			
-			if(response.getStatusLine().getStatusCode() == 401)
-			{
-				CharSequence text = "Incorrect password or email address. Please try again.";
-				Toast toast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG);
-				toast.show();
-				return false;
-			}
-			else if(response.getStatusLine().getStatusCode() != 200)
-			{
-				CharSequence text = "Server error. Please try again later.";
-				Toast toast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG);
-				toast.show();
-				return false;
-			}
-			
-			return true;
-		}
-		catch (ClientProtocolException e) 
-		{
-			e.printStackTrace();
-		}
-		catch (IOException e) 
-		{
-			e.printStackTrace();
-		}
-		    
-		return false;
+		Log.v(TAG, "Checking if logged");
+		return settings.getString("username", null) != null && settings.getString("password", null) != null;
 	}
 	
 	/**
