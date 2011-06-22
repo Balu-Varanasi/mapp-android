@@ -5,28 +5,25 @@
    	android:layout_width="fill_parent"
    	android:layout_height="wrap_content"
    	android:gravity="center"
-   	android:paddingTop="5sp">
-   	<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-		android:id="@+id/accountlabel"
-		style="@style/CenteredLabel"
-		android:text="@string/login_header"/>
+   	android:paddingTop="5sp"
+   	android:background="@drawable/background">
+   	<ImageView 
+	  	android:id="@+id/splashlogo"
+	  	android:src="@drawable/splashlogo"
+	  	android:layout_width="wrap_content"
+	  	android:layout_height="200dip" />
 	<EditText android:id="@+id/input_username"
 		style="@style/TextInput"
-		android:hint="@string/login_username_hint" />
+		android:hint="@string/login_email_hint" />
 	<EditText android:id="@+id/input_password"
 		style="@style/TextInput"
 		android:hint="@string/login_password_hint" />
-	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-		android:orientation="horizontal"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:gravity="center"
-		android:layout_alignParentBottom="true">
-		<Button android:id="@+id/login_loginbutton"
-			style="@style/Button"
-            android:text="@string/loginbutton" />
-        <Button android:id="@+id/login_registerbutton"
-			style="@style/Button"
-            android:text="@string/registerbutton" />
-   	</LinearLayout>
+	<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+		android:id="@+id/accountlabel"
+		style="@style/CenteredLabel"
+		android:text="@string/login_text"/>
+	<Button android:id="@+id/login_loginbutton"
+		style="@style/Button"
+        android:text="@string/loginbutton"
+        android:layout_width="200dip" />
 </LinearLayout>

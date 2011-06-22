@@ -4,7 +4,7 @@
     <string name="savebutton">Save</string>
     <string name="cancelbutton">Cancel</string>
     <string name="logoutbutton">Log out</string>
-    <string name="loginbutton">Log in</string>
+    <string name="loginbutton">Start using Mapp</string>
     <string name="registerbutton">Register</string>
     
     <string name="meta_activitylabel">Polygon Properties</string>
@@ -28,8 +28,9 @@
     <string name="settings_activitylabel">Settings</string>
     <string name="settings_map">Map mode</string>
     <string name="settings_satellite">Satellite mode</string>
-    <string name="settings_mapmodelabel">Display mode</string>
+    <string name="settings_mapmodelabel">Map display preferences</string>
     <string name="settings_syncintervallabel">Synchronization interval</string>
+    <string name="settings_zoomcontrolbox">Enable zooming buttons</string>
     
     <string name="invites_activitylabel">Invites</string>
     
@@ -37,8 +38,8 @@
     
     <string name="account_activitylabel">Account</string>
     
-    <string name="login_username_hint">Username</string>
+    <string name="login_email_hint">E-mail address</string>
     <string name="login_password_hint">Password</string>
-    <string name="login_header">Please register or log in</string>
+    <string name="login_text">If you do not have an account yet, fill in the above and we\'ll create one for you</string>
     
 </resources>
