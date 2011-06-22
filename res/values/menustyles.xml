@@ -49,4 +49,9 @@
 		<item name="android:layout_width">100dip</item>
 		<item name="android:layout_height">wrap_content</item>
 	</style>
+	<style name="BodyLayout" parent="Fullwidth">
+	 	<item name="android:orientation">vertical</item>
+   		<item name="android:layout_height">wrap_content</item>
+		<item name="android:background">@drawable/background</item>
+	</style>
 </resources>

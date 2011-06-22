@@ -1,17 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- @author Joost -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
- 	android:orientation="vertical"
-   	android:layout_width="fill_parent"
-   	android:layout_height="wrap_content"
    	android:gravity="center"
-   	android:paddingTop="5sp"
-   	android:background="@drawable/background">
-   	<ImageView 
-	  	android:id="@+id/splashlogo"
-	  	android:src="@drawable/splashlogo"
-	  	android:layout_width="wrap_content"
-	  	android:layout_height="200dip" />
+   	style="@style/BodyLayout">
+   	<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+   		android:id="@+id/splashlogo"
+   		android:src="@drawable/splashlogo"
+   		android:layout_height="wrap_content"
+   		android:layout_width="wrap_content"
+
+   		/>
 	<EditText android:id="@+id/input_username"
 		style="@style/TextInput"
 		android:hint="@string/login_email_hint" />

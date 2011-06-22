@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.RadioButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -23,7 +24,6 @@ public class SettingsScreen extends Activity  {
 	public static final int RESULT_CANCEL = 41;
 	private int syncTime;
 	private boolean satelliteMode;
-	private boolean zoomControls;
 	
 	/**
 	 * Wordt aangeroepen wanneer deze activity wordt aangemaakt
@@ -37,10 +37,9 @@ public class SettingsScreen extends Activity  {
 		Bundle bundle = getIntent().getExtras();
 		satelliteMode = bundle.getBoolean(SATMODE_KEY);
 		syncTime = bundle.getInt(SYNCINTERVAL_KEY);
-		zoomControls = bundle.getBoolean(ZOOMCONTROLS_KEY);
 		
-		Log.v(Mapp.TAG, "Synctime"+syncTime);
-		
+		final CheckBox zoomcontrolBox = (CheckBox) findViewById(R.id.settings_zoomcontrolbox);
+		zoomcontrolBox.setChecked(bundle.getBoolean(ZOOMCONTROLS_KEY));
 		final RadioButton satbutton = (RadioButton) findViewById(R.id.settings_satbutton);
 		satbutton.setOnClickListener(new View.OnClickListener() {
 			/**
@@ -60,7 +59,7 @@ public class SettingsScreen extends Activity  {
 				satelliteMode = false;
             }
 		});
-
+		
 		final Button savebutton = (Button) findViewById(R.id.settings_savebutton);
 		savebutton.setOnClickListener(new View.OnClickListener() {
 			/**
@@ -71,6 +70,7 @@ public class SettingsScreen extends Activity  {
             	Bundle bundle = new Bundle();
 
             	bundle.putBoolean(SATMODE_KEY, satelliteMode);
+            	bundle.putBoolean(ZOOMCONTROLS_KEY, zoomcontrolBox.isChecked());
             	bundle.putInt(SYNCINTERVAL_KEY, syncTime);
             	
             	Intent mIntent = new Intent();
@@ -108,13 +108,13 @@ public class SettingsScreen extends Activity  {
 			}
 			
 			/**
-			 * Verplichte seekbar-methode, die wij niet nodig hebben
+			 * Verplichte seekbar-methode, die wij niet gaan gebruiken
 			 */
 			public void onStartTrackingTouch(SeekBar seekBar) {
 				// Auto-generated method stub
 			}
 			/**
-			 * Verplichte seekbar-methode, die wij niet nodig hebben
+			 * Verplichte seekbar-methode, die wij niet gaan gebruiken
 			 */
 			public void onStopTrackingTouch(SeekBar seekBar) {
 				// Auto-generated method stub
