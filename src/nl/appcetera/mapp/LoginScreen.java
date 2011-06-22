@@ -109,7 +109,7 @@ public class LoginScreen extends Activity {
 		
 	    return "";
 	}
-	
+	 
 	private boolean validCredentials(String username, String password) {
 		HttpGet httpg = new HttpGet(SyncClient.serverUrl + "user/");
 		UsernamePasswordCredentials creds = new UsernamePasswordCredentials(username, password);

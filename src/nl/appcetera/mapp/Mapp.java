@@ -370,7 +370,7 @@ public class Mapp extends MapActivity
 		bundle.putInt(SettingsScreen.SYNCINTERVAL_KEY, syncInterval);
 		//En we voegen de bundle bij de intent
 		intent.putExtras(bundle);
-
+ 
 		//We starten een nieuwe Activity
 		instance.startActivityForResult(intent, Mapp.SETTINGSSCREEN_ACTIVITYCODE);
 	}
