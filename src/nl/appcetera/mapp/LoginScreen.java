@@ -1,6 +1,9 @@
 package nl.appcetera.mapp;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -10,6 +13,9 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.auth.BasicScheme;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -49,19 +55,32 @@ public class LoginScreen extends Activity {
 			 * en de username en password worden opgeleverd in een Bundle
 			 */
 			public void onClick(View v) {
-				if (usernameField.getText().toString() == "") {
-					
+				String username = usernameField.getText().toString();
+				String password = passwordField.getText().toString();
+				if (username == "") {
+					toastMessage("Please fill in an e-mail address");
 				}
-				else if (passwordField.getText().toString() == "") {
-					
+				else if (password == "") {
+					toastMessage("Please fill in a password");
 				}
-				else if (true) {
+				else if (validCredentials(username, md5(password))) {
 					confirmLogin();
+				}
+				else {
+					String result = accountExists(username);
+					if (result == "unregistered") {
+						registerAccount(username, password);
+						confirmLogin();
+					}
 				}
             }
 		});
 	}
 	
+	/**
+	 * Rondt de loginprocedure af door het e=mailadres en wachtwoord op te slaan in de SharedPreferences
+	 * en de activity te termineren
+	 */
 	private void confirmLogin() {
 		SharedPreferences settings = getSharedPreferences(Mapp.SETTINGS_KEY, MODE_PRIVATE);
 		SharedPreferences.Editor editor = settings.edit();
@@ -109,7 +128,73 @@ public class LoginScreen extends Activity {
 		
 	    return "";
 	}
-	 
+	
+	/**
+	 * Functie die controleert of een e-mailadres al aan een account gekoppeld is
+	 * @param email het e-mailadres dat we willen verifi‘ren
+	 * @return String "unregistered" als het account niet bestaat, anders een foutmeleding
+	 */
+	private String accountExists(String email) {
+		
+		HttpGet httpg = new HttpGet(SyncClient.serverUrl + "is_registered/email/" + email);	
+	    HttpResponse response;
+	        
+	    try
+	    {
+	    	response = SyncClient.getClient().execute(httpg);
+				
+			// Lees het resultaat van de actie in
+			InputStream is = response.getEntity().getContent();
+			BufferedReader r = new BufferedReader(new InputStreamReader(is));
+			StringBuilder total = new StringBuilder();
+			String line;
+			while((line = r.readLine()) != null)
+			{
+			    total.append(line);
+			}
+
+			if(response.getStatusLine().getStatusCode() == 404)
+			{
+				return "Unknown error: unable to check e-mail existance";
+			}
+			else if(response.getStatusLine().getStatusCode() != 200)
+		    {
+				// Er is iets mis gegaan.
+				JSONObject result = new JSONObject(total.toString());
+				Log.e(Mapp.TAG, "Sync error: " + result.getString("message"));
+			    return (result.getString("message"));
+		    }
+			else
+			{
+				// Alles is blijkbaar goed gegaan
+				JSONArray result = new JSONArray(total.toString());
+				JSONObject jsonResult = result.getJSONObject(0);
+				return (jsonResult.getBoolean("registered") ? "registered" : "unregistered");
+			}
+		}
+	    catch (ClientProtocolException e)
+	    {
+			Log.e(Mapp.TAG, e.getMessage());
+			return "Epic HTTP failure";
+		}
+	    catch (IOException e)
+	    {
+	       	Log.e(Mapp.TAG, e.getMessage());
+	       	return "Exception during server synchronisation";
+		}
+	    catch (JSONException e)
+		{
+			Log.e(Mapp.TAG, "Sync failed. Response is no valid JSON or expected variable not found.");
+			return "Invalid server response";
+		}
+	}
+	
+	/**
+	 * Functie die controleert of een combinatie van e-mail en password toegang geeft tot dit account
+	 * @param username het e-mailadres wat we willen controleren
+	 * @param password het bijbehorende wachtwoord
+	 * @return true indien de combinatie e-mail en password klopt
+	 */
 	private boolean validCredentials(String username, String password) {
 		HttpGet httpg = new HttpGet(SyncClient.serverUrl + "user/");
 		UsernamePasswordCredentials creds = new UsernamePasswordCredentials(username, password);
@@ -159,6 +244,19 @@ public class LoginScreen extends Activity {
 		}
 		    
 		return false;
+	}
+	
+	private void registerAccount(String username, String password) {
+		// TODO Auto-generated method stub
+	}
+	
+	/**
+	 * Deze methode toont een toastberichtje - vooral een shortcode omdat 't anders steeds 3 regels kost
+	 * @param text het bericht dat getoond moet worden
+	 */
+	private void toastMessage(CharSequence text) {
+		Toast toast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG);
+		toast.show();
 	}
 }
  
