@@ -117,7 +117,8 @@ public class SyncClient
 		try
 		{
 			int syncTime = getSyncTimeStamp();
-			updateUserInfo();
+			deleteGroups();
+			updateGroups();
 			deletePolygons(group);
 			removeDeletedPolygons(group);
 			putPolygons(group);
@@ -751,7 +752,7 @@ public class SyncClient
 		}
 	}
 	
-	private void updateUserInfo() throws SyncException
+	private void updateGroups() throws SyncException
 	{		
 	    // Alle groepen die nog wel lokaal staan, maar waar volgens de server de gebruiker niet meer in zit,
 	    // keihard wegmikken.
@@ -832,15 +833,188 @@ public class SyncClient
 			throw new SyncException("Invalid server response");
 		}
 	    
+	    // Alles verwijderen wat niet meer op de server zit
+	    ArrayList<Integer> groupsInDb = new ArrayList<Integer>();
+	    
 	    do
 	    {
+	    	groupsInDb.add(c.getInt(0));
 	    	if(!userGroups.contains(c.getInt(0)))
 	    	{
 	    		db.removePolygonsFromGroup(c.getInt(0), false);
-	    		db.deleteGroup(c.getInt(0));
+	    		db.deleteMemberships(c.getInt(0));
+	    		db.removeGroup(c.getInt(0), false);
 	    	}
 	    }
 	    while(c.moveToNext());
+	    
+	    // En nu alles toevoegen wat nog niet lokaal zit
+	    for(int i : groupsInDb)
+	    {
+	    	if(!userGroups.contains(i))
+	    	{
+	    		getGroup(i);
+	    	}
+	    }
+	}
+	
+	/**
+	 * Verwijdert groepen op de server die lokaal verwijderd zijn
+	 * @throws SyncException
+	 */
+	private void deleteGroups() throws SyncException
+	{
+		Cursor c = db.getRemovedGroups();
+		if(!c.moveToFirst())
+		{
+			return; // Dat ging snel.
+		}
+		
+		do
+		{
+			int polygonid = c.getInt(0);
+			HttpDelete httpd = new HttpDelete(serverUrl + "group/id/" + polygonid);
+			UsernamePasswordCredentials creds = new UsernamePasswordCredentials(mappUser, mappPass);
+			
+			try
+			{
+				httpd.addHeader(new BasicScheme().authenticate(creds, httpd));
+			} 
+			catch (AuthenticationException e1)
+			{
+				Log.e(Mapp.TAG, e1.getStackTrace().toString());
+				throw new SyncException("Authentication failed");
+			}
+			
+	        HttpResponse response;
+	        
+	        try
+	        {
+				response = httpclient.execute(httpd);
+				
+				if(response.getStatusLine().getStatusCode() == 418)
+				{
+					throw new SyncException("Unable to synchronize because the server is a teapot.");
+				}
+				else if(response.getStatusLine().getStatusCode() != 200)
+		        {
+					// Er is iets mis gegaan.
+		        	// Lees de uitvoer
+		        	InputStream is = response.getEntity().getContent();
+				    BufferedReader r = new BufferedReader(new InputStreamReader(is));
+				    StringBuilder total = new StringBuilder();
+				    String line;
+				    while((line = r.readLine()) != null)
+				    {
+				        total.append(line);
+				    }
+	
+				    JSONObject result = null;
+				    result = new JSONObject(total.toString());
+			        Log.e(Mapp.TAG, "Sync error: " + result.getString("message"));
+			        throw new SyncException(result.getString("message"));
+		        }
+				else
+				{
+					db.removeRemovedGroup(polygonid);
+				}
+			}
+	        catch (ClientProtocolException e)
+	        {
+				Log.e(Mapp.TAG, e.getMessage());
+				throw new SyncException("Epic HTTP failure");
+			}
+	        catch (IOException e)
+	        {
+	        	Log.e(Mapp.TAG, e.getMessage());
+	        	throw new SyncException("Exception during server synchronisation");
+			}
+	        catch (JSONException e)
+			{
+				Log.e(Mapp.TAG, "Sync failed. Getting status message from JSON response failed.");
+				throw new SyncException("Invalid server response");
+			}
+		}
+		while(c.moveToNext());
+	}
+	
+	/**
+	 * Haalt info over de gegeven groep op en slaat deze lokaal op
+	 * @param i het id van de op te halen groep
+	 * @throws SyncException 
+	 */
+	private void getGroup(int id) throws SyncException
+	{
+		HttpGet httpg = new HttpGet(serverUrl + "group/id/" + id);
+		UsernamePasswordCredentials creds = new UsernamePasswordCredentials(mappUser, mappPass);
+
+		try
+		{
+			httpg.addHeader(new BasicScheme().authenticate(creds, httpg));
+		} 
+		catch (AuthenticationException e1)
+		{
+			Log.e(Mapp.TAG, e1.getMessage());
+			throw new SyncException("Authentication failed");
+		}
+		
+	    HttpResponse response;
+	        
+	    try
+	    {
+	    	response = httpclient.execute(httpg);
+				
+			// Lees het resultaat van de actie in
+			InputStream is = response.getEntity().getContent();
+			BufferedReader r = new BufferedReader(new InputStreamReader(is));
+			StringBuilder total = new StringBuilder();
+			String line;
+			while((line = r.readLine()) != null)
+			{
+			    total.append(line);
+			}
+
+			if(response.getStatusLine().getStatusCode() == 418)
+			{
+				throw new SyncException("Unable to synchronize because the server is a teapot.");
+			}
+			else if(response.getStatusLine().getStatusCode() != 200)
+		    {
+				// Er is iets mis gegaan.
+				JSONObject result = new JSONObject(total.toString());
+				Log.e(Mapp.TAG, "Sync error: " + result.getString("message"));
+			    throw new SyncException(result.getString("message"));
+		    }
+			else
+			{
+				// Alles is blijkbaar goed gegaan
+				JSONObject result = new JSONObject(total.toString());
+				db.addGroup(id, result.getString("email"), result.getString("name"));
+				
+				JSONArray members = result.getJSONArray("members");
+				
+				for(int i = 0; i < members.length(); i++)
+				{
+					JSONObject o = members.getJSONObject(i);
+					db.addMembership(o.getString("email"), id, (o.getString("accepted").equals("true")));
+				}
+			}
+		}
+	    catch (ClientProtocolException e)
+	    {
+			Log.e(Mapp.TAG, e.getMessage());
+			throw new SyncException("Epic HTTP failure");
+		}
+	    catch (IOException e)
+	    {
+	       	Log.e(Mapp.TAG, e.getMessage());
+	       	throw new SyncException("Exception during server synchronisation");
+		}
+	    catch (JSONException e)
+		{
+			Log.e(Mapp.TAG, "Sync failed. Response is no valid JSON or expected variable not found.");
+			throw new SyncException("Invalid server response");
+		}
 	}
 }
  

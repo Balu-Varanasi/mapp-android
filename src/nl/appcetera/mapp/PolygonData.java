@@ -14,7 +14,7 @@ import android.provider.BaseColumns;
 public class PolygonData extends SQLiteOpenHelper
 {
 	private static final String DATABASE_NAME = "mapp.db";
-	private static final int DATABASE_VERSION = 16;
+	private static final int DATABASE_VERSION = 18;
 	
 	private static final String POLYGON_TABLE_NAME 	= "polygondata";
 	private static final String POLYGON_ID 			= BaseColumns._ID;
@@ -47,6 +47,8 @@ public class PolygonData extends SQLiteOpenHelper
 	private static final String USERS_EMAIL 	 = "email";
 	
 	private static final String POLYGON_REMOVAL_TABLE_NAME = "removed_polygons";
+	
+	private static final String GROUP_REMOVAL_TABLE_NAME = "removed_groups";
 
 	public PolygonData(Context context)
 	{
@@ -62,12 +64,12 @@ public class PolygonData extends SQLiteOpenHelper
 	{
 		String sql = "";
 		
-		sql =
+		/*sql =
 			"CREATE TABLE " + USERS_TABLE_NAME + " ("
 			+ USERS_ID + " INTEGER NOT NULL, "
 			+ USERS_EMAIL + " TEXT NOT NULL "
 			+ ");";
-		db.execSQL(sql);
+		db.execSQL(sql);*/
 		
 		sql =
 		    "CREATE TABLE " + GROUPS_TABLE_NAME + " ("
@@ -81,12 +83,10 @@ public class PolygonData extends SQLiteOpenHelper
 		sql =
 			"CREATE TABLE " + GROUP_MEMBERS_TABLE_NAME + " ("
 				+ GROUPS_ID + " INTEGER NOT NULL, "
-				+ USERS_ID + " INTEGER NOT NULL, "
+				+ USERS_EMAIL + " TEXT NOT NULL, "
 				+ GROUP_MEMBERS_ACCEPTED + " INTEGER NOT NULL, "
 				+ "FOREIGN KEY(" + GROUPS_ID + ") REFERENCES " + GROUPS_TABLE_NAME 
-			      + "(" + GROUPS_ID + ") ON UPDATE CASCADE ON DELETE CASCADE, "
-			    + "FOREIGN KEY(" + USERS_ID + ") REFERENCES " + USERS_TABLE_NAME 
-			      + "(" + USERS_ID + ") ON UPDATE CASCADE ON DELETE CASCADE"
+			      + "(" + GROUPS_ID + ") ON UPDATE CASCADE ON DELETE CASCADE"
 				+ ");";
 		db.execSQL(sql);
 		
@@ -126,6 +126,12 @@ public class PolygonData extends SQLiteOpenHelper
 			  + POLYGON_GROUP + " INTEGER NOT NULL"
 			  + ");";
 		db.execSQL(sql);
+		
+		sql = 
+			"CREATE TABLE " + GROUP_REMOVAL_TABLE_NAME + " ("
+			  + GROUPS_ID + " INTEGER NOT NULL"
+			  + ");";
+		db.execSQL(sql);
 	}
 
 	/**
@@ -140,7 +146,8 @@ public class PolygonData extends SQLiteOpenHelper
 		db.execSQL("DROP TABLE IF EXISTS " + POLYGON_POINTS_TABLE_NAME);
 		db.execSQL("DROP TABLE IF EXISTS " + GROUPS_TABLE_NAME);
 		db.execSQL("DROP TABLE IF EXISTS " + POLYGON_REMOVAL_TABLE_NAME);
-		db.execSQL("DROP TABLE IF EXISTS " + USERS_TABLE_NAME);
+		db.execSQL("DROP TABLE IF EXISTS " + GROUP_REMOVAL_TABLE_NAME);
+		//db.execSQL("DROP TABLE IF EXISTS " + USERS_TABLE_NAME);
 		db.execSQL("DROP TABLE IF EXISTS " + GROUP_MEMBERS_TABLE_NAME);
 		onCreate(db);
 	}
@@ -515,36 +522,36 @@ public class PolygonData extends SQLiteOpenHelper
 	 * @param id het id van de gebruiker
 	 * @param email het e-mailadres van de gebruiker
 	 */
-	public synchronized void addUser(int id, String email)
+	/*public synchronized void addUser(int id, String email)
 	{
 		SQLiteDatabase db = getWritableDatabase();
 		ContentValues values = new ContentValues();
 		values.put(USERS_ID, id);
 		values.put(USERS_EMAIL, email);
 		db.insertOrThrow(USERS_TABLE_NAME, null, values);
-	}
+	}*/
 	
 	/**
 	 * Geeft de gevraagde gebruiker terug
 	 * @param id het id van de gebruiker
 	 * @return Cursor-object met gegevens over gebruiker
 	 */
-	public synchronized Cursor getUser(int id)
+	/*public synchronized Cursor getUser(int id)
 	{
 		SQLiteDatabase db = getReadableDatabase();
 		Cursor c = db.query(USERS_TABLE_NAME, new String[]{USERS_EMAIL}, USERS_ID + "=" + id, null, null, null, null);
 		return c;
-	}
+	}*/
 	
 	/**
 	 * Verwijder de gegeven gebruiker
 	 * @param id het id van de te verwijderen gebruiker
 	 */
-	public synchronized void deleteUser(int id)
+	/*public synchronized void deleteUser(int id)
 	{
 		SQLiteDatabase db = getWritableDatabase();
 		db.delete(USERS_TABLE_NAME, USERS_ID + "=" + id, null);
-	}
+	}*/
 
 	/**
 	 * Voegt een groep toe aan de database
@@ -588,8 +595,37 @@ public class PolygonData extends SQLiteOpenHelper
 	/**
 	 * Verwijderd de gegeven groep
 	 * @param id het id van de te verwijderen groep
+	 * @param local true indien de groep lokaal verwijderd werd, false indien van de server
 	 */
-	public synchronized void deleteGroup(int id)
+	public synchronized void removeGroup(int id, boolean local)
+	{
+		SQLiteDatabase db = getWritableDatabase();
+		db.delete(GROUPS_TABLE_NAME, GROUPS_ID + "=" + id, null);
+		
+		if(local)
+		{
+			ContentValues values = new ContentValues();
+			values.put(GROUPS_ID, id);
+			db.insertOrThrow(GROUP_REMOVAL_TABLE_NAME, null, values);
+		}
+	}
+	
+	/**
+	 * Geeft een cursor met alle verwijderde polygonen
+	 * @return cursorobject met alle verwijderde polygonen
+	 */
+	public synchronized Cursor getRemovedGroups()
+	{
+		SQLiteDatabase db = getReadableDatabase();
+		Cursor c = db.query(GROUP_REMOVAL_TABLE_NAME, new String[]{GROUPS_ID}, null, null, null, null, null);
+		return c;
+	}
+	
+	/**
+	 * Verwijdert een groep uit de lijst verwijderde groepen
+	 * @param id het id van de verwijderde groep
+	 */
+	public synchronized void removeRemovedGroup(int id)
 	{
 		SQLiteDatabase db = getWritableDatabase();
 		db.delete(GROUPS_TABLE_NAME, GROUPS_ID + "=" + id, null);
@@ -601,12 +637,12 @@ public class PolygonData extends SQLiteOpenHelper
 	 * @param group het id van de groep
 	 * @param accepted reeds geaccepteerd ja/nee
 	 */
-	public synchronized void addMembership(int user, int group, boolean accepted)
+	public synchronized void addMembership(String user, int group, boolean accepted)
 	{
 		SQLiteDatabase db = getWritableDatabase();
 		ContentValues values = new ContentValues();
 		values.put(GROUPS_ID, group);
-		values.put(USERS_ID, user);
+		values.put(USERS_EMAIL, user);
 		values.put(GROUP_MEMBERS_ACCEPTED, (accepted ? 1 : 0));
 		db.insertOrThrow(GROUP_MEMBERS_TABLE_NAME, null, values);
 	}
@@ -616,10 +652,10 @@ public class PolygonData extends SQLiteOpenHelper
 	 * @param user het id van de gebruiker
 	 * @param group het id van de groep
 	 */
-	public synchronized void deleteMembership(int user, int group)
+	public synchronized void deleteMemberships(int group)
 	{
 		SQLiteDatabase db = getWritableDatabase();
-		db.delete(GROUP_MEMBERS_TABLE_NAME, GROUPS_ID + "=" + group + " AND " + USERS_ID + "=" + user, null);
+		db.delete(GROUP_MEMBERS_TABLE_NAME, GROUPS_ID + "=" + group, null);
 	}
 	
 	/**
@@ -627,11 +663,11 @@ public class PolygonData extends SQLiteOpenHelper
 	 * @param user het id van de gebruiker
 	 * @return een Cursorobject met alle groepid's van de gebruiker
 	 */
-	public synchronized Cursor getMemberShips(int user)
+	public synchronized Cursor getMemberShips(String user)
 	{
 		SQLiteDatabase db = getReadableDatabase();
 		Cursor c = db.query(GROUP_MEMBERS_TABLE_NAME, new String[]{GROUPS_ID}, 
-				USERS_ID + "=" + user + " AND " + GROUP_MEMBERS_ACCEPTED + "=1", null, null, null, null);
+				USERS_EMAIL + "=\"" + user + "\" AND " + GROUP_MEMBERS_ACCEPTED + "=1", null, null, null, null);
 		return c;
 	}
 	
@@ -640,7 +676,7 @@ public class PolygonData extends SQLiteOpenHelper
 	 * @param user het id van de gebruiker
 	 * @param group het id van de groep
 	 */
-	public synchronized void acceptMembership(int user, int group)
+	/*public synchronized void acceptMembership(int user, int group)
 	{
 		SQLiteDatabase db = getWritableDatabase();
 		ContentValues values = new ContentValues();
@@ -648,5 +684,5 @@ public class PolygonData extends SQLiteOpenHelper
 		values.put(USERS_ID, user);
 		values.put(GROUP_MEMBERS_ACCEPTED, 1);
 		db.update(GROUP_MEMBERS_TABLE_NAME, values, null, null);
-	}
+	}*/
 }
