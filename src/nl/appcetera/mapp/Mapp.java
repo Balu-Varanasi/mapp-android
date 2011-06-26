@@ -40,7 +40,7 @@ public class Mapp extends MapActivity
 	public static final int polygonMinDisplayWidth = 5; // Wanneer een polygoon smaller is dan dit wordt ie niet getoond
 	public static int syncInterval = 60*1000; // Interval tussen synchronisaties in milliseconden
 	public static final int offlineRetryInterval = 30*60*1000; // Interval tussen sync-attempts als toestel offline is
-	public static final int metaTouchDuration = 1000; //touch-duration waarna we naar de meta-activity gaan
+	public static final int metaTouchDuration = 500; //touch-duration waarna we naar de meta-activity gaan
 	public static final int META_EDITSCREEN_ACTIVITYCODE = 42;
 	public static final int SETTINGSSCREEN_ACTIVITYCODE = 314;
 	public static final int ACCOUNTSCREEN_ACTIVITYCODE = 271;
