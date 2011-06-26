@@ -387,7 +387,7 @@ public class Mapp extends MapActivity
 	 */
 	private boolean isLoggedIn() {
 		Log.v(TAG, "Checking if logged");
-		return settings.getString("username", null) != null && settings.getString("password", null) != null;
+		return settings.getString("username", null) != "" && settings.getString("password", null) != "" && settings.getString("username", null) != null && settings.getString("password", null) != null;
 	}
 	
 	/**

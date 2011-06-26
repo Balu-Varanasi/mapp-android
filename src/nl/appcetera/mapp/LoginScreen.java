@@ -64,14 +64,15 @@ public class LoginScreen extends Activity {
 			public void onClick(View v) {
 				String username = usernameField.getText().toString();
 				String password = passwordField.getText().toString();
-				if (username == "") {
+				if (username == "" || username == null) {
 					toastMessage("Please fill in an email address");
 				}
-				else if (password == "") {
+				else if (password == "" || password == null) {
 					toastMessage("Please fill in a password");
 				}
 				else
 				{
+					String loginError = null;
 					try
 					{
 						validCredentials(username, md5(password));
@@ -80,9 +81,8 @@ public class LoginScreen extends Activity {
 					}
 					catch(SyncException e)
 					{
-						toastMessage(e.getMessage());
+						loginError = e.getMessage();
 					}
-
 					String result = accountExists(username);
 					if (result == "unregistered")
 					{
@@ -90,6 +90,7 @@ public class LoginScreen extends Activity {
 						{
 							registerAccount(username, password);
 							confirmLogin();
+							return;
 						}
 						catch (SyncException e)
 						{
@@ -98,7 +99,14 @@ public class LoginScreen extends Activity {
 					}
 					else
 					{
-						toastMessage(result);
+						if (result != "registered")
+						{
+							toastMessage(result);
+						}
+						else
+						{
+							toastMessage(loginError);
+						}
 					}
 				}
             }
@@ -110,6 +118,8 @@ public class LoginScreen extends Activity {
 	 * en de activity te termineren
 	 */
 	private void confirmLogin() {
+		Log.v(Mapp.TAG, "Confirming login");
+		
 		SharedPreferences settings = getSharedPreferences(Mapp.SETTINGS_KEY, MODE_PRIVATE);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putString("username", usernameField.getText().toString().toLowerCase());
@@ -217,7 +227,7 @@ public class LoginScreen extends Activity {
 	    catch (IOException e)
 	    {
 	       	Log.e(Mapp.TAG, e.getMessage());
-	       	return "Exception during server synchronisation";
+	       	return "Error during server synchronisation";
 		}
 	    catch (JSONException e)
 		{
@@ -233,7 +243,7 @@ public class LoginScreen extends Activity {
 	 * @return true indien de combinatie e-mail en password klopt
 	 * @throws SyncException 
 	 */
-	private boolean validCredentials(String username, String password) throws SyncException
+	private void validCredentials(String username, String password) throws SyncException
 	{
 		HttpGet httpg = new HttpGet(SyncClient.serverUrl + "user/");
 		UsernamePasswordCredentials creds = new UsernamePasswordCredentials(username.toLowerCase(), password.toLowerCase());
@@ -255,7 +265,7 @@ public class LoginScreen extends Activity {
 			
 			if(response.getStatusLine().getStatusCode() == 401)
 			{
-				return false;
+				throw new SyncException("Authentication failed. Please try again.");
 			}
 			else if(response.getStatusLine().getStatusCode() != 200)
 			{
@@ -263,7 +273,7 @@ public class LoginScreen extends Activity {
 			}
 			else
 			{
-				return true;
+				return;
 			}
 		}
 		catch (ClientProtocolException e) 
@@ -274,8 +284,7 @@ public class LoginScreen extends Activity {
 		{
 			e.printStackTrace();
 		}
-		
-		return false;
+		throw new SyncException("Authentication failed. Please try again.");
 	}
 	
 	private void registerAccount(String username, String password) throws SyncException
@@ -324,7 +333,7 @@ public class LoginScreen extends Activity {
         catch (IOException e)
         {
         	Log.e(Mapp.TAG, e.getMessage());
-        	throw new SyncException("Exception during server synchronisation");
+        	throw new SyncException("Error during server synchronisation");
 		}
         catch (JSONException e)
 		{
