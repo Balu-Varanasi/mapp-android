@@ -186,6 +186,10 @@ public class SyncClient
 				{
 					throw new SyncException("Unable to synchronize because the server is a teapot.");
 				}
+				else if(response.getStatusLine().getStatusCode() == 401)
+				{
+					throw new SyncException("Not authorized");
+				}
 				else if(response.getStatusLine().getStatusCode() != 200)
 		        {
 					// Er is iets mis gegaan.
@@ -319,6 +323,10 @@ public class SyncClient
 				{
 					throw new SyncException("Unable to synchronize because the server is a teapot.");
 				}
+			    else if(response.getStatusLine().getStatusCode() == 401)
+				{
+					throw new SyncException("Not authorized");
+				}
 			    else if(response.getStatusLine().getStatusCode() != 200)
 		        {
 					// Er is iets mis gegaan.
@@ -348,7 +356,7 @@ public class SyncClient
 				throw new SyncException("Invalid server response");
 			}
 	        
-	        //c.requery();// Opnieuw laden omdat polygoonid's gewijzigd kunnen zijn inmiddels
+	        c.requery();// Opnieuw laden omdat polygoonid's gewijzigd kunnen zijn inmiddels
 		}
 		while(c.moveToNext());
 	}
@@ -431,6 +439,10 @@ public class SyncClient
 				if(response.getStatusLine().getStatusCode() == 418)
 				{
 					throw new SyncException("Unable to synchronize because the server is a teapot.");
+				}
+				else if(response.getStatusLine().getStatusCode() == 401)
+				{
+					throw new SyncException("Not authorized");
 				}
 				else if(response.getStatusLine().getStatusCode() != 200)
 		        {
@@ -526,6 +538,10 @@ public class SyncClient
 			if(response.getStatusLine().getStatusCode() == 418)
 			{
 				throw new SyncException("Unable to synchronize because the server is a teapot.");
+			}
+			else if(response.getStatusLine().getStatusCode() == 401)
+			{
+				throw new SyncException("Not authorized");
 			}
 			else if(response.getStatusLine().getStatusCode() == 404)
 			{
@@ -626,6 +642,10 @@ public class SyncClient
 			if(response.getStatusLine().getStatusCode() == 418)
 			{
 				throw new SyncException("Unable to synchronize because the server is a teapot.");
+			}
+			else if(response.getStatusLine().getStatusCode() == 401)
+			{
+				throw new SyncException("Not authorized");
 			}
 			else if(response.getStatusLine().getStatusCode() == 404)
 			{
@@ -797,6 +817,10 @@ public class SyncClient
 			{
 				throw new SyncException("Unable to synchronize because the server is a teapot.");
 			}
+			else if(response.getStatusLine().getStatusCode() == 401)
+			{
+				throw new SyncException("Not authorized");
+			}
 			else if(response.getStatusLine().getStatusCode() != 200)
 		    {
 				// Er is iets mis gegaan.
@@ -896,6 +920,10 @@ public class SyncClient
 				{
 					throw new SyncException("Unable to synchronize because the server is a teapot.");
 				}
+				else if(response.getStatusLine().getStatusCode() == 401)
+				{
+					throw new SyncException("Not authorized");
+				}
 				else if(response.getStatusLine().getStatusCode() != 200)
 		        {
 					// Er is iets mis gegaan.
@@ -977,6 +1005,10 @@ public class SyncClient
 			if(response.getStatusLine().getStatusCode() == 418)
 			{
 				throw new SyncException("Unable to synchronize because the server is a teapot.");
+			}
+			else if(response.getStatusLine().getStatusCode() == 401)
+			{
+				throw new SyncException("Not authorized");
 			}
 			else if(response.getStatusLine().getStatusCode() != 200)
 		    {

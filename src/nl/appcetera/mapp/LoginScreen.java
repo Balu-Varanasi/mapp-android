@@ -4,15 +4,22 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthenticationException;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -58,19 +65,40 @@ public class LoginScreen extends Activity {
 				String username = usernameField.getText().toString();
 				String password = passwordField.getText().toString();
 				if (username == "") {
-					toastMessage("Please fill in an e-mail address");
+					toastMessage("Please fill in an email address");
 				}
 				else if (password == "") {
 					toastMessage("Please fill in a password");
 				}
-				else if (validCredentials(username, md5(password))) {
-					confirmLogin();
-				}
-				else {
-					String result = accountExists(username);
-					if (result == "unregistered") {
-						registerAccount(username, password);
+				else
+				{
+					try
+					{
+						validCredentials(username, md5(password));
 						confirmLogin();
+						return;
+					}
+					catch(SyncException e)
+					{
+						toastMessage(e.getMessage());
+					}
+
+					String result = accountExists(username);
+					if (result == "unregistered")
+					{
+						try
+						{
+							registerAccount(username, password);
+							confirmLogin();
+						}
+						catch (SyncException e)
+						{
+							toastMessage("Your account could not be registered.");
+						}
+					}
+					else
+					{
+						toastMessage(result);
 					}
 				}
             }
@@ -84,8 +112,8 @@ public class LoginScreen extends Activity {
 	private void confirmLogin() {
 		SharedPreferences settings = getSharedPreferences(Mapp.SETTINGS_KEY, MODE_PRIVATE);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putString("username", usernameField.getText().toString());
-		editor.putString("password", md5(passwordField.getText().toString()));
+		editor.putString("username", usernameField.getText().toString().toLowerCase());
+		editor.putString("password", md5(passwordField.getText().toString().toLowerCase()));
 		editor.commit();
     	
     	Intent mIntent = new Intent();
@@ -131,12 +159,21 @@ public class LoginScreen extends Activity {
 	
 	/**
 	 * Functie die controleert of een e-mailadres al aan een account gekoppeld is
-	 * @param email het e-mailadres dat we willen verifi‘ren
-	 * @return String "unregistered" als het account niet bestaat, anders een foutmeleding
+	 * @param email het e-mailadres dat we willen verifiëren
+	 * @return String "unregistered" als het account niet bestaat, anders een foutmelding
 	 */
 	private String accountExists(String email) {
 		
-		HttpGet httpg = new HttpGet(SyncClient.serverUrl + "is_registered/email/" + email);	
+		HttpGet httpg;
+		try
+		{
+			httpg = new HttpGet(SyncClient.serverUrl + "is_registered/email/" + 
+					URLEncoder.encode(email.toLowerCase(), "UTF8"));
+		}
+		catch (UnsupportedEncodingException e1)
+		{
+			return "Encoding error";
+		}	
 	    HttpResponse response;
 	        
 	    try
@@ -194,10 +231,12 @@ public class LoginScreen extends Activity {
 	 * @param username het e-mailadres wat we willen controleren
 	 * @param password het bijbehorende wachtwoord
 	 * @return true indien de combinatie e-mail en password klopt
+	 * @throws SyncException 
 	 */
-	private boolean validCredentials(String username, String password) {
+	private boolean validCredentials(String username, String password) throws SyncException
+	{
 		HttpGet httpg = new HttpGet(SyncClient.serverUrl + "user/");
-		UsernamePasswordCredentials creds = new UsernamePasswordCredentials(username, password);
+		UsernamePasswordCredentials creds = new UsernamePasswordCredentials(username.toLowerCase(), password.toLowerCase());
 		try
 		{
 			httpg.addHeader(new BasicScheme().authenticate(creds, httpg));
@@ -205,10 +244,7 @@ public class LoginScreen extends Activity {
 		catch (AuthenticationException e1)
 		{
 			Log.e(Mapp.TAG, e1.getMessage());
-			CharSequence text = "Authentication failed. Please try again.";
-			Toast toast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG);
-			toast.show();
-			return false;
+			throw new SyncException("Authentication failed. Please try again.");
 		}
 		
 		HttpResponse response;
@@ -219,20 +255,16 @@ public class LoginScreen extends Activity {
 			
 			if(response.getStatusLine().getStatusCode() == 401)
 			{
-				CharSequence text = "Incorrect password or email address. Please try again.";
-				Toast toast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG);
-				toast.show();
 				return false;
 			}
 			else if(response.getStatusLine().getStatusCode() != 200)
 			{
-				CharSequence text = "Server error. Please try again later.";
-				Toast toast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG);
-				toast.show();
-				return false;
+				throw new SyncException("Server error. Please try again later.");
 			}
-			
-			return true;
+			else
+			{
+				return true;
+			}
 		}
 		catch (ClientProtocolException e) 
 		{
@@ -242,12 +274,63 @@ public class LoginScreen extends Activity {
 		{
 			e.printStackTrace();
 		}
-		    
+		
 		return false;
 	}
 	
-	private void registerAccount(String username, String password) {
-		// TODO Auto-generated method stub
+	private void registerAccount(String username, String password) throws SyncException
+	{
+		HttpPut httpp = new HttpPut(SyncClient.serverUrl + "new_user");
+		
+		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+        nameValuePairs.add(new BasicNameValuePair("email", username.toLowerCase()));
+        nameValuePairs.add(new BasicNameValuePair("password", md5(password.toLowerCase())));
+		
+        HttpResponse response;
+        
+        try
+        {
+			response = SyncClient.getClient().execute(httpp);
+			
+			// Lees het resultaat van de actie in
+			JSONObject result = null;
+			InputStream is = response.getEntity().getContent();
+		    BufferedReader r = new BufferedReader(new InputStreamReader(is));
+		    StringBuilder total = new StringBuilder();
+		    String line;
+		    while((line = r.readLine()) != null)
+		    {
+		        total.append(line);
+		    }
+
+		    result = new JSONObject(total.toString());
+			
+		    if(response.getStatusLine().getStatusCode() == 418)
+			{
+				throw new SyncException("Unable to synchronize because the server is a teapot.");
+			}
+		    else if(response.getStatusLine().getStatusCode() != 200)
+	        {
+				// Er is iets mis gegaan.
+		        Log.e(Mapp.TAG, "Sync error: " + result.getString("message"));
+		        throw new SyncException(result.getString("message"));
+	        }
+		}
+        catch (ClientProtocolException e)
+        {
+			Log.e(Mapp.TAG, e.getMessage());
+			throw new SyncException("Epic HTTP failure");
+		}
+        catch (IOException e)
+        {
+        	Log.e(Mapp.TAG, e.getMessage());
+        	throw new SyncException("Exception during server synchronisation");
+		}
+        catch (JSONException e)
+		{
+			Log.e(Mapp.TAG, "Sync failed. Response is no valid JSON or expected variable not found.");
+			throw new SyncException("Invalid server response");
+		}
 	}
 	
 	/**

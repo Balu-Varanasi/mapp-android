@@ -128,7 +128,11 @@ public class Mapp extends MapActivity
 	        om.setGroup(1);
 	        om.loadOverlays();
 		}
-		else {
+		else
+		{
+			database = new PolygonData(this);
+			database.empty();
+			settings.edit().clear().commit();
 			showLoginScreen();
 		}
 	}

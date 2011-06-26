@@ -14,7 +14,7 @@ import android.provider.BaseColumns;
 public class PolygonData extends SQLiteOpenHelper
 {
 	private static final String DATABASE_NAME = "mapp.db";
-	private static final int DATABASE_VERSION = 18;
+	private static final int DATABASE_VERSION = 19;
 	
 	private static final String POLYGON_TABLE_NAME 	= "polygondata";
 	private static final String POLYGON_ID 			= BaseColumns._ID;
@@ -150,6 +150,14 @@ public class PolygonData extends SQLiteOpenHelper
 		//db.execSQL("DROP TABLE IF EXISTS " + USERS_TABLE_NAME);
 		db.execSQL("DROP TABLE IF EXISTS " + GROUP_MEMBERS_TABLE_NAME);
 		onCreate(db);
+	}
+	
+	/**
+	 * Maakt de database leeg
+	 */
+	public void empty()
+	{
+		onUpgrade(getWritableDatabase(), DATABASE_VERSION-1, DATABASE_VERSION);
 	}
 	
 	/**
