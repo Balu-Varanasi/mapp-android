@@ -14,7 +14,7 @@ import android.provider.BaseColumns;
 public class PolygonData extends SQLiteOpenHelper
 {
 	private static final String DATABASE_NAME = "mapp.db";
-	private static final int DATABASE_VERSION = 19;
+	private static final int DATABASE_VERSION = 20;
 	
 	private static final String POLYGON_TABLE_NAME 	= "polygondata";
 	private static final String POLYGON_ID 			= BaseColumns._ID;
@@ -38,12 +38,16 @@ public class PolygonData extends SQLiteOpenHelper
 	private static final String GROUPS_ID			= "groupid";
 	private static final String GROUPS_OWNER		= "owner";
 	private static final String GROUPS_NAME			= "group_name";
+	private static final String GROUPS_NEW			= "new";
+	private static final String GROUPS_CHANGED		= "changed";
 	
 	private static final String GROUP_MEMBERS_TABLE_NAME = "group_members";
 	private static final String GROUP_MEMBERS_ACCEPTED   = "accepted";
+	private static final String GROUP_MEMBERS_NEW		 = "new";
+	private static final String GROUP_MEMBERS_CHANGED	 = "changed";
 	
-	private static final String USERS_TABLE_NAME = "users";
-	private static final String USERS_ID 		 = "userid";
+	/*private static final String USERS_TABLE_NAME = "users";
+	private static final String USERS_ID 		 = "userid";*/
 	private static final String USERS_EMAIL 	 = "email";
 	
 	private static final String POLYGON_REMOVAL_TABLE_NAME = "removed_polygons";
@@ -75,7 +79,9 @@ public class PolygonData extends SQLiteOpenHelper
 		    "CREATE TABLE " + GROUPS_TABLE_NAME + " ("
 		      + GROUPS_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
 		      + GROUPS_OWNER + " TEXT NOT NULL, "
-		      + GROUPS_NAME + " TEXT"
+		      + GROUPS_NAME + " TEXT, "
+		      + GROUPS_NEW + " INTEGER NULL, "
+		      + GROUPS_CHANGED + " INTEGER NULL"
 		      + ");";
 		db.execSQL(sql);
 		db.execSQL("INSERT INTO " + GROUPS_TABLE_NAME + " (" + GROUPS_NAME + "," + GROUPS_OWNER + ") VALUES ('Default','info@mathijsvos.nl')");
@@ -85,6 +91,8 @@ public class PolygonData extends SQLiteOpenHelper
 				+ GROUPS_ID + " INTEGER NOT NULL, "
 				+ USERS_EMAIL + " TEXT NOT NULL, "
 				+ GROUP_MEMBERS_ACCEPTED + " INTEGER NOT NULL, "
+				+ GROUP_MEMBERS_NEW + " INTEGER NULL, "
+				+ GROUP_MEMBERS_CHANGED + " INTEGER NULL, "
 				+ "FOREIGN KEY(" + GROUPS_ID + ") REFERENCES " + GROUPS_TABLE_NAME 
 			      + "(" + GROUPS_ID + ") ON UPDATE CASCADE ON DELETE CASCADE"
 				+ ");";
@@ -566,15 +574,34 @@ public class PolygonData extends SQLiteOpenHelper
 	 * @param id het id van de groep
 	 * @param owner het e-mailadres van de eigenaar van de groep
 	 * @param name de naam van de groep
+	 * @local true indien de groep lokaal werd aangemaakt, false indien ie van de server komt
 	 */
-	public synchronized void addGroup(int id, String owner, String name)
+	public synchronized void addGroup(int id, String owner, String name, boolean local)
 	{
 		SQLiteDatabase db = getWritableDatabase();
 		ContentValues values = new ContentValues();
 		values.put(GROUPS_ID, id);
 		values.put(GROUPS_OWNER, owner);
 		values.put(GROUPS_NAME, name);
+		values.put(GROUPS_NEW, (local ? 1 : 0));
 		db.insertOrThrow(GROUPS_TABLE_NAME, null, values);
+	}
+	
+	/**
+	 * Bewerkt een groep
+	 * @param id het id van de te bewerken groep
+	 * @param owner het e-mailadres van de eigenaar van de groep
+	 * @param name de naam van de groep
+	 * @local true indien de groep lokaal werd bewerkt, false indien ie van de server komt
+	 */
+	public synchronized void editGroup(int id, String owner, String name, boolean local)
+	{
+		SQLiteDatabase db = getWritableDatabase();
+		ContentValues values = new ContentValues();
+		values.put(GROUPS_OWNER, owner);
+		values.put(GROUPS_NAME, name);
+		values.put(GROUPS_CHANGED, (local ? 1 : 0));
+		db.update(GROUPS_TABLE_NAME, values, GROUPS_ID + "=" + id, null);
 	}
 
 	/**
@@ -601,7 +628,7 @@ public class PolygonData extends SQLiteOpenHelper
 	}
 	
 	/**
-	 * Verwijderd de gegeven groep
+	 * Verwijdert de gegeven groep
 	 * @param id het id van de te verwijderen groep
 	 * @param local true indien de groep lokaal verwijderd werd, false indien van de server
 	 */
@@ -644,8 +671,9 @@ public class PolygonData extends SQLiteOpenHelper
 	 * @param user het id van de gebruiker
 	 * @param group het id van de groep
 	 * @param accepted reeds geaccepteerd ja/nee
+	 * @param local true indien membership lokaal toegevoegd werd
 	 */
-	public synchronized void addMembership(String user, int group, boolean accepted)
+	public synchronized void addMembership(String user, int group, boolean accepted, boolean local)
 	{
 		SQLiteDatabase db = getWritableDatabase();
 		ContentValues values = new ContentValues();
@@ -667,6 +695,19 @@ public class PolygonData extends SQLiteOpenHelper
 	}
 	
 	/**
+	 * Geeft de emailadressen van alle leden van een groep terug
+	 * @param group
+	 * @return een Cursorobject met alle leden van de groep
+	 */
+	public synchronized Cursor getGroupMembers(int group)
+	{
+		SQLiteDatabase db = getReadableDatabase();
+		Cursor c = db.query(GROUP_MEMBERS_TABLE_NAME, new String[]{USERS_EMAIL, GROUP_MEMBERS_ACCEPTED}, 
+				GROUPS_ID + "=" + group, null, null, null, null);
+		return c;
+	}
+	
+	/**
 	 * Geeft alle geaccepteerde memberships van de gegeven gebruiker terug
 	 * @param user het id van de gebruiker
 	 * @return een Cursorobject met alle groepid's van de gebruiker
@@ -680,17 +721,17 @@ public class PolygonData extends SQLiteOpenHelper
 	}
 	
 	/**
-	 * Accepteer een membership voor de gegeven gebruiker + groep
-	 * @param user het id van de gebruiker
+	 * Accepteer een membership voor de groep
+	 * @param user het emailadres van de gebruiker
 	 * @param group het id van de groep
 	 */
-	/*public synchronized void acceptMembership(int user, int group)
+	public synchronized void acceptMembership(String user, int group)
 	{
 		SQLiteDatabase db = getWritableDatabase();
 		ContentValues values = new ContentValues();
 		values.put(GROUPS_ID, group);
-		values.put(USERS_ID, user);
+		values.put(USERS_EMAIL, user);
 		values.put(GROUP_MEMBERS_ACCEPTED, 1);
-		db.update(GROUP_MEMBERS_TABLE_NAME, values, null, null);
-	}*/
+		db.insertOrThrow(GROUP_MEMBERS_TABLE_NAME, null, values);
+	}
 }

@@ -119,6 +119,7 @@ public class SyncClient
 			int syncTime = getSyncTimeStamp();
 			deleteGroups();
 			updateGroups();
+			putMemberships();
 			deletePolygons(group);
 			removeDeletedPolygons(group);
 			putPolygons(group);
@@ -772,6 +773,10 @@ public class SyncClient
 		}
 	}
 	
+	/**
+	 * Werkt groepen bij
+	 * @throws SyncException
+	 */
 	private void updateGroups() throws SyncException
 	{		
 	    // Alle groepen die nog wel lokaal staan, maar waar volgens de server de gebruiker niet meer in zit,
@@ -1021,14 +1026,14 @@ public class SyncClient
 			{
 				// Alles is blijkbaar goed gegaan
 				JSONObject result = new JSONObject(total.toString());
-				db.addGroup(id, result.getString("email"), result.getString("name"));
+				db.addGroup(id, result.getString("email"), result.getString("name"), false);
 				
 				JSONArray members = result.getJSONArray("members");
 				
 				for(int i = 0; i < members.length(); i++)
 				{
 					JSONObject o = members.getJSONObject(i);
-					db.addMembership(o.getString("email"), id, (o.getString("accepted").equals("true")));
+					db.addMembership(o.getString("email"), id, (o.getString("accepted").equals("true")), false);
 				}
 			}
 		}
@@ -1047,6 +1052,11 @@ public class SyncClient
 			Log.e(Mapp.TAG, "Sync failed. Response is no valid JSON or expected variable not found.");
 			throw new SyncException("Invalid server response");
 		}
+	}
+	
+	private void putMemberships()
+	{
+		
 	}
 }
  
