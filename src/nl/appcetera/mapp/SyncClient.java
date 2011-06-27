@@ -1026,7 +1026,7 @@ public class SyncClient
 			{
 				// Alles is blijkbaar goed gegaan
 				JSONObject result = new JSONObject(total.toString());
-				db.addGroup(id, result.getString("email"), result.getString("name"), false);
+				db.addGroup(result.getString("email"), result.getString("name"), false);
 				
 				JSONArray members = result.getJSONArray("members");
 				

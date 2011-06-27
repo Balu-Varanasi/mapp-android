@@ -55,6 +55,12 @@ public class LoginScreen extends Activity {
 		usernameField = (EditText) findViewById(R.id.input_username);
 		passwordField = (EditText) findViewById(R.id.input_password);
 	
+		if (Mapp.LOGIN_DISABLED) {
+			usernameField.setText("broodje_kroket@student.ru.nl");
+			passwordField.setText("boe");
+			confirmLogin();
+		}
+		
 		final Button loginbutton = (Button) findViewById(R.id.login_loginbutton);
 		loginbutton.setOnClickListener(new View.OnClickListener() {
 			/**
@@ -119,8 +125,6 @@ public class LoginScreen extends Activity {
 	 * en de activity te termineren
 	 */
 	private void confirmLogin() {
-		Log.v(Mapp.TAG, "Confirming login");
-		
 		SharedPreferences settings = getSharedPreferences(Mapp.SETTINGS_KEY, MODE_PRIVATE);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putString("username", usernameField.getText().toString().toLowerCase());

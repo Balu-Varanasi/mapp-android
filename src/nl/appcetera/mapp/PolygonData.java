@@ -14,7 +14,7 @@ import android.provider.BaseColumns;
 public class PolygonData extends SQLiteOpenHelper
 {
 	private static final String DATABASE_NAME = "mapp.db";
-	private static final int DATABASE_VERSION = 20;
+	private static final int DATABASE_VERSION = 21;
 	
 	private static final String POLYGON_TABLE_NAME 	= "polygondata";
 	private static final String POLYGON_ID 			= BaseColumns._ID;
@@ -571,16 +571,14 @@ public class PolygonData extends SQLiteOpenHelper
 
 	/**
 	 * Voegt een groep toe aan de database
-	 * @param id het id van de groep
 	 * @param owner het e-mailadres van de eigenaar van de groep
 	 * @param name de naam van de groep
 	 * @local true indien de groep lokaal werd aangemaakt, false indien ie van de server komt
 	 */
-	public synchronized void addGroup(int id, String owner, String name, boolean local)
+	public synchronized void addGroup(String owner, String name, boolean local)
 	{
 		SQLiteDatabase db = getWritableDatabase();
 		ContentValues values = new ContentValues();
-		values.put(GROUPS_ID, id);
 		values.put(GROUPS_OWNER, owner);
 		values.put(GROUPS_NAME, name);
 		values.put(GROUPS_NEW, (local ? 1 : 0));

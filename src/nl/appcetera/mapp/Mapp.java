@@ -387,8 +387,6 @@ public class Mapp extends MapActivity
 	 * @return true indien er een gebruiker ingelogd is
 	 */
 	private boolean isLoggedIn() {
-		if (LOGIN_DISABLED)
-			return true;
 		return settings.getString("username", null) != "" && settings.getString("password", null) != "" && settings.getString("username", null) != null && settings.getString("password", null) != null;
 	}
 	

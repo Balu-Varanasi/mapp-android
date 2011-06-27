@@ -5,8 +5,11 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 
 /**
@@ -45,7 +48,13 @@ public class GroupAdminScreen extends Activity {
 		
 		final ListView memberlist = (ListView) findViewById(R.id.memberlist);
 		memberlist.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1 , members));
-		
+			
+		memberlist.setOnItemClickListener(new OnItemClickListener() {
+			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+				//((TextView) view).getText();
+			}
+		});
+
 		
 		final Button okbutton = (Button) findViewById(R.id.okbutton);
 		okbutton.setOnClickListener(new View.OnClickListener() {
