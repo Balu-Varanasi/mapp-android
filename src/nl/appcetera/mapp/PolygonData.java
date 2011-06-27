@@ -14,7 +14,7 @@ import android.provider.BaseColumns;
 public class PolygonData extends SQLiteOpenHelper
 {
 	private static final String DATABASE_NAME = "mapp.db";
-	private static final int DATABASE_VERSION = 21;
+	private static final int DATABASE_VERSION = 22;
 	
 	private static final String POLYGON_TABLE_NAME 	= "polygondata";
 	private static final String POLYGON_ID 			= BaseColumns._ID;
@@ -94,7 +94,8 @@ public class PolygonData extends SQLiteOpenHelper
 				+ GROUP_MEMBERS_NEW + " INTEGER NULL, "
 				+ GROUP_MEMBERS_CHANGED + " INTEGER NULL, "
 				+ "FOREIGN KEY(" + GROUPS_ID + ") REFERENCES " + GROUPS_TABLE_NAME 
-			      + "(" + GROUPS_ID + ") ON UPDATE CASCADE ON DELETE CASCADE"
+			      + "(" + GROUPS_ID + ") ON UPDATE CASCADE ON DELETE CASCADE,"
+			    + " UNIQUE(" + GROUPS_ID + "," + USERS_EMAIL + ")"
 				+ ");";
 		db.execSQL(sql);
 		
@@ -315,18 +316,20 @@ public class PolygonData extends SQLiteOpenHelper
 	 * Geeft een polygoon een nieuw id
 	 * @param oldid het oude id
 	 * @param newid het nieuwe id
+	 * @return true indien het nieuwe id al bezet was
 	 */
-	public synchronized void updatePolygonId(int oldid, int newid)
+	public synchronized boolean updatePolygonId(int oldid, int newid)
 	{
 		SQLiteDatabase db = getWritableDatabase();
+		boolean updated = false;
 		
 		// Als er al een polygoon bestaat met het nieuwe id, dan moet die even een ander id krijgen
 		Cursor c = db.query(POLYGON_TABLE_NAME, new String[]{POLYGON_ID}, POLYGON_ID + "=" + newid, null, null, null, null);
 		if(c.getCount() > 0)
 		{
 			updatePolygonId(newid, newid+1);
-		} // TODO polygoon een serverid geven, en normale id vervangen door serverid
-		// om te voorkomen dat er dubbele ids komen
+			updated = true;
+		}
 		
 		ContentValues values = new ContentValues();
 		values.put(POLYGON_ID, newid);
@@ -337,6 +340,8 @@ public class PolygonData extends SQLiteOpenHelper
 		values = new ContentValues();
 		values.put(POLYGON_POINTS_ID, newid);
 		db.update(POLYGON_POINTS_TABLE_NAME, values, POLYGON_POINTS_ID + "=" + oldid, null);
+		
+		return updated;
 	}
 	
 	/**
@@ -586,6 +591,38 @@ public class PolygonData extends SQLiteOpenHelper
 	}
 	
 	/**
+	 * Voegt een groep toe aan de database, afkomstig van de server
+	 * @param owner het e-mailadres van de eigenaar van de groep
+	 * @param name de naam van de groep
+	 */
+	public synchronized void addGroupFromServer(int id, String owner, String name)
+	{
+		SQLiteDatabase db = getWritableDatabase();
+		ContentValues values = new ContentValues();
+		values.put(GROUPS_OWNER, owner);
+		values.put(GROUPS_NAME, name);
+		values.put(GROUPS_NEW, 0);
+		db.insertOrThrow(GROUPS_TABLE_NAME, null, values);
+	}
+	
+	/**
+	 * Update een groep met gegevens van de server
+	 * @param id het id van de groep
+	 * @param owner het e-mailadres van de eigenaar van de groep
+	 * @param name de naam van de groep
+	 * @local true indien de groep lokaal werd aangemaakt, false indien ie van de server komt
+	 */
+	public synchronized void editGroupFromServer(int id, String owner, String name)
+	{
+		SQLiteDatabase db = getWritableDatabase();
+		ContentValues values = new ContentValues();
+		values.put(GROUPS_OWNER, owner);
+		values.put(GROUPS_NAME, name);
+		values.put(GROUPS_CHANGED, 0);
+		db.replaceOrThrow(GROUPS_TABLE_NAME, null, values);
+	}
+	
+	/**
 	 * Bewerkt een groep
 	 * @param id het id van de te bewerken groep
 	 * @param owner het e-mailadres van de eigenaar van de groep
@@ -622,6 +659,68 @@ public class PolygonData extends SQLiteOpenHelper
 	{
 		SQLiteDatabase db = getReadableDatabase();
 		Cursor c = db.query(GROUPS_TABLE_NAME, new String[]{GROUPS_ID, GROUPS_OWNER, GROUPS_NAME}, null, null, null, null, null);
+		return c;
+	}
+	
+	/**
+	 * Geeft alle nieuwe groepen terug
+	 * @return een cursorobject met alle nieuwe groepen
+	 */
+	public synchronized Cursor getNewGroups()
+	{
+		SQLiteDatabase db = getReadableDatabase();
+		Cursor c = db.query(GROUPS_TABLE_NAME, new String[]{GROUPS_ID, GROUPS_NAME}, 
+				GROUPS_NEW + "=1", null, null, null, null);
+		return c;
+	}
+	
+	/**
+	 * Stelt de status van de gegeven groep in op gesynct
+	 * @param id het id van de groep
+	 */
+	public synchronized void setGroupIsSynced(int id)
+	{
+		SQLiteDatabase db = getWritableDatabase();
+		ContentValues values = new ContentValues();
+		values.put(GROUPS_CHANGED, 0);
+		values.put(GROUPS_NEW, 0);
+		db.update(GROUPS_TABLE_NAME, values, GROUPS_ID + "=" + id, null);
+	}
+	
+	/**
+	 * Update het groepid
+	 * @param oldid oud id
+	 * @param newid nieuw id
+	 * @return of het nieuwe id al bezet was
+	 */
+	public synchronized boolean updateGroupId(int oldid, int newid)
+	{
+		SQLiteDatabase db = getWritableDatabase();
+		boolean updated = false;
+		
+		// Als er al een groep bestaat met het nieuwe id, dan moet die even een ander id krijgen
+		Cursor c = db.query(GROUPS_TABLE_NAME, new String[]{GROUPS_ID}, GROUPS_ID + "=" + newid, null, null, null, null);
+		if(c.getCount() > 0)
+		{
+			updateGroupId(newid, newid+1);
+			updated = true;
+		}
+		
+		ContentValues values = new ContentValues();
+		values.put(GROUPS_ID, newid);
+		db.update(GROUPS_TABLE_NAME, values, GROUPS_ID + "=" + oldid, null);
+		return updated;
+	}
+	
+	/**
+	 * Geeft alle gewijzigde groepen terug
+	 * @return cursorobject met alle gewijzigde groepen
+	 */
+	public synchronized Cursor getChangedGroups()
+	{
+		SQLiteDatabase db = getReadableDatabase();
+		Cursor c = db.query(GROUPS_TABLE_NAME, new String[]{GROUPS_ID, GROUPS_NAME}, 
+				GROUPS_CHANGED + "=1", null, null, null, null);
 		return c;
 	}
 	

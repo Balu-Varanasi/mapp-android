@@ -118,6 +118,7 @@ public class SyncClient
 		{
 			int syncTime = getSyncTimeStamp();
 			deleteGroups();
+			putGroups();
 			updateGroups();
 			putMemberships();
 			deletePolygons(group);
@@ -246,6 +247,12 @@ public class SyncClient
 		String color 	= "";
 		String desc		= "";
 		
+		/**
+		 * Als er tijdens het syncen een andere polygoon een ander id krijgt (omdat zijn
+		 * id nodig was), klopt onze cursor misschien niet meer dus moeten we opnieuw query'en.
+		 */
+		boolean requery = false;
+		
 		if(!c.moveToFirst())
 		{
 			return; // Niks te syncen, dus gelijk klaar!
@@ -337,7 +344,7 @@ public class SyncClient
 				else
 				{
 					// De polygoon een nieuw id geven en het 'nieuw'-vlaggetje verwijderen
-					db.updatePolygonId(polygonid, result.getInt("polygon_id"));
+					requery = db.updatePolygonId(polygonid, result.getInt("polygon_id"));
 					db.setPolygonIsSynced(result.getInt("polygon_id"));
 				}
 			}
@@ -357,7 +364,10 @@ public class SyncClient
 				throw new SyncException("Invalid server response");
 			}
 	        
-	        c.requery();// Opnieuw laden omdat polygoonid's gewijzigd kunnen zijn inmiddels
+	        if(requery)
+	        {
+	        	c.requery();// Opnieuw laden omdat polygoonid's gewijzigd kunnen zijn inmiddels
+	        }
 		}
 		while(c.moveToNext());
 	}
@@ -802,7 +812,7 @@ public class SyncClient
 		}
 		
 	    HttpResponse response;
-	    ArrayList<Integer> userGroups = new ArrayList<Integer>();
+	    ArrayList<Integer> groupsOnServer = new ArrayList<Integer>();
 	        
 	    try
 	    {
@@ -842,7 +852,7 @@ public class SyncClient
 				for(int i = 0; i < groups.length(); i++)
 				{
 					JSONObject o = groups.getJSONObject(i);
-					userGroups.add(o.getInt("id"));
+					groupsOnServer.add(o.getInt("id"));
 				}
 			}
 		}
@@ -868,8 +878,9 @@ public class SyncClient
 	    do
 	    {
 	    	groupsInDb.add(c.getInt(0));
-	    	if(!userGroups.contains(c.getInt(0)))
+	    	if(!groupsOnServer.contains(c.getInt(0)))
 	    	{
+	    		groupsInDb.remove(new Integer(c.getInt(0)));
 	    		db.removePolygonsFromGroup(c.getInt(0), false);
 	    		db.deleteMemberships(c.getInt(0));
 	    		db.removeGroup(c.getInt(0), false);
@@ -877,14 +888,114 @@ public class SyncClient
 	    }
 	    while(c.moveToNext());
 	    
-	    // En nu alles toevoegen wat nog niet lokaal zit
-	    for(int i : groupsInDb)
+	    // En nu alles toevoegen wat nog niet lokaal zit / updaten
+	    for(int i : groupsOnServer)
 	    {
-	    	if(!userGroups.contains(i))
-	    	{
-	    		getGroup(i);
-	    	}
+	    	updateGroup(i, groupsInDb.contains(i));
 	    }
+	}
+	
+	/**
+	 * Stuurt alle nieuwe polygonen naar de server
+	 * @throws SyncException
+	 */
+	private void putGroups() throws SyncException
+	{
+		Cursor c = db.getNewGroups();
+		String name = "";
+		int id = 0;
+		
+		if(!c.moveToFirst())
+		{
+			return; // Niks te syncen, dus gelijk klaar!
+		}
+
+		do
+		{
+			HttpPut httpp = new HttpPut(serverUrl + "group");
+			UsernamePasswordCredentials creds = new UsernamePasswordCredentials(mappUser, mappPass);
+			
+			id   = c.getInt(0);
+			name = c.getString(1);
+			
+			List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+	        nameValuePairs.add(new BasicNameValuePair("name", name));
+			
+			try
+			{
+				httpp.addHeader(new BasicScheme().authenticate(creds, httpp));
+				httpp.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+			} 
+			catch (AuthenticationException e1)
+			{
+				Log.e(Mapp.TAG, e1.getStackTrace().toString());
+				throw new SyncException("Authentication failed");
+			}
+			catch (UnsupportedEncodingException e)
+			{
+				Log.e(Mapp.TAG, e.getStackTrace().toString());
+				throw new SyncException("Failed to encode data");
+			}
+			
+	        HttpResponse response;
+	        
+	        try
+	        {
+				response = httpclient.execute(httpp);
+				
+				// Lees het resultaat van de actie in
+				JSONObject result = null;
+				InputStream is = response.getEntity().getContent();
+			    BufferedReader r = new BufferedReader(new InputStreamReader(is));
+			    StringBuilder total = new StringBuilder();
+			    String line;
+			    while((line = r.readLine()) != null)
+			    {
+			        total.append(line);
+			    }
+
+			    result = new JSONObject(total.toString());
+				
+			    if(response.getStatusLine().getStatusCode() == 418)
+				{
+					throw new SyncException("Unable to synchronize because the server is a teapot.");
+				}
+			    else if(response.getStatusLine().getStatusCode() == 401)
+				{
+					throw new SyncException("Not authorized");
+				}
+			    else if(response.getStatusLine().getStatusCode() != 200)
+		        {
+					// Er is iets mis gegaan.
+			        Log.e(Mapp.TAG, "Sync error: " + result.getString("message"));
+			        throw new SyncException(result.getString("message"));
+		        }
+				else
+				{
+					// De polygoon een nieuw id geven en het 'nieuw'-vlaggetje verwijderen
+					db.updateGroupId(id, result.getInt("group_id"));
+					db.setGroupIsSynced(result.getInt("group_id"));
+				}
+			}
+	        catch (ClientProtocolException e)
+	        {
+				Log.e(Mapp.TAG, e.getMessage());
+				throw new SyncException("Epic HTTP failure");
+			}
+	        catch (IOException e)
+	        {
+	        	Log.e(Mapp.TAG, e.getMessage());
+	        	throw new SyncException("Exception during server synchronisation");
+			}
+	        catch (JSONException e)
+			{
+				Log.e(Mapp.TAG, "Sync failed. Response is no valid JSON or expected variable not found.");
+				throw new SyncException("Invalid server response");
+			}
+	        
+	        c.requery();// Opnieuw laden omdat polygoonid's gewijzigd kunnen zijn inmiddels
+		}
+		while(c.moveToNext());
 	}
 	
 	/**
@@ -974,9 +1085,10 @@ public class SyncClient
 	/**
 	 * Haalt info over de gegeven groep op en slaat deze lokaal op
 	 * @param i het id van de op te halen groep
+	 * @param update of het een update betreft of een nieuwe polygoon is
 	 * @throws SyncException 
 	 */
-	private void getGroup(int id) throws SyncException
+	private void updateGroup(int id, boolean update) throws SyncException
 	{
 		HttpGet httpg = new HttpGet(serverUrl + "group/id/" + id);
 		UsernamePasswordCredentials creds = new UsernamePasswordCredentials(mappUser, mappPass);
@@ -1026,7 +1138,16 @@ public class SyncClient
 			{
 				// Alles is blijkbaar goed gegaan
 				JSONObject result = new JSONObject(total.toString());
-				db.addGroup(result.getString("email"), result.getString("name"), false);
+				
+				if(!update)
+				{
+					db.addGroupFromServer(id, result.getString("email"), result.getString("name"));
+				}
+				else
+				{
+					db.editGroupFromServer(id, result.getString("email"), result.getString("name"));
+					db.deleteMemberships(id);
+				}
 				
 				JSONArray members = result.getJSONArray("members");
 				
