@@ -33,6 +33,9 @@
 		<activity android:name=".GroupsScreen"
 				  android:label="@string/groups_activitylabel">
 		</activity>
+		<activity android:name=".GroupAdminScreen"
+				  android:theme="@android:style/Theme.NoTitleBar">
+		</activity>
     </application>
     
     <uses-permission android:name="android.permission.INTERNET" />

@@ -14,7 +14,7 @@ import android.provider.BaseColumns;
 public class PolygonData extends SQLiteOpenHelper
 {
 	private static final String DATABASE_NAME = "mapp.db";
-	private static final int DATABASE_VERSION = 22;
+	private static final int DATABASE_VERSION = 23;
 	
 	private static final String POLYGON_TABLE_NAME 	= "polygondata";
 	private static final String POLYGON_ID 			= BaseColumns._ID;
@@ -94,8 +94,8 @@ public class PolygonData extends SQLiteOpenHelper
 				+ GROUP_MEMBERS_NEW + " INTEGER NULL, "
 				+ GROUP_MEMBERS_CHANGED + " INTEGER NULL, "
 				+ "FOREIGN KEY(" + GROUPS_ID + ") REFERENCES " + GROUPS_TABLE_NAME 
-			      + "(" + GROUPS_ID + ") ON UPDATE CASCADE ON DELETE CASCADE,"
-			    + " UNIQUE(" + GROUPS_ID + "," + USERS_EMAIL + ")"
+			      + "(" + GROUPS_ID + ") ON UPDATE CASCADE ON DELETE CASCADE"
+			   // + " UNIQUE(" + GROUPS_ID + "," + USERS_EMAIL + ")"
 				+ ");";
 		db.execSQL(sql);
 		
@@ -580,14 +580,14 @@ public class PolygonData extends SQLiteOpenHelper
 	 * @param name de naam van de groep
 	 * @local true indien de groep lokaal werd aangemaakt, false indien ie van de server komt
 	 */
-	public synchronized void addGroup(String owner, String name, boolean local)
+	public synchronized int addGroup(String owner, String name, boolean local)
 	{
 		SQLiteDatabase db = getWritableDatabase();
 		ContentValues values = new ContentValues();
 		values.put(GROUPS_OWNER, owner);
 		values.put(GROUPS_NAME, name);
 		values.put(GROUPS_NEW, (local ? 1 : 0));
-		db.insertOrThrow(GROUPS_TABLE_NAME, null, values);
+		return (int) db.insertOrThrow(GROUPS_TABLE_NAME, null, values) ;
 	}
 	
 	/**

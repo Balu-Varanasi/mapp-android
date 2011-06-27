@@ -8,39 +8,53 @@
 		android:text="@string/groupadmin_groupname" />
 	<EditText android:id="@+id/edtInputName"
 		style="@style/TextInput" />
-	<View style="@style/MediumSeparator" />
 	<TextView xmlns:android="http://schemas.android.com/apk/res/android"
 		android:id="@+id/newmemberlabelview"
 		style="@style/Label"
 		android:text="@string/groupadmin_newmemberlabel" />
-	<EditText android:id="@+id/edtInputMember"
-		style="@style/TextInput"
-		android:hint="@string/groupadmin_newmember_hint" />	
-	<View style="@style/MediumSeparator" />
-	<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-		android:id="@+id/memberslabelview"
-		style="@style/Label"
-		android:text="@string/groupadmin_memberslabel" />
-	<ScrollView
-		android:id="@+id/scrollview"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		xmlns:android="http://schemas.android.com/apk/res/android">
-    	<ListView android:layout_width="fill_parent"
-	        android:drawSelectorOnTop="false" android:clipChildren="true"
-	        android:fitsSystemWindows="true" android:layout_height="fill_parent"
-	        android:id="@+id/memberlist">
-	    </ListView>
-	</ScrollView>
 	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 		android:orientation="horizontal"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:gravity="center"
 		android:layout_alignParentBottom="true">
-        <Button android:id="@+id/togroupbutton"
+		<EditText android:id="@+id/edtInputMember"
+			style="@style/TextInput"
+			android:layout_width="220dip"
+			android:hint="@string/groupadmin_newmember_hint" />	
+		<Button android:id="@+id/addmemberbutton"
 			style="@style/Button"
-            android:text="@string/groupadmin_togroupbutton" />
-   	</LinearLayout>
+	        android:text="@string/groupadmin_addmember" />
+	</LinearLayout>
+	<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+		android:id="@+id/memberslabelview"
+		style="@style/Label"
+		android:text="@string/groupadmin_memberslabel" />
+   	<ListView android:layout_width="fill_parent"
+        android:drawSelectorOnTop="false" android:clipChildren="true"
+        android:fitsSystemWindows="true" android:layout_height="220dip"
+        android:id="@+id/memberlist">
+    </ListView>
+   	
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:gravity="center"
+		android:layout_alignParentBottom="true">
+		<Button android:id="@+id/togroupbutton"
+			style="@style/DeleteButton"
+	        android:text="@string/groupadmin_togroupbutton" />
+	</LinearLayout>
+   	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:gravity="center"
+		android:layout_alignParentBottom="true">
+		<Button android:id="@+id/savebutton"
+			style="@style/DeleteButton"
+	        android:text="@string/groupadmin_saveandexit" />
+	</LinearLayout>
 </LinearLayout>
 

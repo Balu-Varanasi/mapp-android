@@ -109,7 +109,7 @@ public class Mapp extends MapActivity
 	public void onResume()
 	{
 		super.onResume();
-		Log.v(TAG, "In de onresume van Mapp");
+
 		if (isLoggedIn()) {
 			// Naar de juiste plaats op de kaart gaan
 			mapController = mapView.getController();
@@ -126,7 +126,7 @@ public class Mapp extends MapActivity
 	        
 	        // Juiste groep ophalen en polygonen laden
 	        //om.setGroup(settings.getInt("group", 1));
-	        om.setGroup(1);
+	        OverlayManager.setGroup(1);
 	        om.loadOverlays();
 		}
 		else

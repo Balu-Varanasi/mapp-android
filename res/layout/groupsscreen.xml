@@ -2,29 +2,19 @@
 <!-- @author Joost -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
    	style="@style/MetaBodyLayout">
-    <Button android:id="@+id/newgroupbutton"
-		style="@style/GroupButton"
-        android:text="@string/groups_newgroupbutton" />
-    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
-			android:id="@+id/accountlabel"
-			style="@style/CenteredLabel"
-			android:text="@string/groups_label"/>
-	<ScrollView
-		android:id="@+id/scrollview"
+   	<ListView android:layout_width="fill_parent"
+        android:drawSelectorOnTop="false" android:clipChildren="true"
+        android:fitsSystemWindows="true" android:layout_height="420dip"
+        android:id="@+id/grouplist">
+    </ListView>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		android:orientation="horizontal"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		xmlns:android="http://schemas.android.com/apk/res/android">
-		<!-- <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-			android:id="@+id/buttonlayout"
-  			android:orientation="vertical"
-    		android:layout_width="fill_parent"
-    		android:layout_height="fill_parent"
-    		android:paddingTop="5sp">
-    	</LinearLayout>-->
-    	<ListView android:layout_width="fill_parent"
-	        android:drawSelectorOnTop="false" android:clipChildren="true"
-	        android:fitsSystemWindows="true" android:layout_height="fill_parent"
-	        android:id="@+id/grouplist">
-	    </ListView>
-    </ScrollView>
+		android:gravity="center"
+		android:layout_alignParentBottom="true">
+    	<Button android:id="@+id/newgroupbutton"
+			style="@style/DeleteButton"
+    	    android:text="@string/groups_newgroupbutton" />
+    </LinearLayout>
 </LinearLayout>
