@@ -61,14 +61,14 @@ public class GroupsScreen extends Activity {
 	public void onResume() {
 		super.onResume();
 	
-		//tijdelijke hardcode	
-		Cursor groupsIDCursor = dbase.getMemberShips(username);
-		if (groupsIDCursor.getCount() == 0) {
+		//hardcode om te fixen dat je niet in de defaultgroep zit	
+		Cursor hardcodeCursor = dbase.getMemberShips(username);
+		if (hardcodeCursor.getCount() == 0) {
 			dbase.addMembership(username, 1, true, true);
 		}
-		groupsIDCursor.close();
+		hardcodeCursor.close();
 		
-		groupsIDCursor = dbase.getMemberShips(username);
+		Cursor groupsIDCursor = dbase.getMemberShips(username);
 		
 		final ListView grouplist = (ListView) findViewById(R.id.grouplist);
 		final int groups[] = new int[groupsIDCursor.getCount()];
@@ -86,19 +86,20 @@ public class GroupsScreen extends Activity {
 					groupCursor.moveToFirst();
 					groups[index] = id;
 					groupNames[index] = groupCursor.getString(1);
-					groupOwners[index] = groupCursor.getString(0) == username;
+					groupOwners[index] = groupCursor.getString(0).equals(username);
 					groupCursor.close();
+					index++;
 				}
 				while(groupsIDCursor.moveToNext());
+				grouplist.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1 , groupNames));
 			}
 			groupsIDCursor.close();
-			grouplist.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1 , groupNames));
 		}
 		grouplist.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
 				Bundle bundle = new Bundle();
 				bundle.putInt(GroupsScreen.ID_KEY, groups[position]);
-				if (true || groupOwners[position])
+				if (groupOwners[position])
 				{
 					Intent intent = new Intent(instance, GroupAdminScreen.class);
 					intent.putExtras(bundle);
