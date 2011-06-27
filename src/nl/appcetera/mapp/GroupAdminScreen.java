@@ -122,7 +122,7 @@ public class GroupAdminScreen extends Activity {
 
 		memberlist.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-				//((TextView) view).getText();
+				//Een member deleten kan hier eventueel nog
 			}
 		});
 	}

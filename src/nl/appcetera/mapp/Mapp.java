@@ -5,7 +5,6 @@ import java.util.List;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -33,7 +32,7 @@ public class Mapp extends MapActivity
 	private OverlayManager om;
 	private ServerSync s;
 	public SharedPreferences settings;
-	public static final boolean LOGIN_DISABLED = true;
+	public static final boolean LOGIN_DISABLED = false;
 	public static final String SETTINGS_KEY = "MAPP_SETTINGS";
 	public static final int pointPixelTreshold = 25; // Maximaal verschil tussen 2 punten in pixels voor ze als gelijk worden beschouwd
 	public static final String TAG = "AppCetera"; // Log-tag

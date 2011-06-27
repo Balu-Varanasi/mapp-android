@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- @author Joost -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-   	android:gravity="center"
-   	style="@style/BodyLayout">
-   	<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-				android:id="@+id/accountlabel"
-				style="@style/CenteredLabel"
-				android:text="@string/underconstruction" />
-    <Button android:id="@+id/okbutton"
-		style="@style/Button"
-        android:text="@string/okbutton" />
+   	style="@style/MetaBodyLayout">
+   	<ListView android:layout_width="fill_parent"
+        android:drawSelectorOnTop="false" android:clipChildren="true"
+        android:fitsSystemWindows="true" android:layout_height="fill_parent"
+        android:id="@+id/invitelist">
+    </ListView>
 </LinearLayout>
