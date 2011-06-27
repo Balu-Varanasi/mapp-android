@@ -14,6 +14,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.TextView;
 
 /**
  * Klasse die het invites-scherm beheert, waar de gebruiker onder andere uit kan loggen
@@ -59,13 +60,17 @@ public class InvitesScreen extends Activity {
 				while(groupCursor.moveToNext());
 			}
 		}
-		
-		groupCursor.close();
-		
+
+		final TextView noinviteview = (TextView) findViewById(R.id.noinvite_view);
 		final ListView invitelist = (ListView) findViewById(R.id.invitelist);
 		ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1 , groupNames);
 		invitelist.setAdapter(arrayAdapter);
-
+		
+		noinviteview.setVisibility((groupCursor.getCount() == 0 ? View.VISIBLE : View.INVISIBLE));
+		invitelist.setVisibility((groupCursor.getCount() == 0 ? View.INVISIBLE : View.VISIBLE));
+		
+		groupCursor.close();
+		
 		invitelist.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 				final int id = arg2;

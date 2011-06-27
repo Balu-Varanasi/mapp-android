@@ -52,6 +52,7 @@
     <string name="invite_dialogtext">Do you want to accept or decline this invite?</string>
     <string name="invite_positivebutton">Accept</string>
     <string name="invite_negativebutton">Decline</string>
+    <string name="invite_noinvites">No invites available</string>
     
     <string name="account_activitylabel">Account</string>
     
