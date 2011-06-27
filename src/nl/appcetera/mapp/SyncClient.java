@@ -120,7 +120,9 @@ public class SyncClient
 			deleteGroups();
 			putGroups();
 			updateGroups();
+			deleteMemberships();
 			putMemberships();
+			postMemberships();
 			deletePolygons(group);
 			removeDeletedPolygons(group);
 			putPolygons(group);
@@ -918,7 +920,7 @@ public class SyncClient
 			id   = c.getInt(0);
 			name = c.getString(1);
 			
-			List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+			List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
 	        nameValuePairs.add(new BasicNameValuePair("name", name));
 			
 			try
@@ -1175,9 +1177,289 @@ public class SyncClient
 		}
 	}
 	
-	private void putMemberships()
+	/**
+	 * Stuurt nieuwe lidmaatschappen naar 't servertje
+	 * @throws SyncException 
+	 */
+	private void putMemberships() throws SyncException
 	{
+		Cursor c = db.getNewMemberships();
+		String email = "";
+		int id = 0;
 		
+		if(!c.moveToFirst())
+		{
+			return; // Niks te syncen, dus gelijk klaar!
+		}
+
+		do
+		{
+			HttpPut httpp = new HttpPut(serverUrl + "membership");
+			UsernamePasswordCredentials creds = new UsernamePasswordCredentials(mappUser, mappPass);
+			
+			id   = c.getInt(0);
+			email = c.getString(1);
+			
+			List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+	        nameValuePairs.add(new BasicNameValuePair("email", email));
+	        nameValuePairs.add(new BasicNameValuePair("group_id", id + ""));
+			
+			try
+			{
+				httpp.addHeader(new BasicScheme().authenticate(creds, httpp));
+				httpp.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+			} 
+			catch (AuthenticationException e1)
+			{
+				Log.e(Mapp.TAG, e1.getStackTrace().toString());
+				throw new SyncException("Authentication failed");
+			}
+			catch (UnsupportedEncodingException e)
+			{
+				Log.e(Mapp.TAG, e.getStackTrace().toString());
+				throw new SyncException("Failed to encode data");
+			}
+			
+	        HttpResponse response;
+	        
+	        try
+	        {
+				response = httpclient.execute(httpp);
+				
+				// Lees het resultaat van de actie in
+				JSONObject result = null;
+				InputStream is = response.getEntity().getContent();
+			    BufferedReader r = new BufferedReader(new InputStreamReader(is));
+			    StringBuilder total = new StringBuilder();
+			    String line;
+			    while((line = r.readLine()) != null)
+			    {
+			        total.append(line);
+			    }
+
+			    result = new JSONObject(total.toString());
+				
+			    if(response.getStatusLine().getStatusCode() == 418)
+				{
+					throw new SyncException("Unable to synchronize because the server is a teapot.");
+				}
+			    else if(response.getStatusLine().getStatusCode() == 401)
+				{
+					throw new SyncException("Not authorized");
+				}
+			    else if(response.getStatusLine().getStatusCode() != 200)
+		        {
+					// Er is iets mis gegaan.
+			        Log.e(Mapp.TAG, "Sync error: " + result.getString("message"));
+			        throw new SyncException(result.getString("message"));
+		        }
+				else
+				{
+					// De polygoon een nieuw id geven en het 'nieuw'-vlaggetje verwijderen
+					db.setMembershipIsSynced(id, email);
+				}
+			}
+	        catch (ClientProtocolException e)
+	        {
+				Log.e(Mapp.TAG, e.getMessage());
+				throw new SyncException("Epic HTTP failure");
+			}
+	        catch (IOException e)
+	        {
+	        	Log.e(Mapp.TAG, e.getMessage());
+	        	throw new SyncException("Exception during server synchronisation");
+			}
+	        catch (JSONException e)
+			{
+				Log.e(Mapp.TAG, "Sync failed. Response is no valid JSON or expected variable not found.");
+				throw new SyncException("Invalid server response");
+			}
+	        
+	        c.requery();// Opnieuw laden omdat polygoonid's gewijzigd kunnen zijn inmiddels
+		}
+		while(c.moveToNext());
+	}
+	
+	/**
+	 * Verwijdert memberships op de server die lokaal verwijderd zijn
+	 * @throws SyncException
+	 */
+	private void deleteMemberships() throws SyncException
+	{
+		Cursor c = db.getRemovedMemberships();
+		if(!c.moveToFirst())
+		{
+			return; // Dat ging snel.
+		}
+		
+		do
+		{
+			int groupid = c.getInt(0);
+			HttpDelete httpd = new HttpDelete(serverUrl + "membership/id/" + groupid);
+			UsernamePasswordCredentials creds = new UsernamePasswordCredentials(mappUser, mappPass);
+			
+			try
+			{
+				httpd.addHeader(new BasicScheme().authenticate(creds, httpd));
+			} 
+			catch (AuthenticationException e1)
+			{
+				Log.e(Mapp.TAG, e1.getStackTrace().toString());
+				throw new SyncException("Authentication failed");
+			}
+			
+	        HttpResponse response;
+	        
+	        try
+	        {
+				response = httpclient.execute(httpd);
+				
+				if(response.getStatusLine().getStatusCode() == 418)
+				{
+					throw new SyncException("Unable to synchronize because the server is a teapot.");
+				}
+				else if(response.getStatusLine().getStatusCode() == 401)
+				{
+					throw new SyncException("Not authorized");
+				}
+				else if(response.getStatusLine().getStatusCode() != 200)
+		        {
+					// Er is iets mis gegaan.
+		        	// Lees de uitvoer
+		        	InputStream is = response.getEntity().getContent();
+				    BufferedReader r = new BufferedReader(new InputStreamReader(is));
+				    StringBuilder total = new StringBuilder();
+				    String line;
+				    while((line = r.readLine()) != null)
+				    {
+				        total.append(line);
+				    }
+	
+				    JSONObject result = null;
+				    result = new JSONObject(total.toString());
+			        Log.e(Mapp.TAG, "Sync error: " + result.getString("message"));
+			        throw new SyncException(result.getString("message"));
+		        }
+				else
+				{
+					db.removeRemovedMembership(groupid);
+				}
+			}
+	        catch (ClientProtocolException e)
+	        {
+				Log.e(Mapp.TAG, e.getMessage());
+				throw new SyncException("Epic HTTP failure");
+			}
+	        catch (IOException e)
+	        {
+	        	Log.e(Mapp.TAG, e.getMessage());
+	        	throw new SyncException("Exception during server synchronisation");
+			}
+	        catch (JSONException e)
+			{
+				Log.e(Mapp.TAG, "Sync failed. Getting status message from JSON response failed.");
+				throw new SyncException("Invalid server response");
+			}
+		}
+		while(c.moveToNext());
+	}
+	
+	/**
+	 * Stuurt geaccepteerde memberships naar den servert
+	 * @throws SyncException 
+	 */
+	private void postMemberships() throws SyncException
+	{
+		Cursor c = db.getChangedMemberships();
+		int groupid 	= 0;
+		
+		if(!c.moveToFirst())
+		{
+			return; // Niks te syncen, dus gelijk klaar!
+		}
+		
+		do
+		{
+			HttpPost httpp = new HttpPost(serverUrl + "polygon");
+			UsernamePasswordCredentials creds = new UsernamePasswordCredentials(mappUser, mappPass);
+			
+			groupid 	= c.getInt(0);
+			
+			List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
+			nameValuePairs.add(new BasicNameValuePair("group_id", groupid + ""));
+
+			try
+			{
+				httpp.addHeader(new BasicScheme().authenticate(creds, httpp));
+				httpp.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+			} 
+			catch (AuthenticationException e1)
+			{
+				Log.e(Mapp.TAG, e1.getMessage());
+				throw new SyncException("Authentication failed");
+			}
+			catch (UnsupportedEncodingException e)
+			{
+				Log.e(Mapp.TAG, e.getMessage());
+				throw new SyncException("Failed to encode data");
+			}
+			
+	        HttpResponse response;
+	        
+	        try
+	        {
+				response = httpclient.execute(httpp);
+				
+				if(response.getStatusLine().getStatusCode() == 418)
+				{
+					throw new SyncException("Unable to synchronize because the server is a teapot.");
+				}
+				else if(response.getStatusLine().getStatusCode() == 401)
+				{
+					throw new SyncException("Not authorized");
+				}
+				else if(response.getStatusLine().getStatusCode() != 200)
+		        {
+					// Er is iets mis gegaan.
+					
+					// Lees het resultaat van de actie in
+					JSONObject result = null;
+					InputStream is = response.getEntity().getContent();
+				    BufferedReader r = new BufferedReader(new InputStreamReader(is));
+				    StringBuilder total = new StringBuilder();
+				    String line;
+				    while((line = r.readLine()) != null)
+				    {
+				        total.append(line);
+				    }
+
+				    result = new JSONObject(total.toString());
+				    
+			        Log.e(Mapp.TAG, "Sync error: " + result.getString("message"));
+			        throw new SyncException(result.getString("message"));
+		        }
+				else
+				{
+					db.setMembershipIsSynced(groupid, c.getString(1));
+				}
+			}
+	        catch (ClientProtocolException e)
+	        {
+				Log.e(Mapp.TAG, e.getMessage());
+				throw new SyncException("Epic HTTP failure");
+			}
+	        catch (IOException e)
+	        {
+	        	Log.e(Mapp.TAG, e.getMessage());
+	        	throw new SyncException("Exception during server synchronisation");
+			}
+	        catch (JSONException e)
+			{
+				Log.e(Mapp.TAG, "Sync failed. Response is no valid JSON or expected variable not found.");
+				throw new SyncException("Invalid server response");
+			}
+		}
+		while(c.moveToNext());
 	}
 }
  

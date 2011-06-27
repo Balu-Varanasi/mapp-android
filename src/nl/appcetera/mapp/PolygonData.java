@@ -14,7 +14,7 @@ import android.provider.BaseColumns;
 public class PolygonData extends SQLiteOpenHelper
 {
 	private static final String DATABASE_NAME = "mapp.db";
-	private static final int DATABASE_VERSION = 23;
+	private static final int DATABASE_VERSION = 24;
 	
 	private static final String POLYGON_TABLE_NAME 	= "polygondata";
 	private static final String POLYGON_ID 			= BaseColumns._ID;
@@ -53,6 +53,8 @@ public class PolygonData extends SQLiteOpenHelper
 	private static final String POLYGON_REMOVAL_TABLE_NAME = "removed_polygons";
 	
 	private static final String GROUP_REMOVAL_TABLE_NAME = "removed_groups";
+	
+	private static final String GROUP_MEMBERS_REMOVAL_TABLE_NAME = "removed_memberships";
 
 	public PolygonData(Context context)
 	{
@@ -138,6 +140,12 @@ public class PolygonData extends SQLiteOpenHelper
 		
 		sql = 
 			"CREATE TABLE " + GROUP_REMOVAL_TABLE_NAME + " ("
+			  + GROUPS_ID + " INTEGER NOT NULL"
+			  + ");";
+		db.execSQL(sql);
+		
+		sql = 
+			"CREATE TABLE " + GROUP_MEMBERS_REMOVAL_TABLE_NAME + " ("
 			  + GROUPS_ID + " INTEGER NOT NULL"
 			  + ");";
 		db.execSQL(sql);
@@ -743,7 +751,7 @@ public class PolygonData extends SQLiteOpenHelper
 	}
 	
 	/**
-	 * Geeft een cursor met alle verwijderde polygonen
+	 * Geeft een cursor met alle verwijderde groepen
 	 * @return cursorobject met alle verwijderde polygonen
 	 */
 	public synchronized Cursor getRemovedGroups()
@@ -777,18 +785,37 @@ public class PolygonData extends SQLiteOpenHelper
 		values.put(GROUPS_ID, group);
 		values.put(USERS_EMAIL, user);
 		values.put(GROUP_MEMBERS_ACCEPTED, (accepted ? 1 : 0));
+		if(local)
+		{
+			values.put(GROUP_MEMBERS_NEW, 1);
+		}
 		db.insertOrThrow(GROUP_MEMBERS_TABLE_NAME, null, values);
 	}
 	
 	/**
 	 * Verwijderd een lidmaatschap
-	 * @param user het id van de gebruiker
 	 * @param group het id van de groep
+	 * @param local true indien membership lokaal verwijderd werd, false indien server
 	 */
 	public synchronized void deleteMemberships(int group)
 	{
 		SQLiteDatabase db = getWritableDatabase();
 		db.delete(GROUP_MEMBERS_TABLE_NAME, GROUPS_ID + "=" + group, null);
+	}
+	
+	/**
+	 * Verwijdert een membership van de gegeven gebruiker bij de gegeven groep
+	 * @param group het id van de groep
+	 * @param user het e-mailadres van de gebruiker
+	 */
+	public synchronized void deleteMembership(int group, String user)
+	{
+		SQLiteDatabase db = getWritableDatabase();
+		db.delete(GROUP_MEMBERS_TABLE_NAME, GROUPS_ID + "=" + group + " AND " + USERS_EMAIL + "=\"" + user + "\"", null);
+
+		ContentValues values = new ContentValues();
+		values.put(GROUPS_ID, group);
+		db.insertOrThrow(GROUP_MEMBERS_REMOVAL_TABLE_NAME, null, values);
 	}
 	
 	/**
@@ -818,6 +845,19 @@ public class PolygonData extends SQLiteOpenHelper
 	}
 	
 	/**
+	 * Geeft alle niet-geaccepteerde memberships van de gegeven gebruiker terug
+	 * @param user het id van de gebruiker
+	 * @return een Cursorobject met alle groepid's van de gebruiker
+	 */
+	public synchronized Cursor getInvites(String user)
+	{
+		SQLiteDatabase db = getReadableDatabase();
+		Cursor c = db.query(GROUP_MEMBERS_TABLE_NAME, new String[]{GROUPS_ID}, 
+				USERS_EMAIL + "=\"" + user + "\" AND " + GROUP_MEMBERS_ACCEPTED + "=0", null, null, null, null);
+		return c;
+	}
+	
+	/**
 	 * Accepteer een membership voor de groep
 	 * @param user het emailadres van de gebruiker
 	 * @param group het id van de groep
@@ -829,6 +869,66 @@ public class PolygonData extends SQLiteOpenHelper
 		values.put(GROUPS_ID, group);
 		values.put(USERS_EMAIL, user);
 		values.put(GROUP_MEMBERS_ACCEPTED, 1);
+		values.put(GROUP_MEMBERS_CHANGED, 1);
 		db.insertOrThrow(GROUP_MEMBERS_TABLE_NAME, null, values);
+	}
+	
+	/**
+	 * Geeft alle nieuwe lidmaatschappen terug
+	 * @return cursorobject met alle nieuwe lidmaatschappen
+	 */
+	public synchronized Cursor getNewMemberships()
+	{
+		SQLiteDatabase db = getReadableDatabase();
+		Cursor c = db.query(GROUP_MEMBERS_TABLE_NAME, new String[]{GROUPS_ID, USERS_EMAIL}, 
+				GROUP_MEMBERS_NEW + "=1", null, null, null, null);
+		return c;
+	}
+	
+	/**
+	 * Geeft alle gewijzigde lidmaatschappen terug
+	 * @return cursorobject met alle nieuwe lidmaatschappen
+	 */
+	public synchronized Cursor getChangedMemberships()
+	{
+		SQLiteDatabase db = getReadableDatabase();
+		Cursor c = db.query(GROUP_MEMBERS_TABLE_NAME, new String[]{GROUPS_ID, USERS_EMAIL}, 
+				GROUP_MEMBERS_CHANGED + "=1", null, null, null, null);
+		return c;
+	}
+	
+	/**
+	 * Stelt de status van de gegeven membership in op gesynct
+	 * @param group het id van de groep
+	 * @param user het e-mailadres van de gebruiker
+	 */
+	public synchronized void setMembershipIsSynced(int group, String user)
+	{
+		SQLiteDatabase db = getWritableDatabase();
+		ContentValues values = new ContentValues();
+		values.put(GROUP_MEMBERS_CHANGED, 0);
+		values.put(GROUP_MEMBERS_NEW, 0);
+		db.update(GROUPS_TABLE_NAME, values, GROUPS_ID + "=" + group + " AND " + USERS_EMAIL + "=\"" + user + "\"", null);
+	}
+	
+	/**
+	 * Geeft een cursor met alle verwijderde memberships
+	 * @return cursorobject met alle verwijderde polygonen
+	 */
+	public synchronized Cursor getRemovedMemberships()
+	{
+		SQLiteDatabase db = getReadableDatabase();
+		Cursor c = db.query(GROUP_MEMBERS_REMOVAL_TABLE_NAME, new String[]{GROUPS_ID}, null, null, null, null, null);
+		return c;
+	}
+	
+	/**
+	 * Verwijdert een membership uit de lijst verwijderde memberships
+	 * @param id het id van de verwijderde groep
+	 */
+	public synchronized void removeRemovedMembership(int id)
+	{
+		SQLiteDatabase db = getWritableDatabase();
+		db.delete(GROUP_MEMBERS_REMOVAL_TABLE_NAME + "=" + id, null, null);
 	}
 }
