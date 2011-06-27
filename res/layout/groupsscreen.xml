@@ -4,7 +4,8 @@
    	style="@style/MetaBodyLayout">
    	<ListView android:layout_width="fill_parent"
         android:drawSelectorOnTop="false" android:clipChildren="true"
-        android:fitsSystemWindows="true" android:layout_height="420dip"
+        android:fitsSystemWindows="true" android:layout_height="wrap_content"
+        android:layout_weight="1.0"
         android:id="@+id/grouplist">
     </ListView>
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -12,6 +13,7 @@
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:gravity="center"
+		android:id="@+id/newgroupbuttonlayout"
 		android:layout_alignParentBottom="true">
     	<Button android:id="@+id/newgroupbutton"
 			style="@style/DeleteButton"
