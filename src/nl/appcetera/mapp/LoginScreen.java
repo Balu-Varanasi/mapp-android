@@ -63,6 +63,7 @@ public class LoginScreen extends Activity {
 			 */
 			public void onClick(View v) {
 				String username = usernameField.getText().toString();
+				username.replace("@", "%40");
 				String password = passwordField.getText().toString();
 				if (username == "" || username == null) {
 					toastMessage("Please fill in an email address");

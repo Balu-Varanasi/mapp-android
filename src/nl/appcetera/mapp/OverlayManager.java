@@ -18,7 +18,6 @@ public class OverlayManager
 {
 	private MapView mv;
 	private PolygonData db;
-	private int group = 1;
 	private static final String newPolygonNamePrefix = "New Polygon";
 	private static final String newPolygonDescription = "<No description yet>";
 	private static int groupId = 1;
@@ -39,9 +38,8 @@ public class OverlayManager
 	 * Zet het nieuwe id van de groep die je wilt bekijken
 	 * @param group het id van de groep om polygonen uit te tonen
 	 */
-	public void setGroup(int group)
+	public static void setGroup(int group)
 	{
-		this.group = group;
 		OverlayManager.groupId = group;
 	}
 	
@@ -64,7 +62,7 @@ public class OverlayManager
 		
 		OverlayManager.editModeMutex = false; // De mutex vrijgeven
         
-		Cursor c = db.getAllPolygons(group);
+		Cursor c = db.getAllPolygons(groupId);
 		
 		// Er zijn geen polygonen opgeslagen
 		if(!c.moveToFirst())
@@ -152,12 +150,12 @@ public class OverlayManager
 		PolygonOverlay po = new PolygonOverlay(mv, color);
 		po.getManager().setDbEnable(false);
 
-		int id = db.addPolygon(color, false, group);
+		int id = db.addPolygon(color, false, groupId);
         po.getManager().setId(id);
         po.getManager().setColor(color);
         
         po.getManager().setDbEnable(true);
-        po.getManager().setName(newPolygonNamePrefix + " " + Mapp.getDatabase().getNumPolygons(group));
+        po.getManager().setName(newPolygonNamePrefix + " " + Mapp.getDatabase().getNumPolygons(groupId));
         po.getManager().setDescription(newPolygonDescription);
         listOfOverlays.add(po);
         

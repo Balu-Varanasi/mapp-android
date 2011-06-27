@@ -33,6 +33,7 @@ public class Mapp extends MapActivity
 	private OverlayManager om;
 	private ServerSync s;
 	public SharedPreferences settings;
+	public static final boolean LOGIN_DISABLED = true;
 	public static final String SETTINGS_KEY = "MAPP_SETTINGS";
 	public static final int pointPixelTreshold = 25; // Maximaal verschil tussen 2 punten in pixels voor ze als gelijk worden beschouwd
 	public static final String TAG = "AppCetera"; // Log-tag
@@ -229,7 +230,7 @@ public class Mapp extends MapActivity
 	}
 	
 	/**
-	 * Deze functie wordt aangeroepen wanneer een Activity die vanuit Mapp is aangeroepen zn setResult aanroept
+	 * Deze functie wordt aangeroepen wanneer een Activity die vanuit Mapp is aangeroepen zn finish() aanroept
 	 * @param requestCode een int die aangeeft om welke Activity het gaat
 	 * @param resultCode een int die de status van terminatie van de Activity aangeeft
 	 * @param data een intent die eventuele result-data bevat
@@ -284,10 +285,10 @@ public class Mapp extends MapActivity
 					showLoginScreen();
 				}
 				break;
-			case LOGINSCREEN_ACTIVITYCODE:
-				if (resultCode == LoginScreen.RESULT_OK)
-				{
-					//TODO
+			case GROUPSSCREEN_ACTIVITYCODE:
+				if (bundle.getInt(GroupsScreen.ID_KEY) != OverlayManager.getGroupId()) {
+					OverlayManager.setGroup(bundle.getInt(GroupsScreen.ID_KEY));
+					Mapp.reload();
 				}
 				break;
 		}	
@@ -386,7 +387,8 @@ public class Mapp extends MapActivity
 	 * @return true indien er een gebruiker ingelogd is
 	 */
 	private boolean isLoggedIn() {
-		Log.v(TAG, "Checking if logged");
+		if (LOGIN_DISABLED)
+			return true;
 		return settings.getString("username", null) != "" && settings.getString("password", null) != "" && settings.getString("username", null) != null && settings.getString("password", null) != null;
 	}
 	

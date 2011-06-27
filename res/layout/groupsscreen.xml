@@ -3,11 +3,24 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
    	android:gravity="center"
    	style="@style/BodyLayout">
-   	<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-				android:id="@+id/accountlabel"
-				style="@style/CenteredLabel"
-				android:text="@string/underconstruction"/>
-    <Button android:id="@+id/okbutton"
-		style="@style/Button"
-        android:text="@string/okbutton" />
+    <Button android:id="@+id/newgroupbutton"
+		style="@style/GroupButton"
+        android:text="@string/groups_newgroupbutton" />
+    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+			android:id="@+id/accountlabel"
+			style="@style/CenteredLabel"
+			android:text="@string/groups_label"/>
+	<ScrollView
+		android:id="@+id/scrollview"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		xmlns:android="http://schemas.android.com/apk/res/android">
+		<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+			android:id="@+id/buttonlayout"
+  			android:orientation="vertical"
+    		android:layout_width="fill_parent"
+    		android:layout_height="fill_parent"
+    		android:paddingTop="5sp">
+    	</LinearLayout>
+    </ScrollView>
 </LinearLayout>

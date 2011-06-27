@@ -37,6 +37,13 @@
     <string name="invites_activitylabel">Invites</string>
     
     <string name="groups_activitylabel">Groups</string>
+    <string name="groups_label">Your groups:</string>
+    <string name="groups_newgroupbutton">Start a new group</string>
+    <string name="groupadmin_groupname">Group name</string>
+    <string name="groupadmin_newmemberlabel">Add group member</string>
+    <string name="groupadmin_memberslabel">Members</string>
+    <string name="groupadmin_newmember_hint">Email address</string>
+    <string name="groupadmin_togroupbutton">Load group..</string>
     
     <string name="account_activitylabel">Account</string>
     
