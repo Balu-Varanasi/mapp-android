@@ -53,7 +53,7 @@ public class SyncClient
 	private String mappPass = "";
 	//private static final String serverUrl = "http://192.168.2.2/MVics/Mappserver/v1/";
 	public static final String serverUrl = "http://mapp.joelcox.org/v1/";
-	private static final boolean development = true;
+	private static final boolean development = false;
 	private String error = "";
 	private static HttpClient httpclient = null;
 	
@@ -117,12 +117,12 @@ public class SyncClient
 		try
 		{
 			int syncTime = getSyncTimeStamp();
-			deleteGroups();
-			putGroups();
-			updateGroups();
-			deleteMemberships();
-			putMemberships();
-			postMemberships();
+			//deleteGroups();
+			//putGroups();
+			//updateGroups();
+			//deleteMemberships();
+			/*putMemberships();
+			postMemberships();*/
 			deletePolygons(group);
 			removeDeletedPolygons(group);
 			putPolygons(group);
