@@ -64,9 +64,9 @@ public class GroupAdminScreen extends Activity {
 			 * en de gebruiker kan gewoon terugkeren naar de hoofdactivity
 			 */
 			public void onClick(View v) {
-            	Intent mIntent = new Intent();
+            	/*Intent mIntent = new Intent();
             	setResult(RESULT_TOGROUP, mIntent);
-            	finish();
+            	finish();*/
             }
 		});
 		
