@@ -16,6 +16,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthenticationException;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.impl.auth.BasicScheme;
@@ -69,7 +70,6 @@ public class LoginScreen extends Activity {
 			 */
 			public void onClick(View v) {
 				String username = usernameField.getText().toString();
-				username.replace("@", "%40");
 				String password = passwordField.getText().toString();
 				if (username == "" || username == null) {
 					toastMessage("Please fill in an email address");
@@ -82,7 +82,7 @@ public class LoginScreen extends Activity {
 					String loginError = null;
 					try
 					{
-						validCredentials(username, md5(password));
+						validCredentials(username, md5(password.toLowerCase()));
 						confirmLogin();
 						return;
 					}
@@ -96,6 +96,7 @@ public class LoginScreen extends Activity {
 						try
 						{
 							registerAccount(username, password);
+							Log.v(Mapp.TAG, "Voorbij geregistratie");
 							confirmLogin();
 							return;
 						}
@@ -204,7 +205,7 @@ public class LoginScreen extends Activity {
 			{
 			    total.append(line);
 			}
-
+		    Log.v(Mapp.TAG, total.toString());
 			if(response.getStatusLine().getStatusCode() == 404)
 			{
 				return "Unknown error: unable to check e-mail existance";
@@ -218,10 +219,14 @@ public class LoginScreen extends Activity {
 		    }
 			else
 			{
+				Log.v(Mapp.TAG, "Checkpoint 1");
 				// Alles is blijkbaar goed gegaan
-				JSONArray result = new JSONArray(total.toString());
-				JSONObject jsonResult = result.getJSONObject(0);
-				return (jsonResult.getBoolean("registered") ? "registered" : "unregistered");
+				//JSONArray result = new JSONArray(total.toString());
+				Log.v(Mapp.TAG, "Checkpoint 2");
+				//JSONObject jsonResult = result.getJSONObject(0);
+				JSONObject jsonResult = new JSONObject(total.toString());
+				Log.v(Mapp.TAG, "Checkpoint 3");
+				return (jsonResult.getString("registered").equals("true") ? "registered" : "unregistered");
 			}
 		}
 	    catch (ClientProtocolException e)
@@ -251,7 +256,7 @@ public class LoginScreen extends Activity {
 	private void validCredentials(String username, String password) throws SyncException
 	{
 		HttpGet httpg = new HttpGet(SyncClient.serverUrl + "user/");
-		UsernamePasswordCredentials creds = new UsernamePasswordCredentials(username.toLowerCase(), password.toLowerCase());
+		UsernamePasswordCredentials creds = new UsernamePasswordCredentials(username.toLowerCase(), password);
 		try
 		{
 			httpg.addHeader(new BasicScheme().authenticate(creds, httpg));
@@ -262,6 +267,8 @@ public class LoginScreen extends Activity {
 			throw new SyncException("Authentication failed. Please try again.");
 		}
 		
+		Log.v(Mapp.TAG, "username: "+username.toLowerCase());
+		Log.v(Mapp.TAG, "password: "+password.toLowerCase());
 		HttpResponse response;
 		       
 		try
@@ -270,7 +277,7 @@ public class LoginScreen extends Activity {
 			
 			if(response.getStatusLine().getStatusCode() == 401)
 			{
-				throw new SyncException("Authentication failed. Please try again.");
+				throw new SyncException("1st Authentication failed. Please try again.");
 			}
 			else if(response.getStatusLine().getStatusCode() != 200)
 			{
@@ -289,7 +296,7 @@ public class LoginScreen extends Activity {
 		{
 			e.printStackTrace();
 		}
-		throw new SyncException("Authentication failed. Please try again.");
+		throw new SyncException("2nd Authentication failed. Please try again.");
 	}
 	
 	private void registerAccount(String username, String password) throws SyncException
@@ -299,7 +306,18 @@ public class LoginScreen extends Activity {
 		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
         nameValuePairs.add(new BasicNameValuePair("email", username.toLowerCase()));
         nameValuePairs.add(new BasicNameValuePair("password", md5(password.toLowerCase())));
+        try
+        {
+			httpp.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+		}
+        catch (UnsupportedEncodingException e1)
+        {
+			// Meuk
+		}
 		
+        Log.v(Mapp.TAG, username.toLowerCase());
+        Log.v(Mapp.TAG, md5(password.toLowerCase()));
+        
         HttpResponse response;
         
         try
