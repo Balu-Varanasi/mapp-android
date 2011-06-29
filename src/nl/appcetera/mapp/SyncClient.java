@@ -51,7 +51,7 @@ public class SyncClient
 	private PolygonData db;
 	private String mappUser = "";
 	private String mappPass = "";
-	//private static final String serverUrl = "http://192.168.2.2/MVics/Mappserver/v1/";
+	//public static final String serverUrl = "http://192.168.2.4/MVics/Mappserver/v1/";
 	public static final String serverUrl = "http://mapp.joelcox.org/v1/";
 	private static final boolean development = false;
 	private String error = "";
@@ -117,12 +117,12 @@ public class SyncClient
 		try
 		{
 			int syncTime = getSyncTimeStamp();
-			//deleteGroups();
-			//putGroups();
-			//updateGroups();
-			//deleteMemberships();
-			/*putMemberships();
-			postMemberships();*/
+			deleteGroups();
+			putGroups();
+			updateGroups();
+			deleteMemberships();
+			putMemberships();
+			postMemberships();
 			deletePolygons(group);
 			removeDeletedPolygons(group);
 			putPolygons(group);
@@ -346,8 +346,8 @@ public class SyncClient
 				else
 				{
 					// De polygoon een nieuw id geven en het 'nieuw'-vlaggetje verwijderen
+					db.setPolygonIsSynced(polygonid);
 					requery = db.updatePolygonId(polygonid, result.getInt("polygon_id"));
-					db.setPolygonIsSynced(result.getInt("polygon_id"));
 				}
 			}
 	        catch (ClientProtocolException e)
@@ -368,7 +368,7 @@ public class SyncClient
 	        
 	        if(requery)
 	        {
-	        	c.requery();// Opnieuw laden omdat polygoonid's gewijzigd kunnen zijn inmiddels
+	        	c = db.getNewPolygons(group); // Opnieuw laden omdat polygoonid's gewijzigd kunnen zijn inmiddels
 	        }
 		}
 		while(c.moveToNext());
@@ -850,7 +850,7 @@ public class SyncClient
 				// Alles is blijkbaar goed gegaan
 				JSONObject result = new JSONObject(total.toString());
 				JSONArray groups = result.getJSONArray("groups");
-				
+				//TODO GET memberships
 				for(int i = 0; i < groups.length(); i++)
 				{
 					JSONObject o = groups.getJSONObject(i);
@@ -912,6 +912,12 @@ public class SyncClient
 			return; // Niks te syncen, dus gelijk klaar!
 		}
 
+		/**
+		 * Als er tijdens het syncen een andere groep een ander id krijgt (omdat zijn
+		 * id nodig was), klopt onze cursor misschien niet meer dus moeten we opnieuw query'en.
+		 */
+		boolean requery = false;
+		
 		do
 		{
 			HttpPut httpp = new HttpPut(serverUrl + "group");
@@ -957,7 +963,7 @@ public class SyncClient
 			    }
 
 			    result = new JSONObject(total.toString());
-				
+
 			    if(response.getStatusLine().getStatusCode() == 418)
 				{
 					throw new SyncException("Unable to synchronize because the server is a teapot.");
@@ -975,8 +981,8 @@ public class SyncClient
 				else
 				{
 					// De polygoon een nieuw id geven en het 'nieuw'-vlaggetje verwijderen
-					db.updateGroupId(id, result.getInt("group_id"));
-					db.setGroupIsSynced(result.getInt("group_id"));
+					db.setGroupIsSynced(id);
+					requery = db.updateGroupId(id, result.getInt("group_id"));
 				}
 			}
 	        catch (ClientProtocolException e)
@@ -995,7 +1001,10 @@ public class SyncClient
 				throw new SyncException("Invalid server response");
 			}
 	        
-	        c.requery();// Opnieuw laden omdat polygoonid's gewijzigd kunnen zijn inmiddels
+	        if(requery)
+	        {
+	        	c = db.getNewGroups();// Opnieuw laden omdat polygoonid's gewijzigd kunnen zijn inmiddels
+	        }
 		}
 		while(c.moveToNext());
 	}
@@ -1120,7 +1129,7 @@ public class SyncClient
 			{
 			    total.append(line);
 			}
-
+			
 			if(response.getStatusLine().getStatusCode() == 418)
 			{
 				throw new SyncException("Unable to synchronize because the server is a teapot.");
@@ -1203,7 +1212,7 @@ public class SyncClient
 			List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
 	        nameValuePairs.add(new BasicNameValuePair("email", email));
 	        nameValuePairs.add(new BasicNameValuePair("group_id", id + ""));
-			
+	        
 			try
 			{
 				httpp.addHeader(new BasicScheme().authenticate(creds, httpp));
@@ -1255,7 +1264,7 @@ public class SyncClient
 		        }
 				else
 				{
-					// De polygoon een nieuw id geven en het 'nieuw'-vlaggetje verwijderen
+					// Het 'nieuw'-vlaggetje verwijderen
 					db.setMembershipIsSynced(id, email);
 				}
 			}
@@ -1274,8 +1283,6 @@ public class SyncClient
 				Log.e(Mapp.TAG, "Sync failed. Response is no valid JSON or expected variable not found.");
 				throw new SyncException("Invalid server response");
 			}
-	        
-	        c.requery();// Opnieuw laden omdat polygoonid's gewijzigd kunnen zijn inmiddels
 		}
 		while(c.moveToNext());
 	}
