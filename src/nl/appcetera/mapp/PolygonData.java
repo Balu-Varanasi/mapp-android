@@ -909,7 +909,7 @@ public class PolygonData extends SQLiteOpenHelper
 		ContentValues values = new ContentValues();
 		values.put(GROUP_MEMBERS_CHANGED, 0);
 		values.put(GROUP_MEMBERS_NEW, 0);
-		db.update(GROUPS_TABLE_NAME, values, GROUPS_ID + "=" + group + " AND " + USERS_EMAIL + "=\"" + user + "\"", null);
+		db.update(GROUPS_TABLE_NAME, values, GROUPS_ID + "=" + group + " AND " + GROUPS_OWNER + "=\"" + user + "\"", null);
 	}
 	
 	/**
