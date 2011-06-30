@@ -9,7 +9,7 @@ import android.provider.BaseColumns;
 /**
  * Polygon data management
  * @author Mathijs
- *
+ * Deze klasse beheert de SQLite database waarin alle data lokaal wordt opgeslagen
  */
 public class PolygonData extends SQLiteOpenHelper
 {
@@ -56,6 +56,10 @@ public class PolygonData extends SQLiteOpenHelper
 	
 	private static final String GROUP_MEMBERS_REMOVAL_TABLE_NAME = "removed_memberships";
 
+	/** 
+	 * Constructor, puur het aanroepen van de SQLiteOpenHelper-constructor
+	 * @param context
+	 */
 	public PolygonData(Context context)
 	{
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);

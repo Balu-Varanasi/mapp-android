@@ -3,15 +3,12 @@ package nl.appcetera.mapp;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.TextView;
@@ -29,6 +26,8 @@ public class InvitesScreen extends Activity {
 	
 	/**
 	 * Wordt aangeroepen wanneer deze activity wordt aangemaakt
+	 * Deze functie zorgt ervoor dat de invites worden toegevoegd aan de lijst
+	 * En dat er een dialoog verschijnt wanneer er op ene invite wordt getappt, waarmee de gebruiker de invite kan accepteren/weigeren
 	 * @param savedInstanceState de bundle die de activity meekrijgt wanneer hij wordt gemaakt
 	 */
 	@Override

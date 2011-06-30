@@ -12,7 +12,6 @@ import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.SweepGradient;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -52,7 +51,6 @@ public class MetaEditScreen extends Activity {
         polyID = bundle.getInt(ID_KEY);
 		String name = bundle.getString(NAME_KEY);
 		String description = bundle.getString(DESCRIPTION_KEY);
-		Log.v(Mapp.TAG, "Incoming description: "+description);
 		//we vullen de naam in in het editscherm, als we een naam hebben
 		nameField = (EditText) findViewById(R.id.edtInputName);
 		if (name != null && name != "")
@@ -158,7 +156,6 @@ public class MetaEditScreen extends Activity {
 
 	/**
 	 * De klasse die een colorpicker tekent en beheert
-	 * @author Joost
 	 * Deze klasse is gebasseerd op delen van de ColorPickerDialog, zoals aangeleverd in de Android SDK
 	 * http://developer.android.com/resources/samples/ApiDemos/src/com/example/android/apis/graphics/ColorPickerDialog.html
 	 */

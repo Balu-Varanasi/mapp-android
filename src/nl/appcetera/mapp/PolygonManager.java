@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.google.android.maps.GeoPoint;
 
@@ -342,7 +341,6 @@ public class PolygonManager
 	 */
 	public void editMetaData(Mapp instance) {
 		
-		Log.v(Mapp.TAG, "Getting ready to launch Meta Activity");
 		Intent intent = new Intent(instance, MetaEditScreen.class);
 	
 		//We maken een nieuwe bundle om data in mee te sturen
@@ -359,6 +357,5 @@ public class PolygonManager
 		
 		//We starten een nieuwe Activity
 		instance.startActivityForResult(intent, Mapp.META_EDITSCREEN_ACTIVITYCODE);
-		Log.v(Mapp.TAG, "Launched MetaActivity");
 	}
 }

@@ -12,7 +12,6 @@ import android.graphics.Paint.Style;
 import android.graphics.RectF;
 import android.graphics.Region;
 import android.os.Handler;
-import android.util.Log;
 import android.view.MotionEvent;
 
 import com.google.android.maps.GeoPoint;
@@ -57,9 +56,8 @@ class PolygonOverlay extends com.google.android.maps.Overlay
 	
 	/**
 	 * Constructor
-	 * @param hgm
-	 * @param polygon
-	 * @param mv
+	 * @param mv een verwijzing naar de mapview
+	 * @param color de kleur van de polygoon
 	 */
 	public PolygonOverlay(MapView mv, int color)
 	{

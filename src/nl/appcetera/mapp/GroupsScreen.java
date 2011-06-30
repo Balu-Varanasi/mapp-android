@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -58,10 +57,14 @@ public class GroupsScreen extends Activity {
 		});
 	}
 	
+	/**
+	 * Override van de onResume functie, waarin de lijst met groepen wordt gemaakt en gevuld,
+	 * en er een listener wordt toegevoegd aan de lijst, om over te kunnen schakelen naar een GroupAdminScreen
+	 */
 	public void onResume() {
 		super.onResume();
 	
-		//hardcode om te fixen dat je niet in de defaultgroep zit	
+		//om de huidige gebruiker in de defaultgroep te plaatsen als deze hier nog niet in zit
 		Cursor hardcodeCursor = dbase.getMemberShips(username);
 		if (hardcodeCursor.getCount() == 0) {
 			dbase.addMembership(username, 1, true, true);

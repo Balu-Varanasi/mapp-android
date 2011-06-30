@@ -1,6 +1,5 @@
 package nl.appcetera.mapp;
 
-import android.util.Log;
 import android.graphics.Point;
 
 /**
@@ -27,7 +26,6 @@ public class AlgebraLine {
 			this.end = start;
 			this.start = end;
 		}
-		Log.v(Mapp.TAG, "Points: A: "+this.start.x+' '+this.start.y+" B: "+this.end.x+' '+this.end.y);
 	}
 	
 	/**
@@ -46,7 +44,6 @@ public class AlgebraLine {
 			this.end = start;
 			this.start = end;
 		}
-		Log.v(Mapp.TAG, "Points: A: "+this.start.x+' '+this.start.y+" B: "+this.end.x+' '+this.end.y);
 	}
 	
 	/**
@@ -66,7 +63,6 @@ public class AlgebraLine {
 			return false;
 		}
 		double distance = Math.abs((end.x - start.x) * (start.y - p.y) - (end.y - start.y) * (start.x - p.x)) / distance(start, end);
-		//Log.v(HelloGoogleMaps.TAG, "Distance: "+distance);
 		return distance <= d;
 	}
 
