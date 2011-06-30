@@ -62,9 +62,14 @@ public class GroupAdminScreen extends Activity {
 			 * en de gebruiker kan gewoon terugkeren naar de hoofdactivity
 			 */
 			public void onClick(View v) {
-            	/*Intent mIntent = new Intent();
+				groupName = nameField.getText().toString();
+				dbase.editGroup(groupID, groupOwner, groupName, true);
+				Bundle bundle = new Bundle();
+				bundle.putInt(GroupsScreen.ID_KEY, groupID);
+            	Intent mIntent = new Intent();
+            	mIntent.putExtras(bundle);
             	setResult(RESULT_TOGROUP, mIntent);
-            	finish();*/
+            	finish();
             }
 		});
 		

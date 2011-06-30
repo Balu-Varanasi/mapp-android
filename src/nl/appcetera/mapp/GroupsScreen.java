@@ -86,11 +86,12 @@ public class GroupsScreen extends Activity {
 				{
 					int id = groupsIDCursor.getInt(0);				
 					Cursor groupCursor = dbase.getGroup(id);
-					groupCursor.moveToFirst();
-					groups[index] = id;
-					groupNames[index] = groupCursor.getString(1);
-					groupOwners[index] = groupCursor.getString(0).equals(username);
-					groupCursor.close();
+					if (groupCursor.moveToFirst()) {
+						groups[index] = id;
+						groupNames[index] = groupCursor.getString(1);
+						groupOwners[index] = groupCursor.getString(0).equals(username);
+						groupCursor.close();
+					}
 					index++;
 				}
 				while(groupsIDCursor.moveToNext());
@@ -117,6 +118,8 @@ public class GroupsScreen extends Activity {
 				}
 			}
 		});
+		
+		dbase.close();
 	}
 	
 	/**
