@@ -4,14 +4,12 @@ import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -99,6 +97,9 @@ public class GroupAdminScreen extends Activity {
 		});
 	}
 	
+	/**
+	 * Functie die de huidige memberlist in de listview laadt
+	 */
 	private void loadMemberList() {
 		Cursor memberlistCursor = dbase.getGroupMembers(groupID);
 		String members[]= new String[memberlistCursor.getCount()];
@@ -108,7 +109,6 @@ public class GroupAdminScreen extends Activity {
 				do
 				{
 					members[index] = memberlistCursor.getString(0);
-					Log.v(Mapp.TAG, ""+members[index]);
 					index++;
 				}
 				while(memberlistCursor.moveToNext());
@@ -122,7 +122,7 @@ public class GroupAdminScreen extends Activity {
 
 		memberlist.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-				//Een member deleten kan hier eventueel nog
+				//TODO: Een member deleten kan hier eventueel nog
 			}
 		});
 	}

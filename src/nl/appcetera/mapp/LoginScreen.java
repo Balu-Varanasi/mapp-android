@@ -21,7 +21,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -49,6 +48,11 @@ public class LoginScreen extends Activity {
 	EditText passwordField;
 	
 	@Override
+	/**
+	 * Functie die wordt aangeroepen wanneer de activity wordt gestart
+	 * Voegt een listener toe aan de loginknop die uitzoekt of de gebruiker wil registeren of inloggen
+	 * en dit vervolgens afhandelt.
+	 */
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.loginscreen);  
@@ -299,6 +303,12 @@ public class LoginScreen extends Activity {
 		throw new SyncException("2nd Authentication failed. Please try again.");
 	}
 	
+	/**
+	 * Functie om een nieuw account te registreren, mits deze niet bestaat
+	 * @param username het emailadres van de gebruiker die we willen registereren
+	 * @param password het wachtwoord (geen hash) dat we willen toevoegen aan de registratie
+	 * @throws SyncException een exception, wanneer het registreren fout gaat
+	 */
 	private void registerAccount(String username, String password) throws SyncException
 	{
 		HttpPut httpp = new HttpPut(SyncClient.serverUrl + "new_user");
@@ -312,7 +322,7 @@ public class LoginScreen extends Activity {
 		}
         catch (UnsupportedEncodingException e1)
         {
-			// Meuk
+			// Ongevangen exception die in de praktijk niet voorkomt
 		}
 		
         Log.v(Mapp.TAG, username.toLowerCase());

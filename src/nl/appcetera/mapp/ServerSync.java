@@ -52,7 +52,7 @@ public class ServerSync implements Runnable
 	}
 	
 	/**
-	 * Voert één synchronisatiecyclus uit
+	 * Voert ŽŽn synchronisatiecyclus uit
 	 */
 	public void run()
 	{
