@@ -1152,11 +1152,11 @@ public class SyncClient
 				
 				if(!update)
 				{
-					db.addGroupFromServer(id, result.getString("email"), result.getString("name"));
+					db.addGroupFromServer(id, result.optString("email"), result.optString("name"));
 				}
 				else
 				{
-					db.editGroupFromServer(id, result.getString("email"), result.getString("name"));
+					db.editGroupFromServer(id, result.optString("email"), result.optString("name"));
 					db.deleteMemberships(id);
 				}
 				

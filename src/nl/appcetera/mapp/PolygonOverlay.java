@@ -429,7 +429,7 @@ class PolygonOverlay extends com.google.android.maps.Overlay
     public boolean notifyTouchMove(MotionEvent event)
     {
     	//als er bewogen wordt, stoppen we de timer die de metadata-editmode opstart sowieso
-    	metaHandler.removeCallbacks(editMetaCallback);
+    	//metaHandler.removeCallbacks(editMetaCallback);
     	// We zijn een punt aan het verplaatsen
     	if(this.movingPoint)
 		{
