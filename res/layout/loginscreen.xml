@@ -14,6 +14,7 @@
 		android:hint="@string/login_email_hint" />
 	<EditText android:id="@+id/input_password"
 		style="@style/TextInput"
+		android:password="true"
 		android:hint="@string/login_password_hint" />
 	<TextView xmlns:android="http://schemas.android.com/apk/res/android"
 		android:id="@+id/accountlabel"
